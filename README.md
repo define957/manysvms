@@ -1,6 +1,11 @@
 # many SVMs
+![GitHub license](https://img.shields.io/github/license/define957/manysvms)
+![GitHub ISSUES](https://img.shields.io/github/issues/define957/manysvms)
+![GitHub STARS](https://img.shields.io/github/stars/define957/manysvms)
+![GitHub STARS](https://img.shields.io/github/forks/define957/manysvms)
 
-![Image text](MBSVM.png)
+<div align=center><img src = MBSVM.png width="60%"></div>
+
 
 ## Introduction
 
@@ -21,8 +26,8 @@ devtools::install_github('define957/manysvms')
 ## SVMs
 
 + Twin-SVM for binary classification
-+ Twin-SVM for Multi-classification (Ones versus All strategy) 
-+ Twin-SVM for Multi-classification (Ones versus All strategy and K-fold cross validation) 
++ Twin-SVM for Multi-classification (Ones versus Rest strategy) 
++ Twin-SVM for Multi-classification (Ones versus Rest strategy and K-fold cross validation) 
 + Multiple Birth SVM for Multi-classification
 
 ## Development environment and dependency
