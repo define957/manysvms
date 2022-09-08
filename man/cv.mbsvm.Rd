@@ -11,7 +11,7 @@ cv.mbsvm(
   kernel = c("linear", "rbf", "poly"),
   reg = 1,
   gamma = 1/ncol(X),
-  kernel_rect = 0.1,
+  kernel_rect = 1,
   shuffer = TRUE,
   seed = NULL
 )
@@ -26,6 +26,8 @@ cv.mbsvm(
 \item{kernel}{kernel type. Default value \code{kernel = 'linear'}.}
 
 \item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
+
+\item{gamma}{parameter needed for rbf kernel.}
 
 \item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
 

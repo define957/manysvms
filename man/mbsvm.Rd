@@ -24,6 +24,8 @@ mbsvm(
 \item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
 
 \item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
+
+\item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
 }
 \value{
 return mbsvm object.

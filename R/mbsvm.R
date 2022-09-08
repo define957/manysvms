@@ -6,6 +6,7 @@
 #' @param X,y dataset and label.
 #' @param Ck plenty term list.
 #' @param kernel kernel function.
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
 #' @return return mbsvm object.
@@ -176,16 +177,17 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
 #' @param K Number of folds.
-#' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
-#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param kernel kernel type. Default value \code{kernel = 'linear'}.
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
+#' @param gamma parameter needed for rbf kernel.
+#' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
 #' @param shuffer if set \code{shuffer==TRUE}, This function will shuffle the dataset.
 #' @param seed random seed for \code{shuffer} option.
 #' @export
 
 cv.mbsvm <- function(X, y , K = 5,
                            kernel = c('linear', 'rbf', 'poly'),
-                           reg = 1, gamma = 1/ncol(X), kernel_rect = 0.1,
+                           reg = 1, gamma = 1/ncol(X), kernel_rect = 1,
                            shuffer = TRUE, seed = NULL){
 
   m <- nrow(X)

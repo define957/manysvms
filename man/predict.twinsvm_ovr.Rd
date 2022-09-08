@@ -4,14 +4,16 @@
 \alias{predict.twinsvm_ovr}
 \title{Predict Method for Twin Support Vector Machines (O v R)}
 \usage{
-\method{predict}{twinsvm_ovr}(twinsvm_ovr, X, y)
+\method{predict}{twinsvm_ovr}(object, X, y, ...)
 }
 \arguments{
-\item{twinsvm_ovr}{Object of class `twinsvm_ovr`.}
+\item{object}{Object of class `twinsvm_ovr`.}
 
 \item{X}{A new data frame for predicting.}
 
 \item{y}{A label data frame corresponding to X.}
+
+\item{...}{unused parameter.}
 }
 \description{
 Predict Method for Twin Support Vector Machines (O v R)

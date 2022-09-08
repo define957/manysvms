@@ -133,7 +133,8 @@ twinsvm <- function(X, y,
 #'
 #' This function solve coefficients based upon a model trained by \code{twinsvm}.
 #' @author Zhang Jiaqi
-#' @param twinsvm Object of class `twinsvm`.
+#' @param object object of class `twinsvm`.
+#' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
 #' @examples
@@ -146,9 +147,9 @@ twinsvm <- function(X, y,
 #' model <- twinsvm(X, y, kernel = 'linear')
 #' pred <-predict(model, X, y)
 
-coef.twinsvm <- function(twinsvm){
-  coefs <- list('u1' = twinsvm$u1, 'u2' = twinsvm$u2,
-                'b1' = twinsvm$b1, 'b2'= twinsvm$b2)
+coef.twinsvm <- function(object, ...){
+  coefs <- list('u1' = object$u1, 'u2' = object$u2,
+                'b1' = object$b1, 'b2'= object$b2)
   return(coefs)
 }
 
@@ -158,9 +159,10 @@ coef.twinsvm <- function(twinsvm){
 #' This function predicts values based upon a model trained by \code{twinsvm}.
 #'
 #' @author Zhang Jiaqi
-#' @param twinsvm Object of class `twinsvm`.
+#' @param object Object of class `twinsvm`.
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
+#' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
 #' @examples
@@ -173,18 +175,18 @@ coef.twinsvm <- function(twinsvm){
 #' model <- twinsvm(X, y, kernel = 'linear')
 #' pred <-predict(model, X, y)
 
-predict.twinsvm <- function(twinsvm, X, y){
+predict.twinsvm <- function(object, X, y, ...){
 
   X <- as.matrix(X)
 
-  if(twinsvm$kernel != 'linear'){
+  if(object$kernel != 'linear'){
     m1 <- nrow(X)
-    m2 <- nrow(twinsvm$X)
+    m2 <- nrow(object$X)
     kernelX <- matrix(0, nrow = m1, ncol = m2)
     for(i in 1:m1){
       for(j in 1:m2){
-        if(twinsvm$kernel == 'rbf'){
-          kernelX[i, j] <- rbf_kernel(X[i, ], twinsvm$X[j, ], gamma = twinsvm$gamma)
+        if(object$kernel == 'rbf'){
+          kernelX[i, j] <- rbf_kernel(X[i, ], object$X[j, ], gamma = object$gamma)
         }
       }
     }
@@ -193,8 +195,8 @@ predict.twinsvm <- function(twinsvm, X, y){
     kernelX <- X
   }
 
-  disA <- abs(kernelX %*% twinsvm$u1 + twinsvm$b1) / norm(twinsvm$u1, type = '2')
-  disB <- abs(kernelX %*% twinsvm$u2 + twinsvm$b2) / norm(twinsvm$u2, type = '2')
+  disA <- abs(kernelX %*% object$u1 + object$b1) / norm(object$u1, type = '2')
+  disB <- abs(kernelX %*% object$u2 + object$b2) / norm(object$u2, type = '2')
   dis <- cbind(disA, disB)
   predict_idx <- as.vector(apply(dis, 1, which.min))
   conf <- as.vector(apply(dis, 1, which.min))
@@ -202,12 +204,12 @@ predict.twinsvm <- function(twinsvm, X, y){
   m <- length(predict_idx)
   predict_value <- rep(0, m)
   for(i in 1:m){
-    predict_value[i] <- twinsvm$class_set[predict_idx[i]]
+    predict_value[i] <- object$class_set[predict_idx[i]]
   }
   accuracy <- sum(predict_value == y) * 100 / m
   predlist <- list('predict.value' = predict_value, "accuracy"= accuracy,
                    'A.distance' = disA, 'B.distance' = disB)
-  cat('use kernel : ', twinsvm$kernel, '\n')
+  cat('use kernel : ', object$kernel, '\n')
   cat('total accuracy :', accuracy, '%\n')
   return(predlist)
 }

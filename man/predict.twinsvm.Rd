@@ -4,14 +4,16 @@
 \alias{predict.twinsvm}
 \title{Predict Method for Multiple Birth Support Vector Machines}
 \usage{
-\method{predict}{twinsvm}(twinsvm, X, y)
+\method{predict}{twinsvm}(object, X, y, ...)
 }
 \arguments{
-\item{twinsvm}{Object of class `twinsvm`.}
+\item{object}{Object of class `twinsvm`.}
 
 \item{X}{A new data frame for predicting.}
 
 \item{y}{A label data frame corresponding to X.}
+
+\item{...}{unused parameter.}
 }
 \description{
 This function predicts values based upon a model trained by \code{twinsvm}.

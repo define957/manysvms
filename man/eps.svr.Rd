@@ -9,7 +9,11 @@ eps.svr(X, y, eps = 0.1, C = 1, max.steps = 1000)
 \arguments{
 \item{X, y}{dataset and label.}
 
-\item{C}{plenty term list.}
+\item{eps}{epsilon in the insensitive-loss function (default \code{eps = 0.1}).}
+
+\item{C}{plenty term (default \code{C = 1}).}
+
+\item{max.steps}{the number of iterations to solve the optimization problem.}
 }
 \value{
 return eps.svr object.

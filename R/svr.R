@@ -4,7 +4,9 @@
 #'
 #' @author Zhang Jiaqi.
 #' @param X,y dataset and label.
-#' @param C plenty term list.
+#' @param eps epsilon in the insensitive-loss function (default \code{eps = 0.1}).
+#' @param C plenty term (default \code{C = 1}).
+#' @param max.steps the number of iterations to solve the optimization problem.
 #' @return return eps.svr object.
 #' @export
 #' @examples

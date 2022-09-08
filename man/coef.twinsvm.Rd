@@ -4,10 +4,12 @@
 \alias{coef.twinsvm}
 \title{Coef Method for Twin Support Vector Machines}
 \usage{
-\method{coef}{twinsvm}(twinsvm)
+\method{coef}{twinsvm}(object, ...)
 }
 \arguments{
-\item{twinsvm}{Object of class `twinsvm`.}
+\item{object}{object of class `twinsvm`.}
+
+\item{...}{unused parameter.}
 }
 \description{
 This function solve coefficients based upon a model trained by \code{twinsvm}.

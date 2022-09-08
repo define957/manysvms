@@ -13,5 +13,4 @@ URL: https://gitee.com/zhangjiaqi957/many-svms/
 RoxygenNote: 7.2.1
 Imports: 
       ggplot2 (>= 3.3.5),
-      MASS,
-      e1071
+      MASS

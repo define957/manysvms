@@ -14,9 +14,3 @@ pred <-predict(model, X, y)
 cv.mbsvm(X, y, kernel = 'linear', reg = 0.05)
 
 cv.mbsvm(X, y, kernel = 'rbf', reg = 0.05)
-
-library(e1071)
-
-svm_model <- svm(X, y, type = 'C', scale = F, kernel = 'linear')
-
-sum(svm_model$fitted == y) / 150

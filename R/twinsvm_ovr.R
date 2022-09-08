@@ -115,27 +115,28 @@ twinsvm_ovr<- function(X, y,
 #' Predict Method for Twin Support Vector Machines (O v R)
 #'
 #' @author Zhang Jiaqi
-#' @param twinsvm_ovr Object of class `twinsvm_ovr`.
+#' @param object Object of class `twinsvm_ovr`.
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
+#' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
 
-predict.twinsvm_ovr <- function(twinsvm_ovr, X, y){
+predict.twinsvm_ovr <- function(object, X, y, ...){
   X <- as.matrix(X)
   m <- nrow(X)
-  dis_mat <- matrix(0, nrow = m, ncol = twinsvm_ovr$class_num)
+  dis_mat <- matrix(0, nrow = m, ncol = object$class_num)
   X <- as.matrix(X)
 
   # get Kernel X
-  if(twinsvm_ovr$kernel != 'linear'){
+  if(object$kernel != 'linear'){
     m1 <- nrow(X)
-    m2 <- nrow(twinsvm_ovr$X)
+    m2 <- nrow(object$X)
     kernelX <- matrix(0, nrow = m1, ncol = m2)
     for(i in 1:m1){
       for(j in 1:m2){
-        if(twinsvm_ovr$kernel == 'rbf'){
-          kernelX[i, j] <- rbf_kernel(X[i, ], twinsvm_ovr$X[j, ], gamma = twinsvm_ovr$gamma)
+        if(object$kernel == 'rbf'){
+          kernelX[i, j] <- rbf_kernel(X[i, ], object$X[j, ], gamma = object$gamma)
         }
       }
     }
@@ -143,19 +144,19 @@ predict.twinsvm_ovr <- function(twinsvm_ovr, X, y){
     kernelX <- X
   }
 
-  class_num <- twinsvm_ovr$class_num
+  class_num <- object$class_num
   for(i in 1:class_num){
-    dis_mat[, i] <- abs(kernelX %*% twinsvm_ovr$coef[, i] + twinsvm_ovr$intercept[i]) /
-      norm(as.matrix(twinsvm_ovr$coef[, i]), type = "2")
+    dis_mat[, i] <- abs(kernelX %*% object$coef[, i] + object$intercept[i]) /
+      norm(as.matrix(object$coef[, i]), type = "2")
   }
   pred <- rep(0, m)
   for(i in 1:m){
     idx <- which.min(dis_mat[i, ])
-    pred[i] <- twinsvm_ovr$class_set[idx]
+    pred[i] <- object$class_set[idx]
   }
   y <- as.matrix(y)
   acc <- sum(pred == y)/length(y)
-  cat('kernel type :', twinsvm_ovr$kernel, '\n')
+  cat('kernel type :', object$kernel, '\n')
   cat(paste("total accuracy :", acc*100, '% \n'))
   predlist <- list("accuracy"= acc,
                    'distance' = dis_mat)
