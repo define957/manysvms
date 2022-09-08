@@ -29,6 +29,7 @@ devtools::install_github('define957/manysvms')
 + Twin-SVM for Multi-classification (Ones versus Rest strategy) 
 + Twin-SVM for Multi-classification (Ones versus Rest strategy and K-fold cross validation) 
 + Multiple Birth SVM for Multi-classification
++ Liner epsilon Support Vector Machine
 
 ## Development environment and dependency
 
