@@ -17,8 +17,7 @@ In order to learn `SVMs` better, I built this repository to implement support ve
 
 ## How to install manysvms
 
-First set the working path of `R` to the project folder, and then run the following command:
-
+Make sure you have installed devtools and run the following command :
 ```{r}
 devtools::install_github('define957/manysvms')
 ```
