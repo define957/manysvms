@@ -38,7 +38,7 @@ data('iris')
 m <- 100
 X <- iris[0:m, 1:2]
 y <- iris[0:m, 5]
-model <- twinsvm(X, y, kernel = 'linear')
+model <- twinsvm_ovr(X, y, kernel = 'linear')
 
 coef(model)
 pred <-predict(model, X, y)
