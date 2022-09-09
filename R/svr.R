@@ -5,7 +5,9 @@
 #' @author Zhang Jiaqi.
 #' @param X,y dataset and label.
 #' @param eps epsilon in the insensitive-loss function (default \code{eps = 0.1}).
+#' @param kernel kernel function.
 #' @param C plenty term (default \code{C = 1}).
+#' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @return return eps.svr object.
 #' @export
@@ -30,10 +32,26 @@
 #'   geom_abline(slope = m$coef, intercept = m$intercept - m$epsilon, linetype=2, color = 'red')+
 #'   theme_classic()
 
-eps.svr <- function(X, y, eps = 0.1, C = 1, max.steps = 1000){
+eps.svr <- function(X, y, eps = 0.1,
+                    kernel = c('linear', 'rbf', 'poly'),
+                    C = 1, gamma = 1 / ncol(X),
+                    max.steps = 1000){
   X <- as.matrix(X)
   y <- as.matrix(y)
-  Q <- X%*%t(X)
+
+  kernel <- match.arg(kernel)
+  m <-  nrow(X)
+  if(kernel == 'linear'){
+    Q <- X%*%t(X)
+  }else if(kernel == 'rbf'){
+    Q <- matrix(0, nrow = m, ncol = m)
+    for(i in 1:m){
+      for(j in 1:m){
+        Q[i, j] <-  rbf_kernel(X[i, ], X[j, ], gamma = gamma)
+      }
+    }
+  }
+
   Q1 <- cbind(Q, -Q)
   Q2 <- cbind(-Q, Q)
   H <- rbind(Q1, Q2)
@@ -51,7 +69,8 @@ eps.svr <- function(X, y, eps = 0.1, C = 1, max.steps = 1000){
   beta <- clip_dcd_optimizer(H, -q, lb, ub, max.steps = max.steps)$x
   w <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))]) %*% X
   b <- mean(y - X%*%w *  + eps)
-  svr <- list('coef' = w, 'intercept' = b, 'epsilon' = eps)
+  fitted <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))]) %*% Q
+  svr <- list('coef' = w, 'intercept' = b, 'epsilon' = eps, 'fitted' = fitted)
   class(svr) <- 'eps.svr'
   return(svr)
 }

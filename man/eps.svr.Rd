@@ -4,14 +4,26 @@
 \alias{eps.svr}
 \title{epsilon - Support Vector Regression}
 \usage{
-eps.svr(X, y, eps = 0.1, C = 1, max.steps = 1000)
+eps.svr(
+  X,
+  y,
+  eps = 0.1,
+  kernel = c("linear", "rbf", "poly"),
+  C = 1,
+  gamma = 1/ncol(X),
+  max.steps = 1000
+)
 }
 \arguments{
 \item{X, y}{dataset and label.}
 
 \item{eps}{epsilon in the insensitive-loss function (default \code{eps = 0.1}).}
 
+\item{kernel}{kernel function.}
+
 \item{C}{plenty term (default \code{C = 1}).}
+
+\item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 }
