@@ -1,9 +1,9 @@
 # many SVMs
+![GitHub RCMDCHECK](https://img.shields.io/badge/R--CMD--check-passing-brightgreen)
 ![GitHub license](https://img.shields.io/github/license/define957/manysvms)
 ![GitHub ISSUES](https://img.shields.io/github/issues/define957/manysvms)
 ![GitHub STARS](https://img.shields.io/github/stars/define957/manysvms)
 ![GitHub STARS](https://img.shields.io/github/forks/define957/manysvms)
-
 <div align=center><img src = man\figures\MBSVM.png width="60%"></div>
 
 
