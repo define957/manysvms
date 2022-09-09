@@ -9,14 +9,12 @@ x2 <- sin(x1)  + mvrnorm(200, mu = 0, Sigma = 0.03)
 X <- as.matrix(x1)
 y <- as.matrix(x2)
 
-m <- eps.svr(X,y, eps=0.1, kernel = 'rbf', C = 1, gamma = 1, max.steps = 3000)
+s <- Sys.time()
+m <- eps.svr(X,y, eps=0.1, kernel = 'rbf', C = 1,
+             gamma = 1, max.steps = 1000, rcpp = TRUE)
+e <- Sys.time()
+print(e - s)
 dataXy <- as.data.frame(cbind(X, y))
-ggplot(data = dataXy, aes(x = X, y = y))+
-  geom_point()+
-  geom_abline(slope = m$coef, intercept = m$intercept)+
-  geom_abline(slope = m$coef, intercept = m$intercept + m$epsilon, linetype=2, color = 'red')+
-  geom_abline(slope = m$coef, intercept = m$intercept - m$epsilon, linetype=2, color = 'red')+
-  theme_classic()
 
 ggplot(data = dataXy, aes(x = X, y = y))+
   geom_point()+

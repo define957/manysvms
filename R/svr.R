@@ -3,13 +3,16 @@
 #' \code{eps.svr} is an R implementation of epsilon - support vector regression
 #'
 #' @author Zhang Jiaqi.
-#' @param X,y dataset and label.
+#' @param X,y dataset and explained variable.
 #' @param eps epsilon in the insensitive-loss function (default \code{eps = 0.1}).
 #' @param kernel kernel function.
 #' @param C plenty term (default \code{C = 1}).
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param max.steps the number of iterations to solve the optimization problem.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return eps.svr object.
+#' @useDynLib manysvms, .registration = TRUE
+#' @import Rcpp
 #' @export
 #' @examples
 #' library(manysvms)
@@ -35,7 +38,7 @@
 eps.svr <- function(X, y, eps = 0.1,
                     kernel = c('linear', 'rbf', 'poly'),
                     C = 1, gamma = 1 / ncol(X),
-                    max.steps = 1000){
+                    max.steps = 1000, rcpp = TRUE){
   X <- as.matrix(X)
   y <- as.matrix(y)
 
@@ -44,12 +47,17 @@ eps.svr <- function(X, y, eps = 0.1,
   if(kernel == 'linear'){
     Q <- X%*%t(X)
   }else if(kernel == 'rbf'){
-    Q <- matrix(0, nrow = m, ncol = m)
-    for(i in 1:m){
-      for(j in 1:m){
-        Q[i, j] <-  rbf_kernel(X[i, ], X[j, ], gamma = gamma)
+    if(rcpp == FALSE){
+      Q <- matrix(0, nrow = m, ncol = m)
+      for(i in 1:m){
+        for(j in 1:m){
+          Q[i, j] <-  rbf_kernel(X[i, ], X[j, ], gamma = gamma)
+        }
       }
+    }else{
+      Q <- cpp_rbf_kernel(X, X, gamma = gamma)
     }
+
   }
 
   Q1 <- cbind(Q, -Q)

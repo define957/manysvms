@@ -11,11 +11,12 @@ eps.svr(
   kernel = c("linear", "rbf", "poly"),
   C = 1,
   gamma = 1/ncol(X),
-  max.steps = 1000
+  max.steps = 1000,
+  rcpp = TRUE
 )
 }
 \arguments{
-\item{X, y}{dataset and label.}
+\item{X, y}{dataset and explained variable.}
 
 \item{eps}{epsilon in the insensitive-loss function (default \code{eps = 0.1}).}
 
@@ -26,6 +27,8 @@ eps.svr(
 \item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 }
 \value{
 return eps.svr object.

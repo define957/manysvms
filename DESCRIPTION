@@ -6,11 +6,15 @@ Author: Zhang Jiaqi
 Maintainer: Zhang Jiaqi <zhangjiaqi957957@outlook.com> 
 Description: An R package containing many SVMs, not as fast but still useful.
 Depends: R (>= 4.0)
-License: GPL-3
+License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 URL: https://gitee.com/zhangjiaqi957/many-svms/
 RoxygenNote: 7.2.1
 Imports: 
       ggplot2 (>= 3.3.5),
+      Rcpp
+Suggests:
       MASS
+LinkingTo: Rcpp,
+           RcppArmadillo
