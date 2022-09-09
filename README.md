@@ -4,7 +4,7 @@
 ![GitHub STARS](https://img.shields.io/github/stars/define957/manysvms)
 ![GitHub STARS](https://img.shields.io/github/forks/define957/manysvms)
 
-<div align=center><img src = MBSVM.png width="60%"></div>
+<div align=center><img src = man\figures\MBSVM.png width="60%"></div>
 
 
 ## Introduction
@@ -28,7 +28,7 @@ devtools::install_github('define957/manysvms')
 + Twin-SVM for Multi-classification (Ones versus Rest strategy) 
 + Twin-SVM for Multi-classification (Ones versus Rest strategy and K-fold cross validation) 
 + Multiple Birth SVM for Multi-classification
-+ Epsilon Support Vector Regression
++ Epsilon Support Vector Regression [Rcpp acceleration is available]
 
 ## Kernel options
 
