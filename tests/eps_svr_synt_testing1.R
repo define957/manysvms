@@ -10,7 +10,6 @@ X <- as.matrix(x1)
 y <- as.matrix(x2)
 
 m <- eps.svr(X,y, eps=0.1, kernel = 'rbf', C = 1, gamma = 1, max.steps = 3000)
-m1 <- svm(X, y, type='eps-regression', epsilon = 0.1, cost = 1, scale = FALSE)
 dataXy <- as.data.frame(cbind(X, y))
 ggplot(data = dataXy, aes(x = X, y = y))+
   geom_point()+
@@ -21,7 +20,7 @@ ggplot(data = dataXy, aes(x = X, y = y))+
 
 ggplot(data = dataXy, aes(x = X, y = y))+
   geom_point()+
-  geom_line(aes(x=X, y=m$fit.values))+
-  geom_line(aes(x=X, y=m$fit.values + m$epsilon, color = 'red'))+
-  geom_line(aes(x=X, y=m$fit.values - m$epsilon, color = 'red'))
+  geom_line(aes(x=X, y=m$fitted))+
+  geom_line(aes(x=X, y=m$fitted + m$epsilon, color = 'red'))+
+  geom_line(aes(x=X, y=m$fitted - m$epsilon, color = 'red'))+
   theme_classic()
