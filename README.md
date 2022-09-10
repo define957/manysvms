@@ -11,7 +11,7 @@
 
 There are many different types of SVMs in this repository. 
 
-## Why I created this project ?**
+## Why I created this project ?
 
 In order to learn `SVMs` better, I built this repository to implement support vector machines. The package is under active development.
 
