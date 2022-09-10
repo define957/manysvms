@@ -6,9 +6,13 @@
 #' @param X,y dataset and label.
 #' @param Ck plenty term list.
 #' @param kernel kernel function.
-#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
+#' @param eps_opt the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#'
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return mbsvm object.
 #' @export
 #' @examples
@@ -25,7 +29,9 @@
 mbsvm <- function(X, y,
                   Ck = rep(1, length(unique(y))),
                   kernel = c('linear', 'rbf', 'poly'),
-                  gamma = 1 / ncol(X), reg = 1, kernel_rect = 1){
+                  gamma = 1 / ncol(X), reg = 1, kernel_rect = 1,
+                  eps_opt = 1e-6, max.steps = 300,
+                  rcpp = TRUE){
   kernel <- match.arg(kernel)
 
   m <- nrow(X)
@@ -69,27 +75,37 @@ mbsvm <- function(X, y,
       R <- cbind(B, e2)
     }else{
       kernel_m <- round(m*kernel_rect, 0)
-      S <- matrix(0, nrow = mA, ncol = kernel_m)
-      R <- matrix(0, nrow = mB, ncol = kernel_m)
-      for(i in 1:mA){
-        for(j in 1:kernel_m){
-            S[i, j] <-  rbf_kernel(A[i, ], X[j, ], gamma = gamma)
+      if(rcpp == TRUE){
+        S = cpp_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+        R = cpp_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
+      }else{
+        S <- matrix(0, nrow = mA, ncol = kernel_m)
+        R <- matrix(0, nrow = mB, ncol = kernel_m)
+        for(i in 1:mA){
+          for(j in 1:kernel_m){
+              S[i, j] <-  rbf_kernel(A[i, ], X[j, ], gamma = gamma)
+          }
+        }
+
+        for(i in 1:mB){
+          for(j in 1:kernel_m){
+              R[i, j] <-  rbf_kernel(B[i, ], X[j, ], gamma = gamma)
+          }
         }
       }
       S <- cbind(S, e1)
-      for(i in 1:mB){
-        for(j in 1:kernel_m){
-            R[i, j] <-  rbf_kernel(B[i, ], X[j, ], gamma = gamma)
-        }
-      }
       R <- cbind(R, e2)
     }
     RTR_reg_inv <- solve(t(R) %*% R + diag(rep(reg, ncol(R))))
     H <- S %*% RTR_reg_inv %*% t(S)
     lbB <- matrix(0, nrow = mA)
     ubB <- matrix(Ck[k], nrow = mA)
-    qp2_solver <- clip_dcd_optimizer(H, e1, lbB, ubB)
-    gammas <- as.matrix(qp2_solver$x)
+    if(rcpp == TRUE){
+      x <- cpp_clip_dcd_optimizer(H, e1, lbB, ubB, eps = eps_opt, max_steps = max.steps)
+    }else{
+      x <- clip_dcd_optimizer(H, e1, lbB, ubB, eps_opt ,max.steps)$x
+    }
+    gammas <- as.matrix(x)
     Z2 <- RTR_reg_inv %*% t(S) %*% gammas
 
     coef_list[, k] <- Z2[1:coef_dim]
@@ -101,8 +117,9 @@ mbsvm <- function(X, y,
                       'coef' = coef_list, 'intercept' = intercept_list,
                       'kernel' = kernel,
                       'gamma' = gamma,
-                      'kernel_rect' = kernel_rect
-  )
+                      'kernel_rect' = kernel_rect,
+                      'Rcpp' = rcpp
+                )
   class(mbsvm)<-"mbsvm"
   return(mbsvm)
 }
@@ -125,22 +142,28 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
   m <- nrow(X)
   dis_mat <- matrix(0, nrow = m, ncol = object$class_num)
   X <- as.matrix(X)
-
+  m1 <- nrow(X)
+  m2 <- round(nrow(object$X)*object$kernel_rect, 0)
   # get Kernel X
-  if(object$kernel != 'linear'){
-    m1 <- nrow(X)
-    m2 <- round(nrow(object$X)*object$kernel_rect, 0)
-    kernelX <- matrix(0, nrow = m1, ncol = m2)
-    for(i in 1:m1){
-      for(j in 1:m2){
-        if(object$kernel == 'rbf'){
-          kernelX[i, j] <- rbf_kernel(X[i, ], object$X[j, ], gamma = object$gamma)
+  if(object$kernel == 'linear'){
+    kernelX <- X
+  }else{
+    if(object$Rcpp == TRUE){
+      kernelX <- cpp_rbf_kernel(X, object$X[1:m2,], gamma = object$gamma)
+    }else{
+      if(object$kernel != 'linear'){
+        kernelX <- matrix(0, nrow = m1, ncol = m2)
+        for(i in 1:m1){
+          for(j in 1:m2){
+            if(object$kernel == 'rbf'){
+              kernelX[i, j] <- rbf_kernel(X[i, ], object$X[j, ], gamma = object$gamma)
+            }
+          }
         }
       }
     }
-  }else{
-    kernelX <- X
   }
+
 
   class_num <- object$class_num
   for(i in 1:class_num){
