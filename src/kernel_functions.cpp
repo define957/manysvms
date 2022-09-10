@@ -18,3 +18,5 @@ SEXP cpp_rbf_kernel(arma::mat x1, arma::mat x2, double gamma)
   }
   return Rcpp::wrap(kernelx);
 }
+
+

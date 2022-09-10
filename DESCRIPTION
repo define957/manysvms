@@ -16,5 +16,5 @@ Imports:
       Rcpp
 Suggests:
       MASS
-LinkingTo: Rcpp,
+LinkingTo: Rcpp, 
            RcppArmadillo

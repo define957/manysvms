@@ -11,6 +11,22 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// cpp_clip_dcd_optimizer
+SEXP cpp_clip_dcd_optimizer(arma::mat H, arma::mat q, arma::mat lb, arma::mat ub, double eps, int max_steps);
+RcppExport SEXP _manysvms_cpp_clip_dcd_optimizer(SEXP HSEXP, SEXP qSEXP, SEXP lbSEXP, SEXP ubSEXP, SEXP epsSEXP, SEXP max_stepsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type q(qSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type lb(lbSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type ub(ubSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_clip_dcd_optimizer(H, q, lb, ub, eps, max_steps));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_rbf_kernel
 SEXP cpp_rbf_kernel(arma::mat x1, arma::mat x2, double gamma);
 RcppExport SEXP _manysvms_cpp_rbf_kernel(SEXP x1SEXP, SEXP x2SEXP, SEXP gammaSEXP) {
@@ -26,6 +42,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_manysvms_cpp_clip_dcd_optimizer", (DL_FUNC) &_manysvms_cpp_clip_dcd_optimizer, 6},
     {"_manysvms_cpp_rbf_kernel", (DL_FUNC) &_manysvms_cpp_rbf_kernel, 3},
     {NULL, NULL, 0}
 };

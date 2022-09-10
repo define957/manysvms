@@ -1,39 +1,39 @@
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-12, max.steps = 200){
-  
+
   # Clipping dual coordinate decent optimizer
   # solve quadratic programming like:
   #       min t(x) %*% H %*% x - t(q) %*% x
   #       s.t lb < x < ub
-  
+
   H <- as.matrix(H)
   q <- as.matrix(q)
   lb <- as.matrix(lb)
   ub <- as.matrix(ub)
-  
+
   u <- (lb + ub) / 2
   for(i in 1:max.steps){
     numerator <- (q - t(t(u)%*%H))
     L_idx_val <- numerator / diag(H)
     L_val <- numerator^(2) / diag(H)
-    
+
     if(max(L_val) < eps){
       break
     }
-    
+
     idx1 = which(u > lb & L_idx_val < 0)
     idx2 = which(u < ub & L_idx_val >0)
     idx <- unique(c(idx1, idx2))
-    
+
     if(length(idx) == 0){
       break
     }
-    
+
     L_val[-idx] = -Inf
-    
+
     k <- which.max(t(L_val))
     lambda_max <- L_idx_val[k]
     lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
-    
+
     u[k] <- u[k] + lambda_opt
   }
   obj_val <- 0.5 * t(u) %*% H %*% u - t(q) %*% u
