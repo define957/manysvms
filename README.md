@@ -4,7 +4,11 @@
 ![GitHub ISSUES](https://img.shields.io/github/issues/define957/manysvms)
 ![GitHub STARS](https://img.shields.io/github/stars/define957/manysvms)
 ![GitHub STARS](https://img.shields.io/github/forks/define957/manysvms)
+
+MBSVM :
 <div align=center><img src = man\figures\MBSVM.png width="60%"></div>
+SVR :
+<div align=center><img src = man\figures\SVR.png width="60%"></div>
 
 
 ## Introduction
