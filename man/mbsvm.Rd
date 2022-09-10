@@ -11,7 +11,10 @@ mbsvm(
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   reg = 1,
-  kernel_rect = 1
+  kernel_rect = 1,
+  eps_opt = 1e-06,
+  max.steps = 300,
+  rcpp = TRUE
 )
 }
 \arguments{
@@ -26,6 +29,12 @@ mbsvm(
 \item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
 
 \item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
+
+\item{eps_opt}{the precision of the optimization algorithm.}
+
+\item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 }
 \value{
 return mbsvm object.
