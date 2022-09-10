@@ -1,4 +1,4 @@
-#library(manysvms)
+library(manysvms)
 library(MASS)
 set.seed(112)
 n <- 300
