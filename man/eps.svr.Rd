@@ -11,6 +11,8 @@ eps.svr(
   kernel = c("linear", "rbf", "poly"),
   C = 1,
   gamma = 1/ncol(X),
+  degree = 3,
+  coef0 = 0,
   max.steps = 1000,
   rcpp = TRUE
 )
@@ -25,6 +27,10 @@ eps.svr(
 \item{C}{plenty term (default \code{C = 1}).}
 
 \item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
+
+\item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
+
+\item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 

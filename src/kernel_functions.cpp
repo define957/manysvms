@@ -12,7 +12,7 @@ SEXP cpp_rbf_kernel(arma::mat x1, arma::mat x2, double gamma)
   int j = 0;
   arma::mat kernelx(n, m);
   for(i = 0; i < n; i ++){
-    for(j = 0; j < n; j ++){
+    for(j = 0; j < m; j ++){
       kernelx(i, j) = exp(as_scalar(- gamma * pow(norm(x1.row(i) - x2.row(j),2), 2)));
     }
   }

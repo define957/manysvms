@@ -9,3 +9,7 @@ cpp_rbf_kernel <- function(x1, x2, gamma) {
     .Call(`_manysvms_cpp_rbf_kernel`, x1, x2, gamma)
 }
 
+cpp_poly_kernel <- function(x1, x2, gamma, degree, coef0) {
+    .Call(`_manysvms_cpp_poly_kernel`, x1, x2, gamma, degree, coef0)
+}
+
