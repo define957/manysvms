@@ -8,6 +8,8 @@
 #' @param kernel kernel function.
 #' @param C plenty term (default \code{C = 1}).
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
+#' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
+#' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return eps.svr object.
@@ -37,8 +39,8 @@
 
 eps.svr <- function(X, y, eps = 0.1,
                     kernel = c('linear', 'rbf', 'poly'),
-                    C = 1, gamma = 1 / ncol(X),
-                    max.steps = 1000, rcpp = TRUE){
+                    C = 1, gamma = 1 / ncol(X), degree = 3,
+                    coef0 = 0, max.steps = 1000, rcpp = TRUE){
   X <- as.matrix(X)
   y <- as.matrix(y)
 
@@ -46,18 +48,29 @@ eps.svr <- function(X, y, eps = 0.1,
   m <-  nrow(X)
   if(kernel == 'linear'){
     Q <- X%*%t(X)
-  }else if(kernel == 'rbf'){
-    if(rcpp == FALSE){
+  }
+  if(rcpp == FALSE){
+    if(kernel == 'rbf'){
       Q <- matrix(0, nrow = m, ncol = m)
       for(i in 1:m){
         for(j in 1:m){
           Q[i, j] <-  rbf_kernel(X[i, ], X[j, ], gamma = gamma)
+
         }
       }
-    }else{
-      Q <- cpp_rbf_kernel(X, X, gamma = gamma)
+    }else if(kernel == 'poly'){
+      Q <-  poly_kernel(X, X,
+                        gamma = gamma, degree = degree,
+                        coef0 = coef0)
     }
 
+  }else if(rcpp == TRUE){
+    if(kernel == 'rbf'){
+      Q <- cpp_rbf_kernel(X, X, gamma = gamma)
+    }else if(kernel == 'poly'){
+      Q <- cpp_poly_kernel(X, X, gamma = gamma,
+                           degree = degree, coef0 = coef0)
+    }
   }
 
   Q1 <- cbind(Q, -Q)
@@ -74,14 +87,14 @@ eps.svr <- function(X, y, eps = 0.1,
   lb <- matrix(0, nrow = nrow(q))
   ub <- matrix(C, nrow = nrow(q))
   if(rcpp == TRUE){
-    beta <- cpp_clip_dcd_optimizer(H, -q, lb, ub, 1e-12, max.steps)
+    beta <- cpp_clip_dcd_optimizer(H, -q, lb, ub, eps = 1e-12, max.steps)
   }else{
     beta <- clip_dcd_optimizer(H, -q, lb, ub, max.steps = max.steps)$x
   }
-  w <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))]) %*% X
-  b <- mean(y - X%*%w *  + eps)
-  fitted <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))]) %*% Q
-  svr <- list('coef' = w, 'intercept' = b, 'epsilon' = eps, 'fitted' = fitted)
+  coef <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))])
+  fitted <- coef %*% Q
+  svr <- list('coef' = coef, 'epsilon' = eps, 'fitted' = fitted)
   class(svr) <- 'eps.svr'
+
   return(svr)
 }
