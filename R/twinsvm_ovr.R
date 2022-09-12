@@ -159,6 +159,6 @@ predict.twinsvm_ovr <- function(object, X, y, ...){
   cat('kernel type :', object$kernel, '\n')
   cat(paste("total accuracy :", acc*100, '% \n'))
   predlist <- list("accuracy"= acc,
-                   'distance' = dis_mat)
+                   'distance' = dis_mat, 'predict' = pred)
   return(predlist)
 }
