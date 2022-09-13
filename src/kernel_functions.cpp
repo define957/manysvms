@@ -25,6 +25,3 @@ SEXP cpp_poly_kernel(arma::mat x1, arma::mat x2, double gamma, int degree, doubl
   arma::mat kernelx = arma::pow((gamma * x1 * x2.t() + coef0), degree);
   return Rcpp::wrap(kernelx);
 }
-
-
-

@@ -1,4 +1,14 @@
-clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-12, max.steps = 200){
+clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
+                               max.steps = 200, rcpp = FALSE){
+  if(rcpp == TRUE){
+    x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = 1e-5, max.steps)
+  }else if(rcpp == FALSE){
+    x <- r_clip_dcd_optimizer(H, q, lb, ub, eps, max.steps)
+  }
+  return(x)
+}
+
+r_clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5, max.steps = 200){
 
   # Clipping dual coordinate decent optimizer
   # solve quadratic programming like:

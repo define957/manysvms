@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // cpp_clip_dcd_optimizer
-SEXP cpp_clip_dcd_optimizer(arma::mat H, arma::mat q, arma::mat lb, arma::mat ub, double eps, unsigned int max_steps);
+Rcpp::List cpp_clip_dcd_optimizer(arma::mat H, arma::mat q, arma::mat lb, arma::mat ub, double eps, unsigned int max_steps);
 RcppExport SEXP _manysvms_cpp_clip_dcd_optimizer(SEXP HSEXP, SEXP qSEXP, SEXP lbSEXP, SEXP ubSEXP, SEXP epsSEXP, SEXP max_stepsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

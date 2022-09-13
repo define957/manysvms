@@ -93,7 +93,7 @@ eps.svr <- function(X, y, eps = 0.1,
   lb <- matrix(0, nrow = nrow(q))
   ub <- matrix(C, nrow = nrow(q))
   if(rcpp == TRUE){
-    beta <- cpp_clip_dcd_optimizer(H, -q, lb, ub, eps = 1e-12, max.steps)
+    beta <- cpp_clip_dcd_optimizer(H, -q, lb, ub, eps = 1e-12, max.steps)$x
   }else{
     beta <- clip_dcd_optimizer(H, -q, lb, ub, max.steps = max.steps)$x
   }

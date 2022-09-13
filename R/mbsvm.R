@@ -101,7 +101,7 @@ mbsvm <- function(X, y,
     lbB <- matrix(0, nrow = mA)
     ubB <- matrix(Ck[k], nrow = mA)
     if(rcpp == TRUE){
-      x <- cpp_clip_dcd_optimizer(H, e1, lbB, ubB, eps = eps_opt, max_steps = max.steps)
+      x <- cpp_clip_dcd_optimizer(H, e1, lbB, ubB, eps = eps_opt, max_steps = max.steps)$x
     }else{
       x <- clip_dcd_optimizer(H, e1, lbB, ubB, eps_opt ,max.steps)$x
     }

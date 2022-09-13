@@ -1,11 +1,12 @@
 #include <RcppArmadillo.h>
+#include <Rcpp.h>
 
 using namespace arma;
-
+using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 //[[Rcpp::export]]
-SEXP cpp_clip_dcd_optimizer(arma::mat H, arma::mat q,
+Rcpp::List cpp_clip_dcd_optimizer(arma::mat H, arma::mat q,
                             arma::mat lb, arma::mat ub,
                             double eps, unsigned int max_steps){
   arma::mat u = (lb + ub) / 2;
@@ -53,8 +54,13 @@ SEXP cpp_clip_dcd_optimizer(arma::mat H, arma::mat q,
 
     lambda_max = L_idx_val(max_idx);
     lambda_opt = std::max(as_scalar(lb(max_idx) - u(max_idx)),
-                          std::min(lambda_max, as_scalar(ub(max_idx) - u(max_idx))));
+                 std::min(lambda_max, as_scalar(ub(max_idx) - u(max_idx))));
     u(max_idx) = u(max_idx) + lambda_opt;
   }
-  return Rcpp::wrap(u);
+  double obj_val = as_scalar(0.5 * u.t() * H * u - q.t() * u);
+
+  Rcpp::List res = Rcpp::List::create(Rcpp::Named("x") = u,
+                                      Rcpp::Named("iterations") = i,
+                                      Rcpp::Named("objectiv.value") = obj_val);
+  return res;
 }
