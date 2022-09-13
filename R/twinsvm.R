@@ -13,7 +13,11 @@
 #'     \item{rbf:}{\eqn{e^{(-\gamma |u-v|^2)}}{exp(-gamma*|u-v|^2)}}
 #' }
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
-#' @param  reg regularization term to take care of problems due to ill-conditioning in dual problem.
+#' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
+#' @param tol the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return twinsvm object.
 #' @export
 #' @examples
@@ -31,11 +35,9 @@
 twinsvm <- function(X, y,
                     C1 = 1.0, C2 = 1.0,
                     kernel = c('linear', 'rbf', 'poly'),
-                    gamma = 1 / ncol(X), reg = 1){
+                    gamma = 1 / ncol(X), reg = 1, kernel_rect = 1,
+                    tol = 1e-5, max.steps = 300, rcpp = TRUE){
 
-  # twinsvm
-  # X, y: your dataset
-  # C1, C2 :
   kernel <- match.arg(kernel)
 
   X <- as.matrix(X)
@@ -66,26 +68,11 @@ twinsvm <- function(X, y,
     S <- cbind(A, e1)
     R <- cbind(B, e2)
 
-  }else{
-    S <- matrix(rep(0, mA*m), nrow = mA, ncol = m)
-    R <- matrix(rep(0, mB*m), nrow = mB, ncol = m)
-
-    for(i in 1:mA){
-      for(j in 1:m){
-          if(kernel == 'rbf'){
-          S[i, j] <-  rbf_kernel(A[i, ], X[j, ], gamma = gamma)
-        }
-      }
-    }
+  }else if(kernel == 'rbf'){
+    kernel_m <- round(m*kernel_rect, 0)
+    S <- r_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+    R <- r_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
     S <- cbind(S, e1)
-
-    for(i in 1:mB){
-      for(j in 1:m){
-        if(kernel == 'rbf'){
-          R[i, j] <-  rbf_kernel(B[i, ], X[j, ], gamma = gamma)
-        }
-      }
-    }
     R <- cbind(R, e2)
   }
 
@@ -95,7 +82,7 @@ twinsvm <- function(X, y,
   lbA <- matrix(0, nrow = mB)
   ubA <- matrix(C1, nrow = mB)
   AA <- diag(rep(1, nrow(H)))
-  qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA)
+  qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA, tol, max.steps)
   alphas <- as.matrix(qp1_solver$x)
   Z1 <- - STS_reg_inv %*% t(R) %*% alphas
 
@@ -105,7 +92,7 @@ twinsvm <- function(X, y,
   lbB <- matrix(0, nrow = mA)
   ubB <- matrix(C2, nrow = mA)
   AB <- diag(rep(1, nrow(H)))
-  qp2_solver <- clip_dcd_optimizer(H, e1, lbB, ubB)
+  qp2_solver <- clip_dcd_optimizer(H, e1, lbB, ubB, tol, max.steps)
   gammas <- as.matrix(qp2_solver$x)
   Z2 <- RTR_reg_inv %*% t(S) %*% gammas
   u_idx <- length(Z2) - 1
@@ -213,5 +200,3 @@ predict.twinsvm <- function(object, X, y, ...){
   cat('total accuracy :', accuracy, '%\n')
   return(predlist)
 }
-
-

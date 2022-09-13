@@ -11,7 +11,11 @@ twinsvm(
   C2 = 1,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
-  reg = 1
+  reg = 1,
+  kernel_rect = 1,
+  tol = 1e-05,
+  max.steps = 300,
+  rcpp = TRUE
 )
 }
 \arguments{
@@ -31,6 +35,14 @@ twinsvm(
 \item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
 
 \item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
+
+\item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
+
+\item{tol}{the precision of the optimization algorithm.}
+
+\item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 }
 \value{
 return twinsvm object.

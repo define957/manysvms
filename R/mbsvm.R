@@ -29,8 +29,8 @@ mbsvm <- function(X, y,
                   Ck = rep(1, length(unique(y))),
                   kernel = c('linear', 'rbf', 'poly'),
                   gamma = 1 / ncol(X), reg = 1, kernel_rect = 1,
-                  tol = 1e-6, max.steps = 300,
-                  rcpp = TRUE){
+                  tol = 1e-6, max.steps = 300, rcpp = TRUE){
+
   kernel <- match.arg(kernel)
 
   m <- nrow(X)
@@ -75,22 +75,11 @@ mbsvm <- function(X, y,
     }else{
       kernel_m <- round(m*kernel_rect, 0)
       if(rcpp == TRUE){
-        S = cpp_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
-        R = cpp_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
+        S <- cpp_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+        R <- cpp_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
       }else{
-        S <- matrix(0, nrow = mA, ncol = kernel_m)
-        R <- matrix(0, nrow = mB, ncol = kernel_m)
-        for(i in 1:mA){
-          for(j in 1:kernel_m){
-              S[i, j] <-  rbf_kernel(A[i, ], X[j, ], gamma = gamma)
-          }
-        }
-
-        for(i in 1:mB){
-          for(j in 1:kernel_m){
-              R[i, j] <-  rbf_kernel(B[i, ], X[j, ], gamma = gamma)
-          }
-        }
+        S <- r_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+        R <- r_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
       }
       S <- cbind(S, e1)
       R <- cbind(R, e2)

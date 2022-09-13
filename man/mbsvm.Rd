@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbsvm.R
 \name{mbsvm}
 \alias{mbsvm}
-\title{Multiple Birth SVM}
+\title{Multiple Birth Support Vector Machine}
 \usage{
 mbsvm(
   X,
