@@ -1,5 +1,5 @@
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
-                               max.steps = 200, rcpp = FALSE){
+                               max.steps = 200, rcpp = TRUE){
   if(rcpp == TRUE){
     x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = 1e-5, max.steps)
   }else if(rcpp == FALSE){

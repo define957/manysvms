@@ -11,6 +11,7 @@
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param max.steps the number of iterations to solve the optimization problem.
+#' @param tol tolerance of termination criterion, default: \code{1e-5}.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return eps.svr object.
 #' @useDynLib manysvms, .registration = TRUE
@@ -92,11 +93,8 @@ eps.svr <- function(X, y, eps = 0.1,
 
   lb <- matrix(0, nrow = nrow(q))
   ub <- matrix(C, nrow = nrow(q))
-  if(rcpp == TRUE){
-    beta <- cpp_clip_dcd_optimizer(H, -q, lb, ub, eps = 1e-12, max.steps)$x
-  }else{
-    beta <- clip_dcd_optimizer(H, -q, lb, ub, max.steps = max.steps)$x
-  }
+
+  beta <- clip_dcd_optimizer(H, -q, lb, ub, eps = 1e-5, max.steps, rcpp = rcpp)$x
   coef <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))])
   fitted <- coef %*% Q
   svr <- list('coef' = coef, 'epsilon' = eps, 'fitted' = fitted)
