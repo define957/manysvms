@@ -21,9 +21,14 @@ In order to learn `SVMs` better, I built this repository to implement support ve
 
 ## How to install manysvms
 
-Make sure you have installed devtools and run the following command :
+Make sure you have installed `devtools`, If you don't have `devtools` installed, please run the following command first 
 ```{r}
-devtools::install_github('define957/manysvms')
+install.packages("devtools")
+```
+
+and run the following command :
+```{r}
+devtools::install_github("define957/manysvms")
 ```
 
 ## SVMs
