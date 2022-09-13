@@ -28,9 +28,9 @@ devtools::install_github('define957/manysvms')
 
 ## SVMs
 
-+ Twin-SVM for binary classification
-+ Twin-SVM for Multi-classification (Ones versus Rest strategy) 
-+ Twin-SVM for Multi-classification (Ones versus Rest strategy and K-fold cross validation) 
++ Twin-SVM for binary classification [Rcpp acceleration is available]
++ Twin-SVM for Multi-classification (Ones versus Rest strategy) [Rcpp acceleration is available]
++ Twin-SVM for Multi-classification (Ones versus Rest strategy and K-fold cross validation) [Rcpp acceleration is available]
 + Multiple Birth SVM for Multi-classification [Rcpp acceleration is available]
 + Epsilon Support Vector Regression [Rcpp acceleration is available]
 
