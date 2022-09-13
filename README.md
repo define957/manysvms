@@ -41,7 +41,13 @@ devtools::install_github('define957/manysvms')
 
 ## Development environment and dependency
 
-R Version : 4.2.1
+enviroment: R 4.2.1, windows 10 x64
+
+dependency: 
+
++ ggplot2 
++ Rcpp
++ RcppArmadillo
 
 ## Contact us
 
