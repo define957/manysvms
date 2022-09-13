@@ -47,7 +47,7 @@
 eps.svr <- function(X, y, eps = 0.1,
                     kernel = c('linear', 'rbf', 'poly'),
                     C = 1, gamma = 1 / ncol(X), degree = 3,
-                    coef0 = 0, max.steps = 1000, rcpp = TRUE){
+                    coef0 = 0, max.steps = 1000, tol = 1e-5, rcpp = TRUE){
   X <- as.matrix(X)
   y <- as.matrix(y)
 
@@ -58,19 +58,12 @@ eps.svr <- function(X, y, eps = 0.1,
   }
   if(rcpp == FALSE){
     if(kernel == 'rbf'){
-      Q <- matrix(0, nrow = m, ncol = m)
-      for(i in 1:m){
-        for(j in 1:m){
-          Q[i, j] <-  rbf_kernel(X[i, ], X[j, ], gamma = gamma)
-
-        }
-      }
+      Q <- r_rbf_kernel(X, X, gamma = gamma)
     }else if(kernel == 'poly'){
       Q <-  poly_kernel(X, X,
                         gamma = gamma, degree = degree,
                         coef0 = coef0)
     }
-
   }else if(rcpp == TRUE){
     if(kernel == 'rbf'){
       Q <- cpp_rbf_kernel(X, X, gamma = gamma)
@@ -94,7 +87,7 @@ eps.svr <- function(X, y, eps = 0.1,
   lb <- matrix(0, nrow = nrow(q))
   ub <- matrix(C, nrow = nrow(q))
 
-  beta <- clip_dcd_optimizer(H, -q, lb, ub, eps = 1e-5, max.steps, rcpp = rcpp)$x
+  beta <- clip_dcd_optimizer(H, -q, lb, ub, eps = tol, max.steps, rcpp = rcpp)$x
   coef <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))])
   fitted <- coef %*% Q
   svr <- list('coef' = coef, 'epsilon' = eps, 'fitted' = fitted)

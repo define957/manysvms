@@ -14,6 +14,7 @@ eps.svr(
   degree = 3,
   coef0 = 0,
   max.steps = 1000,
+  tol = 1e-05,
   rcpp = TRUE
 )
 }
@@ -33,6 +34,8 @@ eps.svr(
 \item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{tol}{tolerance of termination criterion, default: \code{1e-5}.}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 }
