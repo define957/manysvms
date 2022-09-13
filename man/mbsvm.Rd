@@ -12,7 +12,7 @@ mbsvm(
   gamma = 1/ncol(X),
   reg = 1,
   kernel_rect = 1,
-  eps_opt = 1e-06,
+  tol = 1e-06,
   max.steps = 300,
   rcpp = TRUE
 )
@@ -30,7 +30,7 @@ mbsvm(
 
 \item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
 
-\item{eps_opt}{the precision of the optimization algorithm.}
+\item{tol}{the precision of the optimization algorithm.}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
@@ -47,11 +47,11 @@ library(manysvms)
 data('iris')
 
 
-X <- iris[1:100, 1:2]
-y <- iris[1:100, 5]
+X <- iris[1:150, 1:4]
+y <- iris[1:150, 5]
 
-model <- mbsvm(X, y, kernel = 'linear')
-pred <-predict(model, X, y)
+model1 <- mbsvm(X, y, kernel = 'linear')
+pred <-predict(model1, X, y)
 }
 \author{
 Zhang Jiaqi.

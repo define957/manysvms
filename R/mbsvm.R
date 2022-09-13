@@ -1,4 +1,4 @@
-#' Multiple Birth SVM
+#' Multiple Birth Support Vector Machine
 #'
 #' \code{mbsvm} is an R implementation of multiple birth SVM
 #'
@@ -9,9 +9,8 @@
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
-#' @param eps_opt the precision of the optimization algorithm.
+#' @param tol the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
-#'
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return mbsvm object.
 #' @export
@@ -20,17 +19,17 @@
 #' data('iris')
 #'
 #'
-#' X <- iris[1:100, 1:2]
-#' y <- iris[1:100, 5]
+#' X <- iris[1:150, 1:4]
+#' y <- iris[1:150, 5]
 #'
-#' model <- mbsvm(X, y, kernel = 'linear')
-#' pred <-predict(model, X, y)
+#' model1 <- mbsvm(X, y, kernel = 'linear')
+#' pred <-predict(model1, X, y)
 
 mbsvm <- function(X, y,
                   Ck = rep(1, length(unique(y))),
                   kernel = c('linear', 'rbf', 'poly'),
                   gamma = 1 / ncol(X), reg = 1, kernel_rect = 1,
-                  eps_opt = 1e-6, max.steps = 300,
+                  tol = 1e-6, max.steps = 300,
                   rcpp = TRUE){
   kernel <- match.arg(kernel)
 
@@ -100,11 +99,9 @@ mbsvm <- function(X, y,
     H <- S %*% RTR_reg_inv %*% t(S)
     lbB <- matrix(0, nrow = mA)
     ubB <- matrix(Ck[k], nrow = mA)
-    if(rcpp == TRUE){
-      x <- cpp_clip_dcd_optimizer(H, e1, lbB, ubB, eps = eps_opt, max_steps = max.steps)$x
-    }else{
-      x <- clip_dcd_optimizer(H, e1, lbB, ubB, eps_opt ,max.steps)$x
-    }
+
+    x <- clip_dcd_optimizer(H, e1, lbB, ubB, tol, max.steps, rcpp = rcpp)$x
+
     gammas <- as.matrix(x)
     Z2 <- RTR_reg_inv %*% t(S) %*% gammas
 
