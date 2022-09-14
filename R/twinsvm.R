@@ -65,16 +65,21 @@ twinsvm <- function(X, y,
   e2 <- as.matrix(rep(1, mB))
   dim(e2) <- c(mB, 1)
   if(kernel == 'linear'){
-    S <- cbind(A, e1)
-    R <- cbind(B, e2)
+    S <- A
+    R <- B
 
   }else if(kernel == 'rbf'){
     kernel_m <- round(m*kernel_rect, 0)
-    S <- r_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
-    R <- r_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
-    S <- cbind(S, e1)
-    R <- cbind(R, e2)
+    if(rcpp == TRUE){
+      S <- cpp_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+      R <- cpp_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
+    }else if(rcpp == FALSE){
+      S <- r_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+      R <- r_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
+    }
   }
+  S <- cbind(S, e1)
+  R <- cbind(R, e2)
 
   # Solve QP 1
   STS_reg_inv <- solve(t(S) %*% S + diag(rep(reg, ncol(S))))
@@ -82,7 +87,7 @@ twinsvm <- function(X, y,
   lbA <- matrix(0, nrow = mB)
   ubA <- matrix(C1, nrow = mB)
   AA <- diag(rep(1, nrow(H)))
-  qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA, tol, max.steps)
+  qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA, tol, max.steps, rcpp)
   alphas <- as.matrix(qp1_solver$x)
   Z1 <- - STS_reg_inv %*% t(R) %*% alphas
 
@@ -92,7 +97,7 @@ twinsvm <- function(X, y,
   lbB <- matrix(0, nrow = mA)
   ubB <- matrix(C2, nrow = mA)
   AB <- diag(rep(1, nrow(H)))
-  qp2_solver <- clip_dcd_optimizer(H, e1, lbB, ubB, tol, max.steps)
+  qp2_solver <- clip_dcd_optimizer(H, e1, lbB, ubB, tol, max.steps, rcpp)
   gammas <- as.matrix(qp2_solver$x)
   Z2 <- RTR_reg_inv %*% t(S) %*% gammas
   u_idx <- length(Z2) - 1

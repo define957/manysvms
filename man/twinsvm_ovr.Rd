@@ -10,7 +10,11 @@ twinsvm_ovr(
   Ck = rep(1, length(unique(y))),
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
-  reg = 1
+  reg = 1,
+  kernel_rect = 1,
+  tol = 1e-05,
+  max.steps = 300,
+  rcpp = TRUE
 )
 }
 \arguments{
@@ -23,6 +27,14 @@ twinsvm_ovr(
 \item{gamma}{rbf kernel parameter}
 
 \item{reg}{regularization tern}
+
+\item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
+
+\item{tol}{the precision of the optimization algorithm.}
+
+\item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 }
 \value{
 return twinsvm object

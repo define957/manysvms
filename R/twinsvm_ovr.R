@@ -6,6 +6,10 @@
 #' @param kernel kernel function
 #' @param gamma rbf kernel parameter
 #' @param  reg regularization tern
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
+#' @param tol the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return twinsvm object
 #' @export
 #' @examples
@@ -24,7 +28,8 @@
 twinsvm_ovr<- function(X, y,
                         Ck = rep(1, length(unique(y))),
                         kernel = c('linear', 'rbf', 'poly'),
-                        gamma = 1 / ncol(X), reg = 1){
+                        gamma = 1 / ncol(X), reg = 1, kernel_rect = 1,
+                        tol = 1e-5, max.steps = 300, rcpp = TRUE){
   kernel <- match.arg(kernel)
 
   m <- nrow(X)
@@ -64,35 +69,26 @@ twinsvm_ovr<- function(X, y,
     dim(e2) <- c(mB, 1)
 
     if(kernel == 'linear'){
-      S <- cbind(A, e1)
-      R <- cbind(B, e2)
-    }else{
-      kernel_m <- m
-      S <- matrix(0, nrow = mA, ncol = kernel_m)
-      R <- matrix(0, nrow = mB, ncol = kernel_m)
-      for(i in 1:mA){
-        for(j in 1:kernel_m){
-          if(kernel == 'rbf'){
-            S[i, j] <-  rbf_kernel(A[i, ], X[j, ], gamma = gamma)
-          }
-        }
+      S <- A
+      R <- B
+    }else if(kernel == 'rbf'){
+      kernel_m <- round(m*kernel_rect, 0)
+      if(rcpp == TRUE){
+        S <- cpp_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+        R <- cpp_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
+      }else if(rcpp == FALSE){
+        S <- r_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
+        R <- r_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
       }
-      S <- cbind(S, e1)
-
-      for(i in 1:mB){
-        for(j in 1:kernel_m){
-          if(kernel == 'rbf'){
-            R[i, j] <-  rbf_kernel(B[i, ], X[j, ], gamma = gamma)
-          }
-        }
-      }
-      R <- cbind(R, e2)
     }
+    S <- cbind(S, e1)
+    R <- cbind(R, e2)
+
     STS_reg_inv <- solve(t(S) %*% S + diag(reg, ncol(S)))
     H <- R %*% STS_reg_inv %*% t(R)
     lbA <- matrix(0, nrow = mB)
     ubA <- matrix(Ck[k], nrow = mB)
-    qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA)
+    qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA, tol, max.steps, rcpp)
     alphas <- as.matrix(qp1_solver$x)
     Z1 <- -STS_reg_inv %*% t(R) %*% alphas
 
