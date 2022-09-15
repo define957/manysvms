@@ -2,5 +2,5 @@
 #'
 #'@export
 record.something <- function(){
-  cat("2")
+  cat("The number of flowers is 2")
 }
