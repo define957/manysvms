@@ -36,7 +36,7 @@ twinsvm(
 
 \item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
 
-\item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
+\item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}.}
 
 \item{tol}{the precision of the optimization algorithm.}
 
