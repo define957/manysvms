@@ -115,7 +115,9 @@ twinsvm <- function(X, y,
                         'class_set' = class_set,
                         'kernel' = kernel,
                         'gamma' = gamma,
-                        'Rcpp' = rcpp)
+                        'Rcpp' = rcpp,
+                        'call' = match.call())
+  twinsvm_model$call [[1]] <- as.name("twinsvm")
   class(twinsvm_model)<-"twinsvm"
 
   return(twinsvm_model)
@@ -147,14 +149,14 @@ coef.twinsvm <- function(object, ...){
 }
 
 
-#' Predict Method for Multiple Birth Support Vector Machines
+#' Predict Method for Twin Support Vector Machines
 #'
 #' This function predicts values based upon a model trained by \code{twinsvm}.
 #'
 #' @author Zhang Jiaqi
-#' @param object Object of class `twinsvm`.
-#' @param X A new data frame for predicting.
-#' @param y A label data frame corresponding to X.
+#' @param object object of class `twinsvm`.
+#' @param X a new data frame for predicting.
+#' @param y a label data frame corresponding to X.
 #' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
@@ -194,4 +196,22 @@ predict.twinsvm <- function(object, X, y, ...){
   cat('use kernel : ', object$kernel, '\n')
   cat('total accuracy :', accuracy, '%\n')
   return(predlist)
+}
+
+#' Print Method for Twin Support Vector Machines
+#'
+#' This function prints information about \code{twinsvm} model.
+#' @param x object of class \code{twinsvm}.
+#' @param ... unsed argument.
+#' @export
+
+print.twinsvm <- function(x, ...){
+  cat("\nCall:", deparse(x$call, 0.8 * getOption("width")), "\n", sep="\n")
+  cat("SVM type : ", class(x), "\n")
+  cat("SVM kernel : ", x$kernel, "\n")
+  if(x$kernel == 'rbf'){
+    cat("gamma : ", x$gamma, "\n")
+  }
+  cat("number of observations : ", nrow(x$X), "\n")
+  cat("number of class : ", length(x$class_set), "\n")
 }

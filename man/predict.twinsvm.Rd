@@ -2,16 +2,16 @@
 % Please edit documentation in R/twinsvm.R
 \name{predict.twinsvm}
 \alias{predict.twinsvm}
-\title{Predict Method for Multiple Birth Support Vector Machines}
+\title{Predict Method for Twin Support Vector Machines}
 \usage{
 \method{predict}{twinsvm}(object, X, y, ...)
 }
 \arguments{
-\item{object}{Object of class `twinsvm`.}
+\item{object}{object of class `twinsvm`.}
 
-\item{X}{A new data frame for predicting.}
+\item{X}{a new data frame for predicting.}
 
-\item{y}{A label data frame corresponding to X.}
+\item{y}{a label data frame corresponding to X.}
 
 \item{...}{unused parameter.}
 }
