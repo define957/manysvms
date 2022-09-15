@@ -117,7 +117,6 @@ twinsvm <- function(X, y,
                         'gamma' = gamma,
                         'Rcpp' = rcpp,
                         'call' = match.call())
-  twinsvm_model$call [[1]] <- as.name("twinsvm")
   class(twinsvm_model)<-"twinsvm"
 
   return(twinsvm_model)
