@@ -14,7 +14,7 @@
 #' }
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
-#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}.
 #' @param tol the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
