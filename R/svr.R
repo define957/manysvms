@@ -60,7 +60,7 @@ eps.svr <- function(X, y, eps = 0.1,
     if(kernel == 'rbf'){
       Q <- r_rbf_kernel(X, X, gamma = gamma)
     }else if(kernel == 'poly'){
-      Q <-  poly_kernel(X, X,
+      Q <- r_poly_kernel(X, X,
                         gamma = gamma, degree = degree,
                         coef0 = coef0)
     }
