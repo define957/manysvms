@@ -2,18 +2,19 @@
 % Please edit documentation in R/twinKsvm.R
 \name{twinKsvm}
 \alias{twinKsvm}
-\title{Twin K SVM for Multi-classification by Using Ones versus Rest Strategy}
+\title{Twin K SVM for Multi-classification}
 \usage{
 twinKsvm(
   X,
   y,
-  Ck = rep(1, length(unique(y))),
+  C = rep(1, 4),
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
   reg = 1,
   kernel_rect = 1,
+  eps = 0.1,
   tol = 1e-05,
   max.steps = 300,
   rcpp = TRUE
@@ -21,8 +22,6 @@ twinKsvm(
 }
 \arguments{
 \item{X, y}{dataset and label}
-
-\item{Ck}{plenty term vector}
 
 \item{kernel}{kernel function}
 
@@ -36,17 +35,21 @@ twinKsvm(
 
 \item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
 
+\item{eps}{parameter for rest class.}
+
 \item{tol}{the precision of the optimization algorithm.}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
+
+\item{Ck}{plenty term vector}
 }
 \value{
 return twinKsvm object
 }
 \description{
-Twin K SVM for Multi-classification by Using Ones versus Rest Strategy
+Twin K SVM for Multi-classification
 }
 \author{
 Zhang Jiaqi
