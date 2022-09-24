@@ -5,6 +5,8 @@
 #' @param Ck plenty term vector
 #' @param kernel kernel function
 #' @param gamma rbf kernel parameter
+#' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
+#' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param  reg regularization tern
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param tol the precision of the optimization algorithm.
@@ -26,10 +28,11 @@
 #' pred <-predict(model, X, y)
 
 twinsvm_ovr<- function(X, y,
-                        Ck = rep(1, length(unique(y))),
-                        kernel = c('linear', 'rbf', 'poly'),
-                        gamma = 1 / ncol(X), reg = 1, kernel_rect = 1,
-                        tol = 1e-5, max.steps = 300, rcpp = TRUE){
+                       Ck = rep(1, length(unique(y))),
+                       kernel = c('linear', 'rbf', 'poly'),
+                       gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                       reg = 1, kernel_rect = 1,
+                       tol = 1e-5, max.steps = 300, rcpp = TRUE){
   kernel <- match.arg(kernel)
 
   m <- nrow(X)
@@ -44,13 +47,11 @@ twinsvm_ovr<- function(X, y,
   if(kernel == 'linear'){
     coef_dim <- n
   }else if(kernel == 'rbf'){
-    coef_dim <- m
+    coef_dim <- m*kernel_rect
   }
-  coef_list <- rep(0, coef_dim*class_num)
-  dim(coef_list) <- c(coef_dim, class_num)
-  intercept_list <- rep(0, class_num)
-  coef_list <- as.matrix(coef_list)
-  intercept_list <- as.matrix(intercept_list)
+
+  coef_list <- matrix(0, nrow = coef_dim, ncol = class_num)
+  intercept_list <- matrix(0, ncol = class_num)
 
 
   for(k in 1:class_num){
@@ -71,15 +72,17 @@ twinsvm_ovr<- function(X, y,
     if(kernel == 'linear'){
       S <- A
       R <- B
-    }else if(kernel == 'rbf'){
+    }else{
       kernel_m <- round(m*kernel_rect, 0)
-      if(rcpp == TRUE){
-        S <- cpp_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
-        R <- cpp_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
-      }else if(rcpp == FALSE){
-        S <- r_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
-        R <- r_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
-      }
+
+      S <- kernel_function(A, X[1:kernel_m, ],
+                           kernel.type = kernel,
+                           gamma = gamma, degree = degree, coef0 = coef0,
+                           rcpp = rcpp)
+      R <- kernel_function(B, X[1:kernel_m, ],
+                           kernel.type = kernel,
+                           gamma = gamma, degree = degree, coef0 = coef0,
+                           rcpp = rcpp)
     }
     S <- cbind(S, e1)
     R <- cbind(R, e2)
@@ -129,12 +132,8 @@ predict.twinsvm_ovr <- function(object, X, y, ...){
     m1 <- nrow(X)
     m2 <- nrow(object$X)
     kernelX <- matrix(0, nrow = m1, ncol = m2)
-    for(i in 1:m1){
-      for(j in 1:m2){
-        if(object$kernel == 'rbf'){
-          kernelX[i, j] <- rbf_kernel(X[i, ], object$X[j, ], gamma = object$gamma)
-        }
-      }
+    if(object$kernel == 'rbf'){
+        kernelX <- r_rbf_kernel(X, object$X, gamma = object$gamma)
     }
   }else{
     kernelX <- X
