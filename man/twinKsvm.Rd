@@ -10,6 +10,8 @@ twinKsvm(
   Ck = rep(1, length(unique(y))),
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
+  degree = 3,
+  coef0 = 0,
   reg = 1,
   kernel_rect = 1,
   tol = 1e-05,
@@ -25,6 +27,10 @@ twinKsvm(
 \item{kernel}{kernel function}
 
 \item{gamma}{rbf kernel parameter}
+
+\item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
+
+\item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
 \item{reg}{regularization tern}
 
