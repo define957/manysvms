@@ -59,7 +59,7 @@ twinKsvm <- function(X, y,
       mA <- nrow(A)
       mB <- nrow(B)
       mC <- m - mA -mB
-      print(mB)
+
       e1 <- matrix(1, nrow = mA)
       e2 <- matrix(1, nrow = mB)
       e3 <- matrix(1, nrow = mC)
