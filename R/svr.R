@@ -90,8 +90,32 @@ eps.svr <- function(X, y, eps = 0.1,
   beta <- clip_dcd_optimizer(H, -q, lb, ub, eps = tol, max.steps, rcpp = rcpp)$x
   coef <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))])
   fitted <- coef %*% Q
-  svr <- list('coef' = coef, 'epsilon' = eps, 'fitted' = fitted)
+  svr <- list('X' = X, 'y' = y,
+              'coef' = coef,
+              'epsilon' = eps,
+              'fitted' = fitted,
+              'kernel' = kernel,
+              'gamma' = gamma,
+              'call' = match.call())
   class(svr) <- 'eps.svr'
 
   return(svr)
+}
+
+
+#' Print Method for epsilon - Support Vector Regression
+#'
+#' This function prints information about \code{eps.svr} model.
+#' @param x object of class \code{twinsvm}.
+#' @param ... unsed argument.
+#' @export
+
+print.eps.svr <- function(x, ...){
+  cat("\nCall:", deparse(x$call, 0.8 * getOption("width")), "\n", sep="\n")
+  cat("SVM type : ", class(x), "\n")
+  cat("SVM kernel : ", x$kernel, "\n")
+  if(x$kernel == 'rbf'){
+    cat("gamma : ", x$gamma, "\n")
+  }
+  cat("number of observations : ", nrow(x$X), "\n")
 }
