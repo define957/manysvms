@@ -53,25 +53,12 @@ eps.svr <- function(X, y, eps = 0.1,
 
   kernel <- match.arg(kernel)
   m <-  nrow(X)
-  if(kernel == 'linear'){
-    Q <- X%*%t(X)
-  }
-  if(rcpp == FALSE){
-    if(kernel == 'rbf'){
-      Q <- r_rbf_kernel(X, X, gamma = gamma)
-    }else if(kernel == 'poly'){
-      Q <- r_poly_kernel(X, X,
-                        gamma = gamma, degree = degree,
-                        coef0 = coef0)
-    }
-  }else if(rcpp == TRUE){
-    if(kernel == 'rbf'){
-      Q <- cpp_rbf_kernel(X, X, gamma = gamma)
-    }else if(kernel == 'poly'){
-      Q <- cpp_poly_kernel(X, X, gamma = gamma,
-                           degree = degree, coef0 = coef0)
-    }
-  }
+
+  Q <- kernel_function(X, X,
+                       kernel.type = kernel,
+                       gamma = gamma, degree = degree, coef0 = coef0,
+                       rcpp = rcpp)
+
 
   Q1 <- cbind(Q, -Q)
   Q2 <- cbind(-Q, Q)

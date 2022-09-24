@@ -12,7 +12,7 @@ y <- as.matrix(x2)
 
 s <- Sys.time()
 m <- eps.svr(X,y, eps=0.3, kernel = 'rbf', C = 1,
-             gamma = 1, max.steps = 500, rcpp = FALSE)
+             gamma = 1, max.steps = 500, rcpp = TRUE)
 e <- Sys.time()
 print(e - s)
 dataXy <- as.data.frame(cbind(X, y))
