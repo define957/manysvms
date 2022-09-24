@@ -11,6 +11,8 @@ twinsvm(
   C2 = 1,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
+  degree = 3,
+  coef0 = 0,
   reg = 1,
   kernel_rect = 1,
   tol = 1e-05,
@@ -33,6 +35,10 @@ twinsvm(
 }}
 
 \item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
+
+\item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
+
+\item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
 \item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
 
