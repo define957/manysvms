@@ -31,12 +31,16 @@ and run the following command :
 devtools::install_github("define957/manysvms")
 ```
 
-## SVMs
+## SVMs for classification
 
 + Twin-SVM for binary classification [Rcpp acceleration is available]
-+ Twin-SVM for Multi-classification (Ones versus Rest strategy) [Rcpp acceleration is available]
-+ Twin-SVM for Multi-classification (Ones versus Rest strategy and K-fold cross validation) [Rcpp acceleration is available]
++ Twin-SVM for Multi-classification (One versus Rest strategy) [Rcpp acceleration is available]
++ Twin-SVM for Multi-classification (One versus Rest strategy and K-fold cross validation) [Rcpp acceleration is available]
 + Multiple Birth SVM for Multi-classification [Rcpp acceleration is available]
++ Twin K SVM for Multi-classification (One versus One versus Rest strategy) [Rcpp acceleration is available]
+
+## SVMs for regression
+
 + Epsilon Support Vector Regression [Rcpp acceleration is available]
 
 ## Kernel options
