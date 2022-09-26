@@ -64,10 +64,8 @@ twinsvm_ovr<- function(X, y,
     mA <- nrow(A)
     mB <- nrow(B)
 
-    e1 <- as.matrix(rep(1, mA))
-    dim(e1) <- c(mA, 1)
-    e2 <- as.matrix(rep(1, mB))
-    dim(e2) <- c(mB, 1)
+    e1 <- matrix(1, nrow = mA)
+    e2 <- matrix(1, nrow = mB)
 
     if(kernel == 'linear'){
       S <- A
