@@ -119,6 +119,8 @@ twinsvm <- function(X, y,
                         'class_set' = class_set,
                         'kernel' = kernel,
                         'gamma' = gamma,
+                        'coef0' = coef0,
+                        'kernel_rect' = kernel_rect,
                         'Rcpp' = rcpp,
                         'call' = match.call())
   class(twinsvm_model)<-"twinsvm"
@@ -176,10 +178,17 @@ coef.twinsvm <- function(object, ...){
 predict.twinsvm <- function(object, X, y, ...){
 
   X <- as.matrix(X)
-  if(object$kernel == "linear"){
+  y <- as.matrix(y)
+  if(object$kernel == 'linear'){
     kernelX <- X
-  }else if(object$kernel == "rbf"){
-    kernelX <- r_rbf_kernel(X, object$X, gamma = object$gamma)
+  }else{
+    kernel_m <- round(m*object$kernel_rect, 0)
+    kernelX <- kernel_function(X, X[1:kernel_m, ],
+                               kernel.type = object$kernel,
+                               gamma = object$gamma,
+                               degree = object$degree,
+                               coef0 = object$coef0,
+                               rcpp = object$Rcpp)
   }
 
   disA <- abs(kernelX %*% object$u1 + object$b1) / norm(object$u1, type = '2')
