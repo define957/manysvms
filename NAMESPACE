@@ -3,6 +3,7 @@
 S3method(coef,twinsvm)
 S3method(plot,mbsvm)
 S3method(predict,mbsvm)
+S3method(predict,twinKsvm)
 S3method(predict,twinsvm)
 S3method(predict,twinsvm_ovr)
 S3method(print,eps.svr)

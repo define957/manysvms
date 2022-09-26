@@ -2,12 +2,12 @@
 % Please edit documentation in R/twinKsvm.R
 \name{twinKsvm}
 \alias{twinKsvm}
-\title{Twin K SVM for Multi-classification}
+\title{Twin K Support Vector Machine for Multi-classification}
 \usage{
 twinKsvm(
   X,
   y,
-  C = rep(1, 4),
+  Ck = rep(1, 4),
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,
@@ -21,17 +21,19 @@ twinKsvm(
 )
 }
 \arguments{
-\item{X, y}{dataset and label}
+\item{X, y}{dataset and label.}
 
-\item{kernel}{kernel function}
+\item{Ck}{plenty term vector.}
 
-\item{gamma}{rbf kernel parameter}
+\item{kernel}{kernel function.}
+
+\item{gamma}{rbf kernel parameter.}
 
 \item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
 
 \item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
-\item{reg}{regularization tern}
+\item{reg}{regularization term.}
 
 \item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
 
@@ -42,14 +44,12 @@ twinKsvm(
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
-
-\item{Ck}{plenty term vector}
 }
 \value{
 return twinKsvm object
 }
 \description{
-Twin K SVM for Multi-classification
+Twin K Support Vector Machine for Multi-classification
 }
 \author{
 Zhang Jiaqi
