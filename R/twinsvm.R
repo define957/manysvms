@@ -210,11 +210,9 @@ predict.twinsvm <- function(object, X, y, ...){
   return(predlist)
 }
 
-#' Print Method for Twin Support Vector Machines
-#'
-#' This function prints information about \code{twinsvm} model.
-#' @param x object of class \code{twinsvm}.
-#' @param ... unsed argument.
+#' @rdname twinsvm
+#' @format NULL
+#' @usage NULL
 #' @export
 
 print.twinsvm <- function(x, ...){

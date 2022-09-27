@@ -2,6 +2,7 @@
 % Please edit documentation in R/twinsvm.R
 \name{twinsvm}
 \alias{twinsvm}
+\alias{print.twinsvm}
 \title{Twin Support Vector Machines}
 \usage{
 twinsvm(
