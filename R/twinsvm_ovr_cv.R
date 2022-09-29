@@ -1,5 +1,5 @@
-#' An R implementation of Twin-SVM
-#'
+#' Twin SVM for Multi-classification by Using Ones versus Rest Strategy
+#' An R implementation of \code{twinsvm} (Cross Validation)
 #' @author Zhang Jiaqi
 #' @param X,y dataset and label
 #' @param K `K = 10` means K-fold cross validation
@@ -19,8 +19,8 @@
 #' cv.twinsvm_ovr(X, y, K = 10, kernel = 'rbf', gamma = 1/8, seed = 1234)
 
 cv.twinsvm_ovr <- function(X, y , K = 5,
-                           kernel = c('None','linear', 'rbf', 'poly'),
-                           reg = 1e-7, gamma = 1/ncol(X),
+                           kernel = c('linear', 'rbf', 'poly'),
+                           reg = 1e-3, gamma = 1/ncol(X),
                            shuffer = TRUE, seed = NULL){
 
   m <- nrow(X)
