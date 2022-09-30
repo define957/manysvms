@@ -2,14 +2,15 @@
 % Please edit documentation in R/twinsvm_ovr_cv.R
 \name{cv.twinsvm_ovr}
 \alias{cv.twinsvm_ovr}
-\title{An R implementation of Twin-SVM}
+\title{Twin SVM for Multi-classification by Using Ones versus Rest Strategy
+An R implementation of \code{twinsvm} (Cross Validation)}
 \usage{
 cv.twinsvm_ovr(
   X,
   y,
   K = 5,
-  kernel = c("None", "linear", "rbf", "poly"),
-  reg = 1e-07,
+  kernel = c("linear", "rbf", "poly"),
+  reg = 0.001,
   gamma = 1/ncol(X),
   shuffer = TRUE,
   seed = NULL
@@ -34,7 +35,8 @@ cv.twinsvm_ovr(
 average accuracy in K-fold cross validation
 }
 \description{
-An R implementation of Twin-SVM
+Twin SVM for Multi-classification by Using Ones versus Rest Strategy
+An R implementation of \code{twinsvm} (Cross Validation)
 }
 \examples{
 library(manysvms)
