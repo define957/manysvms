@@ -2,6 +2,7 @@
 % Please edit documentation in R/twinKsvm.R
 \name{twinKsvm}
 \alias{twinKsvm}
+\alias{print.twinKsvm}
 \title{Twin K Support Vector Machine for Multi-classification}
 \usage{
 twinKsvm(

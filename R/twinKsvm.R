@@ -141,8 +141,8 @@ twinKsvm <- function(X, y,
                    'gamma' = gamma,
                    'coef0' = coef0,
                    'kernel_rect' = kernel_rect,
-                   'Rcpp' = rcpp
-                   )
+                   'Rcpp' = rcpp,
+                   'call' = match.call())
   class(twinKsvm) <- "twinKsvm"
   return(twinKsvm)
 }
@@ -213,3 +213,20 @@ predict.twinKsvm <- function(object, X, y, ...){
                    'vote_mat' = vote_mat, 'predict' = pred)
   return(predlist)
 }
+
+#' @rdname twinKsvm
+#' @format NULL
+#' @usage NULL
+#' @export
+
+print.twinKsvm <- function(x, ...){
+  cat("\nCall:", deparse(x$call, 0.8 * getOption("width")), "\n", sep="\n")
+  cat("SVM type : ", class(x), "\n")
+  cat("SVM kernel : ", x$kernel, "\n")
+  if(x$kernel == 'rbf'){
+    cat("gamma : ", x$gamma, "\n")
+  }
+  cat("number of observations : ", nrow(x$X), "\n")
+  cat("number of class : ", length(x$class_set), "\n")
+}
+
