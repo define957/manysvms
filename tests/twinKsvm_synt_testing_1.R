@@ -20,3 +20,16 @@ model <- twinKsvm(X, y, kernel = 'rbf', eps = 0.3, kernel_rect = 1)
 e <- Sys.time()
 print(e - s)
 pred <- predict(model, X, y)
+
+s <- Sys.time()
+cv.twinKsvm(X, y,  kernel = 'rbf', eps = 0.3, kernel_rect = 1)
+e <- Sys.time()
+print(e - s)
+
+data("glass")
+X <- glass[,1:10]
+y <- glass[,10]
+s <- Sys.time()
+cv.twinKsvm(X, y, K = 5, kernel = 'rbf', eps = 0.3, kernel_rect = 1)
+e <- Sys.time()
+print(e - s)

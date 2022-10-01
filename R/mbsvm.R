@@ -182,7 +182,6 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
 #' Computes K-fold Cross-Validated Accuracy for MBSVM
 #'
 #' @author Zhang Jiaqi
-#' @param mbsvm a fitted object of class inheriting from \code{mbsvm}.
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
 #' @param K Number of folds.
