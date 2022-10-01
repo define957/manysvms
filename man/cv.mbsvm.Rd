@@ -34,8 +34,6 @@ cv.mbsvm(
 \item{shuffer}{if set \code{shuffer==TRUE}, This function will shuffle the dataset.}
 
 \item{seed}{random seed for \code{shuffer} option.}
-
-\item{mbsvm}{a fitted object of class inheriting from \code{mbsvm}.}
 }
 \description{
 Computes K-fold Cross-Validated Accuracy for MBSVM
