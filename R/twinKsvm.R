@@ -106,8 +106,7 @@ twinKsvm <- function(X, y,
       lbA <- matrix(0, nrow = m - mA)
       ubA1 <- matrix(Ck[1], nrow = mB)
       ubA2 <- matrix(Ck[2], nrow = mC)
-      ubAx <- rbind(ubA1, ubA2)
-      ubA <- matrix(1, nrow = m - mA)
+      ubA <- rbind(ubA1, ubA2)
       qp1_solver <- clip_dcd_optimizer(H, e4, lbA, ubA, tol, max.steps, rcpp)
       gammas <- as.matrix(qp1_solver$x)
       Z1 <- - STS_reg_inv %*% (t(R) %*% gammas[0:mB] +
@@ -123,7 +122,6 @@ twinKsvm <- function(X, y,
       ubB1 <- matrix(Ck[3], nrow = mA)
       ubB2 <- matrix(Ck[4], nrow = mC)
       ubB <- rbind(ubB1, ubB2)
-      ubB <- matrix(1, nrow = m - mB)
       qp2_solver <- clip_dcd_optimizer(H, e5, lbB, ubB, tol, max.steps, rcpp)
       rhos <- as.matrix(qp2_solver$x)
       Z2 <- RTR_reg_inv %*% t(J) %*% rhos
