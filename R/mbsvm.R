@@ -179,7 +179,7 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
 }
 
 
-#' Computes K-fold Cross-Validated Accuracy for MBSVM
+#' Computes K-fold Cross-Validation Accuracy for MBSVM
 #'
 #' @author Zhang Jiaqi
 #' @param X A new data frame for predicting.

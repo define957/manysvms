@@ -232,7 +232,7 @@ print.twinKsvm <- function(x, ...){
 }
 
 
-#' Computes K-fold Cross-Validated Accuracy for Twin K svm
+#' Computes K-fold Cross-Validation Accuracy for Twin K svm
 #'
 #' @author Zhang Jiaqi
 #' @param X a new data frame for predicting.
