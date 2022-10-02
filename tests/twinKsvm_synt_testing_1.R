@@ -16,13 +16,13 @@ X <- rbind(x1, x2, x3)
 y <- rep(c(1,2,3), rep(n/n_c, n_c))
 
 s <- Sys.time()
-model <- twinKsvm(X, y, kernel = 'rbf', eps = 0.3, kernel_rect = 1)
+model <- twinKsvm(X, y, kernel = 'rbf', eps = 0.3, kernel_rect = 1,  reg = 10e-4)
 e <- Sys.time()
 print(e - s)
 pred <- predict(model, X, y)
 
 s <- Sys.time()
-cv.twinKsvm(X, y,  kernel = 'rbf', eps = 0.3, kernel_rect = 1)
+cv.twinKsvm(X, y,  kernel = 'rbf', eps = 0.3, kernel_rect = 1, reg = 10e-4)
 e <- Sys.time()
 print(e - s)
 
@@ -30,6 +30,14 @@ data("glass")
 X <- glass[,1:10]
 y <- glass[,10]
 s <- Sys.time()
-cv.twinKsvm(X, y, K = 5, kernel = 'rbf', eps = 0.3, kernel_rect = 1)
+cv.twinKsvm(X, y, K = 10, gamma = 1 / 4, kernel = 'rbf', eps = 0.2, kernel_rect = 0.5, reg = 10e-4)
+e <- Sys.time()
+print(e - s)
+
+data("iris")
+X <- iris[, 1:4]
+y <- iris[, 5]
+s <- Sys.time()
+cv.twinKsvm(X, y, gamma = 1 / 4, kernel = 'linear', eps = 0.1, kernel_rect = 1, reg = 10e-4)
 e <- Sys.time()
 print(e - s)

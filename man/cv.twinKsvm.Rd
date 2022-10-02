@@ -2,7 +2,7 @@
 % Please edit documentation in R/twinKsvm.R
 \name{cv.twinKsvm}
 \alias{cv.twinKsvm}
-\title{Computes K-fold Cross-Validated Accuracy for MBSVM}
+\title{Computes K-fold Cross-Validation Accuracy for Twin K svm}
 \usage{
 cv.twinKsvm(
   X,
@@ -57,7 +57,7 @@ cv.twinKsvm(
 \item{seed}{random seed for \code{shuffer} option.}
 }
 \description{
-Computes K-fold Cross-Validated Accuracy for MBSVM
+Computes K-fold Cross-Validation Accuracy for Twin K svm
 }
 \author{
 Zhang Jiaqi

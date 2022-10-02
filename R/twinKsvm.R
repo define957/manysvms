@@ -40,14 +40,14 @@ twinKsvm <- function(X, y,
   if(kernel == 'linear'){
     coef_dim <- n
   }else{
-    coef_dim <- m * kernel_rect
+    coef_dim <- round(m * kernel_rect, 0)
   }
 
   coef_list_pos <- matrix(0, nrow = coef_dim, ncol = class_num * (class_num - 1)/2)
   coef_list_neg <- matrix(0, nrow = coef_dim, ncol = class_num * (class_num - 1)/2)
 
-  intercept_list_pos <- matrix(0, ncol = class_num * (class_num - 1))
-  intercept_list_neg <- matrix(0, ncol = class_num * (class_num - 1))
+  intercept_list_pos <- matrix(0, ncol = class_num * (class_num - 1)/2)
+  intercept_list_neg <- matrix(0, ncol = class_num * (class_num - 1)/2)
 
   # solve K * K-1 models
   idx <- 0
