@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbsvm.R
 \name{cv.mbsvm}
 \alias{cv.mbsvm}
-\title{Computes K-fold Cross-Validated Accuracy for MBSVM}
+\title{Computes K-fold Cross-Validation Accuracy for MBSVM}
 \usage{
 cv.mbsvm(
   X,
@@ -36,7 +36,7 @@ cv.mbsvm(
 \item{seed}{random seed for \code{shuffer} option.}
 }
 \description{
-Computes K-fold Cross-Validated Accuracy for MBSVM
+Computes K-fold Cross-Validation Accuracy for MBSVM
 }
 \author{
 Zhang Jiaqi
