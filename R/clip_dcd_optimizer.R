@@ -5,6 +5,7 @@
 #' @param lb,ub lower bound and upper bound.
 #' @param eps,max.steps error and maximum iterations.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @return return results list
 #' @export
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
                                max.steps = 200, rcpp = TRUE){
