@@ -9,7 +9,7 @@
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
                                max.steps = 200, rcpp = TRUE){
   if(rcpp == TRUE){
-    x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = 1e-5, max.steps)
+    x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = eps, max.steps)
   }else if(rcpp == FALSE){
     x <- r_clip_dcd_optimizer(H, q, lb, ub, eps, max.steps)
   }
