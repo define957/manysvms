@@ -1,7 +1,5 @@
 #' Clipping Dual Coordinate Decent Optimizer
 #'
-#' \code{mbsvm} is an R implementation of multiple birth SVM
-#'
 #' @author Zhang Jiaqi.
 #' @param H,q input matrices.
 #' @param lb,ub lower bound and upper bound.
