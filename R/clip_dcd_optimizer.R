@@ -1,3 +1,13 @@
+#' Clipping Dual Coordinate Decent Optimizer
+#'
+#' \code{mbsvm} is an R implementation of multiple birth SVM
+#'
+#' @author Zhang Jiaqi.
+#' @param H,q input matrices.
+#' @param lb,ub lower bound and upper bound.
+#' @param eps,max.steps error and maximum iterations.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @export
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
                                max.steps = 200, rcpp = TRUE){
   if(rcpp == TRUE){
