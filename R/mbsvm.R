@@ -126,28 +126,20 @@ mbsvm <- function(X, y,
 predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
   X <- as.matrix(X)
   m <- nrow(X)
+  km <- nrow(object$X)
   dis_mat <- matrix(0, nrow = m, ncol = object$class_num)
   X <- as.matrix(X)
-  m1 <- nrow(X)
-  m2 <- round(nrow(object$X)*object$kernel_rect, 0)
   # get Kernel X
   if(object$kernel == 'linear'){
     kernelX <- X
   }else{
-    if(object$Rcpp == TRUE){
-      kernelX <- cpp_rbf_kernel(X, object$X[1:m2,], gamma = object$gamma)
-    }else{
-      if(object$kernel != 'linear'){
-        kernelX <- matrix(0, nrow = m1, ncol = m2)
-        for(i in 1:m1){
-          for(j in 1:m2){
-            if(object$kernel == 'rbf'){
-              kernelX[i, j] <- rbf_kernel(X[i, ], object$X[j, ], gamma = object$gamma)
-            }
-          }
-        }
-      }
-    }
+    kernel_m <- round(km*object$kernel_rect, 0)
+    kernelX <- kernel_function(X, object$X[1:kernel_m, ],
+                               kernel.type = object$kernel,
+                               gamma = object$gamma,
+                               degree = object$degree,
+                               coef0 = object$coef0,
+                               rcpp = object$Rcpp)
   }
 
 
