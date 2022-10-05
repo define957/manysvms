@@ -291,4 +291,5 @@ cv.twinKsvm <- function(X, y, K = 5,
   }
   avg_acc <- mean(accuracy_list)
   cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%\n')
+  return(avg_acc)
 }
