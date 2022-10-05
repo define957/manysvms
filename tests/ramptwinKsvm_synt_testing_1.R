@@ -21,3 +21,5 @@ model <- ramptwinKsvm(X, y, kernel = 'rbf',kernel_rect = 1,  reg = 0.2,
 e <- Sys.time()
 print(e - s)
 pred <- predict(model, X, y)
+
+cv.ramptwinKsvm(X, y, K=5)

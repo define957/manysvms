@@ -284,3 +284,69 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
                    'vote_mat' = vote_mat, 'predict' = pred)
   return(predlist)
 }
+
+
+#' Computes K-fold Cross-Validation Accuracy for ramp Twin K svm
+#'
+#' @author Zhang Jiaqi
+#' @param X a new data frame for predicting.
+#' @param y a label data frame corresponding to X.
+#' @param K number of folds.
+#' @param Ck plenty term vector.
+#' @param kernel kernel function.
+#' @param gamma rbf kernel parameter.
+#' @param reg regularization term.
+#' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
+#' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
+#' @param eps parameter for rest class.
+#' @param tol the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @param shuffer if set \code{shuffer==TRUE}, This function will shuffle the dataset.
+#' @param seed random seed for \code{shuffer} option.
+#' @export
+
+cv.ramptwinKsvm <- function(X, y, K = 5,
+                            Ck = rep(1, 4),
+                            sk = rep(0.5, 4),
+                            kernel = c('linear', 'rbf', 'poly'),
+                            gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                            reg = 1, kernel_rect = 1,
+                            eps = 0.1,
+                            tol = 1e-5, cccp.steps = 30,max.steps = 300,
+                            rcpp = TRUE,
+                            shuffer = TRUE, seed = NULL){
+  m <- nrow(X)
+  if(shuffer == TRUE){
+    if(is.null(seed) == FALSE){
+      set.seed(seed)
+    }
+    new_idx <- sample(m)
+
+  }else{
+    new_idx <- 1:m
+  }
+  v_size <- m %/% K
+  indx_cv <- 1
+  accuracy_list <- c()
+  for(i in 1:K){
+    new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+    indx_cv <- indx_cv + v_size
+    test_X <- X[new_idx_k, ]
+    train_X <- X[-new_idx_k, ]
+    test_y <- y[new_idx_k]
+    train_y <- y[-new_idx_k]
+    ramptwinKsvm_model <- ramptwinKsvm(X, y,
+                               Ck = Ck,
+                               kernel = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               reg = reg, kernel_rect = kernel_rect,
+                               eps = eps,
+                               tol = tol, max.steps = max.steps, rcpp = TRUE)
+    pred <- predict(ramptwinKsvm_model, test_X, test_y)
+    accuracy_list <- append(accuracy_list, pred$accuracy)
+  }
+  avg_acc <- mean(accuracy_list)
+  cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%\n')
+}
