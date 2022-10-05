@@ -8,6 +8,7 @@ cv.mbsvm(
   X,
   y,
   K = 5,
+  Ck = rep(1, length(unique(y))),
   kernel = c("linear", "rbf", "poly"),
   reg = 1,
   gamma = 1/ncol(X),
@@ -22,6 +23,8 @@ cv.mbsvm(
 \item{y}{A label data frame corresponding to X.}
 
 \item{K}{Number of folds.}
+
+\item{Ck}{plenty term list.}
 
 \item{kernel}{kernel type. Default value \code{kernel = 'linear'}.}
 

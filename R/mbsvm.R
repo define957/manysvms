@@ -176,6 +176,7 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
 #' @author Zhang Jiaqi
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
+#' @param Ck plenty term list.
 #' @param K Number of folds.
 #' @param kernel kernel type. Default value \code{kernel = 'linear'}.
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
@@ -186,9 +187,10 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
 #' @export
 
 cv.mbsvm <- function(X, y , K = 5,
-                           kernel = c('linear', 'rbf', 'poly'),
-                           reg = 1, gamma = 1/ncol(X), kernel_rect = 1,
-                           shuffer = TRUE, seed = NULL){
+                     Ck = rep(1, length(unique(y))),
+                     kernel = c('linear', 'rbf', 'poly'),
+                     reg = 1, gamma = 1/ncol(X), kernel_rect = 1,
+                     shuffer = TRUE, seed = NULL){
 
   m <- nrow(X)
   if(shuffer == TRUE){
