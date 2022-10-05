@@ -293,6 +293,7 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @param y a label data frame corresponding to X.
 #' @param K number of folds.
 #' @param Ck plenty term vector.
+#' @param sk parameter for ramp loss.
 #' @param kernel kernel function.
 #' @param gamma rbf kernel parameter.
 #' @param reg regularization term.
@@ -301,6 +302,8 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param eps parameter for rest class.
 #' @param tol the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param cccp.steps the number of iterations of Concave–Convex Procedure (CCCP).
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param shuffer if set \code{shuffer==TRUE}, This function will shuffle the dataset.
@@ -337,13 +340,13 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
     train_X <- X[-new_idx_k, ]
     test_y <- y[new_idx_k]
     train_y <- y[-new_idx_k]
-    ramptwinKsvm_model <- ramptwinKsvm(X, y,
-                               Ck = Ck,
-                               kernel = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               reg = reg, kernel_rect = kernel_rect,
-                               eps = eps,
-                               tol = tol, max.steps = max.steps, rcpp = TRUE)
+    ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = rep(1, 4),
+                              sk = rep(0.5, 4),
+                              kernel = c('linear', 'rbf', 'poly'),
+                              gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                              reg = 1, kernel_rect = 1, eps = 0.1,
+                              tol = tol, cccp.steps = cccp.steps,
+                              max.steps = max.steps, rcpp = rcpp)
     pred <- predict(ramptwinKsvm_model, test_X, test_y)
     accuracy_list <- append(accuracy_list, pred$accuracy)
   }
