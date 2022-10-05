@@ -3,6 +3,7 @@
 #' @author Zhang Jiaqi
 #' @param X,y dataset and label
 #' @param K `K = 10` means K-fold cross validation
+#' @param Ck plenty term vector
 #' @param kernel kernel function
 #' @param reg regularization tern
 #' @param gamma rbf kernel parameter
@@ -18,7 +19,7 @@
 #' y <- iris[, 5]
 #' cv.twinsvm_ovr(X, y, K = 10, kernel = 'rbf', gamma = 1/8, seed = 1234)
 
-cv.twinsvm_ovr <- function(X, y , K = 5,
+cv.twinsvm_ovr <- function(X, y , K = 5, Ck = rep(1, length(unique(y))),
                            kernel = c('linear', 'rbf', 'poly'),
                            reg = 1e-3, gamma = 1/ncol(X),
                            shuffer = TRUE, seed = NULL){
@@ -43,11 +44,10 @@ cv.twinsvm_ovr <- function(X, y , K = 5,
     train_X <- X[-new_idx_k, ]
     test_y <- y[new_idx_k]
     train_y <- y[-new_idx_k]
-    twinsvm_ovr <- twinsvm_ovr(train_X, train_y, kernel = kernel, reg = reg, gamma = gamma)
+    twinsvm_ovr <- twinsvm_ovr(train_X, train_y, Ck = Ck, kernel = kernel, reg = reg, gamma = gamma)
     pred <- predict(twinsvm_ovr, test_X, test_y)
     accuracy_list <- append(accuracy_list, pred$accuracy)
   }
   avg_acc <- mean(accuracy_list)
-  cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%')
-  return(avg_acc)
+  cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%\n')
 }

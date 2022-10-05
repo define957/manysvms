@@ -9,6 +9,7 @@ cv.twinsvm_ovr(
   X,
   y,
   K = 5,
+  Ck = rep(1, length(unique(y))),
   kernel = c("linear", "rbf", "poly"),
   reg = 0.001,
   gamma = 1/ncol(X),
@@ -20,6 +21,8 @@ cv.twinsvm_ovr(
 \item{X, y}{dataset and label}
 
 \item{K}{`K = 10` means K-fold cross validation}
+
+\item{Ck}{plenty term vector}
 
 \item{kernel}{kernel function}
 
