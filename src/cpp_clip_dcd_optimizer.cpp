@@ -8,8 +8,8 @@ using namespace Rcpp;
 //[[Rcpp::export]]
 Rcpp::List cpp_clip_dcd_optimizer(arma::mat H, arma::mat q,
                             arma::mat lb, arma::mat ub,
-                            double eps, unsigned int max_steps){
-  arma::mat u = (lb + ub) / 2;
+                            double eps, unsigned int max_steps,
+                            arma::mat u){
   unsigned int n = H.n_rows;
 
   unsigned int i = 0;

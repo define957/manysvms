@@ -13,7 +13,10 @@ x2 <- mvrnorm(n/2, mu = c(0.1, -0.1), Sigma = sig)
 X <- rbind(x1, x2)
 y <- rep(c(1,2), rep(n/2, 2))
 
-twinsvm_model = twinsvm(X, y, reg = 1e-3)
+s <- Sys.time()
+twinsvm_model = twinsvm(X, y, reg = 1e-3, rcpp = TRUE)
+e <- Sys.time()
+print(e - s)
 
 coefs <- coef(twinsvm_model)
 pred <- predict(twinsvm_model, X, y)

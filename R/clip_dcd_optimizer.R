@@ -5,19 +5,23 @@
 #' @param lb,ub lower bound and upper bound.
 #' @param eps,max.steps error and maximum iterations.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @param u init solution.
 #' @return return results list
 #' @export
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
-                               max.steps = 200, rcpp = TRUE){
+                               max.steps = 200, rcpp = TRUE,
+                               u =  (lb + ub) / 2){
   if(rcpp == TRUE){
-    x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = eps, max.steps)
+    x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = eps, max.steps, u)
   }else if(rcpp == FALSE){
-    x <- r_clip_dcd_optimizer(H, q, lb, ub, eps, max.steps)
+    x <- r_clip_dcd_optimizer(H, q, lb, ub, u, eps, max.steps)
   }
   return(x)
 }
 
-r_clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5, max.steps = 200){
+r_clip_dcd_optimizer <- function(H, q, lb, ub,
+                                 eps = 1e-5, max.steps = 200,
+                                 u = (lb + ub) / 2){
 
   # Clipping dual coordinate decent optimizer
   # solve quadratic programming like:
@@ -29,7 +33,6 @@ r_clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5, max.steps = 200){
   lb <- as.matrix(lb)
   ub <- as.matrix(ub)
 
-  u <- (lb + ub) / 2
   for(i in 1:max.steps){
     numerator <- (q - t(t(u)%*%H))
     L_idx_val <- numerator / diag(H)

@@ -4,7 +4,16 @@
 \alias{clip_dcd_optimizer}
 \title{Clipping Dual Coordinate Decent Optimizer}
 \usage{
-clip_dcd_optimizer(H, q, lb, ub, eps = 1e-05, max.steps = 200, rcpp = TRUE)
+clip_dcd_optimizer(
+  H,
+  q,
+  lb,
+  ub,
+  eps = 1e-05,
+  max.steps = 200,
+  rcpp = TRUE,
+  u = (lb + ub)/2
+)
 }
 \arguments{
 \item{H, q}{input matrices.}
@@ -14,6 +23,8 @@ clip_dcd_optimizer(H, q, lb, ub, eps = 1e-05, max.steps = 200, rcpp = TRUE)
 \item{eps, max.steps}{error and maximum iterations.}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
+
+\item{u}{init solution.}
 }
 \value{
 return results list
