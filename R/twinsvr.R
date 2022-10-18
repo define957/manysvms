@@ -1,0 +1,59 @@
+#' Twin Support Vector Regression
+#'
+#' \code{twinsvr} is an R implementation of TSVR.
+#'
+#' @author Zhang Jiaqi.
+#' @param X,y dataset and response variable.
+#' @param C1,C2 plenty term.
+#' @param kernel kernel function.
+#' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
+#' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}.
+#' @param tol the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @return return twinsvr object.
+
+twinsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
+                    kernel = c('linear', 'rbf', 'poly'),
+                    reg = 1e-5, kernel_rect = 1,
+                    gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                    tol = 1e-5, max.steps  = 300,
+                    rcpp = TRUE){
+
+  kernel <- match.arg(kernel)
+
+  X <- as.matrix(X)
+  y <- as.matrix(y)
+
+  n <- nrow(X)
+  m <- ncol(X)
+
+  e <- matrix(1, nrow = n)
+  if(kernel != 'linear'){
+    kernel_m <- round(m*kernel_rect, 0)
+    X <- kernel_function(X, X,
+                         kernel.type = kernel,
+                         gamma = gamma, degree = degree, coef0 = coef0,
+                         rcpp = rcpp)
+  }
+  G <- cbind(X, e)
+  f <- y - e*C1
+  h <- y + e*C2
+  H <- G %*% solve(t(G) %*% G + diag(rep(reg, ncol(G)))) %*% t(G)
+  q1 <- t(t(f) - t(f) %*% H)
+  q2 <- t(t(h) %*% H - t(h))
+  lb <- matrix(0, nrow = n)
+  ub1 <- matrix(C1, nrow = n)
+  ub2 <- matrix(C2, nrow = n)
+  alphas <- clip_dcd_optimizer(H, q1, lb, ub1, tol, max.steps, rcpp = rcpp)$x
+  gammas <- clip_dcd_optimizer(H, q2, lb, ub2, tol, max.steps, rcpp = rcpp)$x
+  u1 <- solve(t(G) %*% G + diag(rep(reg, ncol(G)))) %*% t(G) %*% (f - alphas)
+  u2 <- solve(t(G) %*% G + diag(rep(reg, ncol(G)))) %*% t(G) %*% (h + gammas)
+  coef <- (u1 + u2) / 2
+  fitted <- G %*% coef
+  twinsvr_model <- list("coef" = coef,
+                        "coef_1" = u1,
+                        "coef_2" = u2,
+                        "fitted" = fitted)
+  return(twinsvr_model)
+}
