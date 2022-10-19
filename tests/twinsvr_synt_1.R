@@ -10,7 +10,10 @@ x2 <- sin(x1)  + mvrnorm(obs, mu = 0, Sigma = 0.03)
 X <- as.matrix(x1)
 y <- as.matrix(x2)
 
+model <- twinsvr(X, y, reg = 1e-7, kernel = 'rbf', kernel_rect = 0.5)
+predict(model, X, y)
 model <- twinsvr(X, y, reg = 1e-7, kernel = 'rbf', kernel_rect = 1)
+predict(model, X, y)
 
 df1 <- as.data.frame(cbind(x1, y))
 df2 <- as.data.frame(cbind(x1, model$fitted))

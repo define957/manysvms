@@ -179,6 +179,7 @@ predict.twinsvm <- function(object, X, y, ...){
 
   X <- as.matrix(X)
   y <- as.matrix(y)
+  m <- nrow(object$X)
   if(object$kernel == 'linear'){
     kernelX <- X
   }else{

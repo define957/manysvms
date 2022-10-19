@@ -36,8 +36,8 @@ twinsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
 
   e <- matrix(1, nrow = n)
   if(kernel != 'linear'){
-    kernel_m <- round(m*kernel_rect, 0)
-    X <- kernel_function(X, X,
+    kernel_m <- round(n*kernel_rect, 0)
+    X <- kernel_function(X, as.matrix(X[1:kernel_m, ]),
                          kernel.type = kernel,
                          gamma = gamma, degree = degree, coef0 = coef0,
                          rcpp = rcpp)
@@ -62,7 +62,44 @@ twinsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
                         "coef_2" = u2,
                         "fitted" = fitted,
                         "C1" = C1,
-                        "C2" = C2)
+                        "C2" = C2,
+                        "kernel_rect" = kernel_rect,
+                        "kernel" = kernel,
+                        "gamma" = gamma,
+                        "degree" = degree,
+                        "coef0" = coef0,
+                        "Rcpp" = rcpp,
+                        "X" = X,
+                        "y" = y
+                        )
   class(twinsvr_model) <- "twinsvr"
   return(twinsvr_model)
+}
+
+
+#' Predict Method for Multiple Birth Support Vector Machines
+#'
+#' @author Zhang Jiaqi
+#' @param object a fitted object of class inheriting from \code{twinsvr}.
+#' @param X a new data frame for predicting.
+#' @param y response variable data frame corresponding to X.
+#' @param ... unused parameter.
+#' @importFrom stats predict
+#' @export
+
+predict.twinsvr <- function(object, X, y, ...){
+  km <- nrow(object$X)
+  if(object$kernel != 'linear'){
+    kernel_m <- round(km*object$kernel_rect, 0)
+    kernelX <- kernel_function(X, as.matrix(X[1:kernel_m, ]),
+                         kernel.type = object$kernel,
+                         gamma = object$gamma, degree = object$degree,
+                         coef0 = object$coef0,
+                         rcpp = object$Rcpp)
+  }
+
+  kernelX <- as.matrix(cbind(kernelX, 1))
+  y_hat <- kernelX %*% object$coef
+  mse <- mean_squared_error(y, y_hat)
+  return(y_hat)
 }
