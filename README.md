@@ -42,6 +42,7 @@ devtools::install_github("define957/manysvms")
 ## SVMs for regression
 
 + Epsilon Support Vector Regression [Rcpp acceleration is available]
++ Twin Support Vector Regression [Rcpp acceleration is available]
 
 ## Kernel options
 
