@@ -10,10 +10,6 @@ x2 <- sin(x1)  + mvrnorm(obs, mu = 0, Sigma = 0.03)
 X <- as.matrix(x1)
 y <- as.matrix(x2)
 
-
-XK <- kernel_function(X, X, kernel.type = 'rbf')
-solve(t(XK)%*%XK + diag(rep(1, ncol(XK))))
-
 model <- twinsvr(X, y, reg = 1e-7, kernel = 'rbf', kernel_rect = 1)
 
 df1 <- as.data.frame(cbind(x1, y))
