@@ -5,8 +5,15 @@
 #' @author Zhang Jiaqi.
 #' @param X,y dataset and label.
 #' @param Ck plenty term list.
-#' @param kernel kernel function.
+#' @param kernel kernel function. The definitions of various kernel functions are as follows:
+#' \describe{
+#'     \item{linear:}{\eqn{u'v}{u'*v}}
+#'     \item{poly:}{\eqn{(\gamma u'v + coef0)^{degree}}{(gamma*u'*v + coef0)^degree}}
+#'     \item{rbf:}{\eqn{e^{(-\gamma |u-v|^2)}}{exp(-gamma*|u-v|^2)}}
+#' }
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
+#' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
+#' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param tol the precision of the optimization algorithm.
@@ -28,7 +35,8 @@
 mbsvm <- function(X, y,
                   Ck = rep(1, length(unique(y))),
                   kernel = c('linear', 'rbf', 'poly'),
-                  gamma = 1 / ncol(X), reg = 1, kernel_rect = 1,
+                  gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                  reg = 1, kernel_rect = 1,
                   tol = 1e-6, max.steps = 300, rcpp = TRUE){
 
   kernel <- match.arg(kernel)
@@ -64,26 +72,27 @@ mbsvm <- function(X, y,
     mA <- nrow(A)
     mB <- nrow(B)
 
-    e1 <- as.matrix(rep(1, mA))
-    dim(e1) <- c(mA, 1)
-    e2 <- as.matrix(rep(1, mB))
-    dim(e2) <- c(mB, 1)
+    e1 <- matrix(1, nrow = mA)
+    e2 <- matrix(1, nrow = mB)
 
     if(kernel == 'linear'){
-      S <- cbind(A, e1)
-      R <- cbind(B, e2)
+      S <- A
+      R <- B
     }else{
       kernel_m <- round(m*kernel_rect, 0)
-      if(rcpp == TRUE){
-        S <- cpp_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
-        R <- cpp_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
-      }else{
-        S <- r_rbf_kernel(A, X[1:kernel_m, ], gamma = gamma)
-        R <- r_rbf_kernel(B, X[1:kernel_m, ], gamma = gamma)
-      }
-      S <- cbind(S, e1)
-      R <- cbind(R, e2)
+
+      S <- kernel_function(A, X[1:kernel_m, ],
+                           kernel.type = kernel,
+                           gamma = gamma, degree = degree, coef0 = coef0,
+                           rcpp = rcpp)
+      R <- kernel_function(B, X[1:kernel_m, ],
+                           kernel.type = kernel,
+                           gamma = gamma, degree = degree, coef0 = coef0,
+                           rcpp = rcpp)
     }
+    S <- cbind(S, e1)
+    R <- cbind(R, e2)
+
     RTR_reg_inv <- solve(t(R) %*% R + diag(rep(reg, ncol(R))))
     H <- S %*% RTR_reg_inv %*% t(S)
     lbB <- matrix(0, nrow = mA)

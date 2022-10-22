@@ -10,6 +10,8 @@ mbsvm(
   Ck = rep(1, length(unique(y))),
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
+  degree = 3,
+  coef0 = 0,
   reg = 1,
   kernel_rect = 1,
   tol = 1e-06,
@@ -22,9 +24,18 @@ mbsvm(
 
 \item{Ck}{plenty term list.}
 
-\item{kernel}{kernel function.}
+\item{kernel}{kernel function. The definitions of various kernel functions are as follows:
+\describe{
+    \item{linear:}{\eqn{u'v}{u'*v}}
+    \item{poly:}{\eqn{(\gamma u'v + coef0)^{degree}}{(gamma*u'*v + coef0)^degree}}
+    \item{rbf:}{\eqn{e^{(-\gamma |u-v|^2)}}{exp(-gamma*|u-v|^2)}}
+}}
 
 \item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
+
+\item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
+
+\item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
 \item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
 
