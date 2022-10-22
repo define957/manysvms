@@ -49,6 +49,7 @@ mbsvm <- function(X, y,
 
   class_set <- unique(as.matrix(y))
   class_num <- length(class_set)
+  kernel_m <- round(m*kernel_rect, 0)
 
   if(kernel == 'linear'){
     coef_dim <- n
@@ -79,7 +80,6 @@ mbsvm <- function(X, y,
       S <- A
       R <- B
     }else{
-      kernel_m <- round(m*kernel_rect, 0)
 
       S <- kernel_function(A, X[1:kernel_m, ],
                            kernel.type = kernel,
