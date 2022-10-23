@@ -1,7 +1,7 @@
 #' Mean Squared Error
 #' return mean squared error for two vector
 #' @author Zhang Jiaqi
-#' @param y,y_hat real values and fitted values
+#' @param y,y_hat real values and fitted values.
 #' @export
 mean_squared_error <- function(y, y_hat){
   y <- as.matrix(y)
