@@ -76,7 +76,7 @@ eps.svr <- function(X, y, eps = 0.1,
 
   beta <- clip_dcd_optimizer(H, -q, lb, ub, eps = tol, max.steps, rcpp = rcpp)$x
   coef <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))])
-  fitted <- coef %*% Q
+  fitted <- matrix(coef %*% Q, nrow = m)
   svr <- list('X' = X, 'y' = y,
               'coef' = coef,
               'epsilon' = eps,
