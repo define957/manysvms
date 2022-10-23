@@ -101,7 +101,9 @@ twinsvm_ovr<- function(X, y,
                       'class_set' = class_set,'class_num' = class_num,
                       'coef' = coef_list, 'intercept' = intercept_list,
                       'kernel' = kernel,
-                      'gamma' = gamma
+                      'gamma' = gamma,
+                      'Rcpp' = rcpp,
+                      'kernel_rect' = kernel_rect
                       )
 
 
@@ -124,17 +126,18 @@ predict.twinsvm_ovr <- function(object, X, y, ...){
   m <- nrow(X)
   dis_mat <- matrix(0, nrow = m, ncol = object$class_num)
   X <- as.matrix(X)
-
-  # get Kernel X
-  if(object$kernel != 'linear'){
-    m1 <- nrow(X)
-    m2 <- nrow(object$X)
-    kernelX <- matrix(0, nrow = m1, ncol = m2)
-    if(object$kernel == 'rbf'){
-        kernelX <- r_rbf_kernel(X, object$X, gamma = object$gamma)
-    }
-  }else{
+  km <- nrow(object$X)
+  if(object$kernel == 'linear'){
     kernelX <- X
+  }else{
+    kernel_m <- round(km*object$kernel_rect, 0)
+    print(km)
+    kernelX <- kernel_function(X, object$X[1:kernel_m, ],
+                               kernel.type = object$kernel,
+                               gamma = object$gamma,
+                               degree = object$degree,
+                               coef0 = object$coef0,
+                               rcpp = object$Rcpp)
   }
 
   class_num <- object$class_num

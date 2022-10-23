@@ -5,10 +5,12 @@
 \title{Mean Squared Error
 return mean squared error for two vector}
 \usage{
-mean_squared_error(y, y_hat)
+mean_squared_error(y, y_hat, dof = 0)
 }
 \arguments{
-\item{y, y_hat}{real values and fitted values}
+\item{y, y_hat}{real values and fitted values.}
+
+\item{dof}{degree of freedom.}
 }
 \description{
 Mean Squared Error

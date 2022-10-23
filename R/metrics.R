@@ -2,8 +2,9 @@
 #' return mean squared error for two vector
 #' @author Zhang Jiaqi
 #' @param y,y_hat real values and fitted values.
+#' @param dof degree of freedom.
 #' @export
-mean_squared_error <- function(y, y_hat){
+mean_squared_error <- function(y, y_hat, dof = 0){
   y <- as.matrix(y)
   y_hat <- as.matrix(y_hat)
   n1 <- nrow(y)
@@ -12,7 +13,7 @@ mean_squared_error <- function(y, y_hat){
     stop("y and y_hat should have same rows.")
   }
   n <- n1
-  mse <- sum((y - y_hat)^2) / n
+  mse <- sum((y - y_hat)^2) / (n - 0)
   return(mse)
 }
 
