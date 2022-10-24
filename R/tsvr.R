@@ -1,6 +1,6 @@
 #' Twin Support Vector Regression
 #'
-#' \code{twinsvr} is an R implementation of TSVR.
+#' \code{tsvr} is an R implementation of TSVR.
 #'
 #' @author Zhang Jiaqi.
 #' @param X,y dataset and response variable.
@@ -16,10 +16,10 @@
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @references Xinjun Peng. TSVR: An efficient Twin Support Vector Machine for
 #' regression, Neural Networks, Volume 23, Issue 3, 2010, Pages 365-372.
-#' @return return twinsvr object.
+#' @return return tsvr object.
 #' @export
 
-twinsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
+tsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
                     kernel = c('linear', 'rbf', 'poly'),
                     reg = 1e-5, kernel_rect = 1,
                     gamma = 1 / ncol(X), degree = 3, coef0 = 0,
@@ -57,7 +57,7 @@ twinsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
   u2 <- solve(t(G) %*% G + diag(rep(reg, ncol(G)))) %*% t(G) %*% (h + gammas)
   coef <- (u1 + u2) / 2
   fitted <- G %*% coef
-  twinsvr_model <- list("coef" = coef,
+  tsvr_model <- list("coef" = coef,
                         "coef_1" = u1,
                         "coef_2" = u2,
                         "fitted" = fitted,
@@ -72,8 +72,8 @@ twinsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
                         "X" = X,
                         "y" = y
                         )
-  class(twinsvr_model) <- "twinsvr"
-  return(twinsvr_model)
+  class(tsvr_model) <- "tsvr"
+  return(tsvr_model)
 }
 
 
@@ -87,7 +87,7 @@ twinsvr <- function(X, y, C1 = 1.0, C2 = 1.0,
 #' @importFrom stats predict
 #' @export
 
-predict.twinsvr <- function(object, X, y, ...){
+predict.tsvr <- function(object, X, y, ...){
   km <- nrow(object$X)
   if(object$kernel != 'linear'){
     kernel_m <- round(km*object$kernel_rect, 0)
