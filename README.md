@@ -15,13 +15,17 @@ SVR :
 
 There are many different types of SVMs in this repository. 
 
+## Organization structure
+
+<div align=center><img src = man\figures\manysvms.svg width="100%"></div>
+
 ## Why I created this project ?
 
 In order to learn `SVMs` better, I built this repository to implement support vector machines. The package is under active development.
 
 ## How to install manysvms
 
-Make sure you have installed `devtools`, If you don't have `devtools` installed, please run the following command first 
+Make sure you have installed `devtools`, if you don't have `devtools` installed, please run the following command first 
 ```{r}
 install.packages("devtools")
 ```
@@ -50,7 +54,7 @@ devtools::install_github("define957/manysvms")
 
 ## Development environment and dependency
 
-enviroment: R 4.2.1, windows 10 x64
+enviroment: R 4.2.1, windows 10 x64 &#x2705;
 
 dependency: 
 
@@ -60,11 +64,11 @@ dependency:
 
 ## Bug report
 
-If you find bug in this package, Please post an issue on the [issue](https://github.com/define957/manysvms/issues) website.
+If you find bug in this package, please post an issue on the [issue](https://github.com/define957/manysvms/issues) website.
 
 ## Contact us
 
-Email : zhangjiaqi957957@outlook.com
+&#x2709; Email : zhangjiaqi957957@outlook.com
 
 ## Licenses
 
