@@ -91,14 +91,14 @@ predict.twinsvr <- function(object, X, y, ...){
   km <- nrow(object$X)
   if(object$kernel != 'linear'){
     kernel_m <- round(km*object$kernel_rect, 0)
-    kernelX <- kernel_function(X, as.matrix(X[1:kernel_m, ]),
+    X <- kernel_function(X, as.matrix(X[1:kernel_m, ]),
                          kernel.type = object$kernel,
                          gamma = object$gamma, degree = object$degree,
                          coef0 = object$coef0,
                          rcpp = object$Rcpp)
   }
 
-  kernelX <- as.matrix(cbind(kernelX, 1))
+  kernelX <- as.matrix(cbind(X, 1))
   y_hat <- kernelX %*% object$coef
   mse <- mean_squared_error(y, y_hat)
   return(y_hat)
