@@ -58,6 +58,10 @@ dependency:
 + Rcpp
 + RcppArmadillo
 
+## Bug report
+
+If you find bug in this package, Please post an issue on the [issue](https://github.com/define957/manysvms/issues) website.
+
 ## Contact us
 
 Email : zhangjiaqi957957@outlook.com
