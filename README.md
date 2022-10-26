@@ -41,16 +41,19 @@ devtools::install_github("define957/manysvms")
 + Twin-SVM for Multi-classification (One versus Rest strategy) [Rcpp acceleration is available]
 + Multiple Birth SVM for Multi-classification [Rcpp acceleration is available]
 + Twin K SVM for Multi-classification (One versus One versus Rest strategy) [Rcpp acceleration is available]
++ Ramp Twin K SVM for Multi-Classification (One versus One versus Rest strategy) [Rcpp acceleration is available]
 
 ## SVMs for regression
 
 + Epsilon Support Vector Regression [Rcpp acceleration is available]
 + Twin Support Vector Regression [Rcpp acceleration is available]
++ Least Squares Support Vector Regression
 
 ## Kernel options
 
-+ linear kernel
-+ rbf kernel
++ Linear kernel
++ RBF kernel
++ Polynomial kernel
 
 ## Development environment and dependency
 
