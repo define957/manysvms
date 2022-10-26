@@ -29,11 +29,12 @@ Make sure you have installed `devtools`, if you don't have `devtools` installed,
 ```{r}
 install.packages("devtools")
 ```
-
-and run the following command :
+After you installed `devtools`, remember to instal `RTools`. You can find suitable `RTools` on the website https://cran.r-project.org/bin/windows/Rtools/. 
+After above steps, please run the following command :
 ```{r}
 devtools::install_github("define957/manysvms")
 ```
+Then you can have `manysvms` package on your PC。
 
 ## SVMs for classification
 
