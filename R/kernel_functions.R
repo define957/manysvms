@@ -1,5 +1,5 @@
 r_linear_kernel <- function(x1, x2){
-  return(x1 %*% x2)
+  return(x1 %*% t(x2))
 }
 
 r_poly_kernel <- function(x1, x2, gamma, degree = 3, coef0 = 0){
