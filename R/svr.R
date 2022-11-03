@@ -177,3 +177,43 @@ predict.eps.svr <- function(object, X, y, ...){
   y_hat <- X %*% object$coef
   return(y_hat)
 }
+
+cv.eps.svr <- function(X, y , K = 5,
+                     eps = 0.1,
+                     kernel = c('linear', 'rbf', 'poly'),
+                     C = 1, gamma = 1 / ncol(X), degree = 3,
+                     max.steps = 1000, projection.steps = 20,
+                     shuffle = TRUE, seed = NULL){
+
+  m <- nrow(X)
+  if(shuffle == TRUE){
+    if(is.null(seed) == FALSE){
+      set.seed(seed)
+    }
+    new_idx <- sample(m)
+
+  }else{
+    new_idx <- 1:m
+  }
+  v_size <- m %/% K
+  indx_cv <- 1
+  mse_list <- c()
+  for(i in 1:K){
+    new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+    indx_cv <- indx_cv + v_size
+    test_X <- X[new_idx_k, ]
+    train_X <- X[-new_idx_k, ]
+    test_y <- y[new_idx_k]
+    train_y <- y[-new_idx_k]
+    jssvr_model <- eps.svr(train_X, train_y, eps = eps,
+                         C = C, gamma = gamma, degree = degree, coef0 = coef0,
+                         max.steps = max.steps,
+                         kernel = kernel)
+    pred <- predict(jssvr_model, test_X, test_y)
+    mse <- mean_squared_error(test_y, pred)
+    mse_list <- append(mse_list, mse)
+    cat('MSE in ',K, 'fold cross validation :', mse, '\n')
+  }
+  cat('average MSE in ',K, 'fold cross validation :', mean(mse_list), '\n')
+  cat('Sd of MSE in ',K, 'fold cross validation :', sd(mse_list), '\n')
+}
