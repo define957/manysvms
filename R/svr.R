@@ -83,7 +83,8 @@ eps.svr <- function(X, y, eps = 0.1,
               'fitted' = fitted,
               'kernel' = kernel,
               'gamma' = gamma,
-              'call' = match.call())
+              'call' = match.call(),
+              "Rcpp" = rcpp)
   class(svr) <- 'eps.svr'
 
   return(svr)
@@ -105,4 +106,74 @@ print.eps.svr <- function(x, ...){
     cat("gamma : ", x$gamma, "\n")
   }
   cat("number of observations : ", nrow(x$X), "\n")
+}
+
+cv.svr <- function(X, y , K = 5,
+                     eps = 0.1,
+                     kernel = c('linear', 'rbf', 'poly'),
+                     shuffer = TRUE, seed = NULL){
+
+  m <- nrow(X)
+  if(shuffer == TRUE){
+    if(is.null(seed) == FALSE){
+      set.seed(seed)
+    }
+    new_idx <- sample(m)
+
+  }else{
+    new_idx <- 1:m
+  }
+  v_size <- m %/% K
+  indx_cv <- 1
+  mse_list <- c()
+  for(i in 1:K){
+    new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+    indx_cv <- indx_cv + v_size
+    test_X <- X[new_idx_k, ]
+    train_X <- X[-new_idx_k, ]
+    test_y <- y[new_idx_k]
+    train_y <- y[-new_idx_k]
+    jssvr_model <- svr(train_X, train_y, eps = eps,
+                         max.steps = 800, kernel = 'rbf')
+    pred <- predict(jssvr_model, test_X, test_y)
+    mse <- mean_squared_error(test_y, pred)
+    mse_list <- append(mse_list, mse)
+    cat('MSE in ',K, 'fold cross validation :', mse, '\n')
+  }
+  cat('average MSE in ',K, 'fold cross validation :', mean(mse_list), '\n')
+  cat('Sd of MSE in ',K, 'fold cross validation :', sd(mse_list), '\n')
+}
+
+
+predict.eps.svr <- function(object, X, y = NULL, ...){
+  m <-  nrow(X)
+  X <- X %*% object$Projection
+  Q <- kernel_function(X, object$X%*%object$Projection,
+                       kernel.type = object$kernel,
+                       gamma = object$gamma, degree = object$degree, coef0 = object$coef0,
+                       rcpp = object$Rcpp)
+  pred <- matrix(Q %*% object$coef , nrow = m)
+  return(pred)
+}
+
+#' Predict Method for epsilon - Support Vector Regression
+#'
+#' @author Zhang Jiaqi
+#' @param object A fitted object of class inheriting from \code{eps.svr}.
+#' @param X A new data frame for predicting.
+#' @param y A label data frame corresponding to X.
+#' @param ... unused parameter.
+#' @importFrom stats predict
+#' @export
+
+predict.eps.svr <- function(object, X, y, ...){
+  X <- as.matrix(X)
+  y <- as.matrix(y)
+  X <- kernel_function(X, object$X,
+                         kernel.type = object$kernel,
+                         gamma = object$gamma, degree = object$degree,
+                         coef0 = object$coef0,
+                         rcpp = object$Rcpp)
+  y_hat <- X %*% object$coef
+  return(y_hat)
 }
