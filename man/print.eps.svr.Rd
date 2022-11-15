@@ -7,7 +7,7 @@
 \method{print}{eps.svr}(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{twinsvm}.}
+\item{x}{object of class \code{eps.svr}.}
 
 \item{...}{unsed argument.}
 }

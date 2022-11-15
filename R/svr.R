@@ -76,14 +76,16 @@ eps.svr <- function(X, y, eps = 0.1,
 
   beta <- clip_dcd_optimizer(H, -q, lb, ub, eps = tol, max.steps, rcpp = rcpp)$x
   coef <- (beta[1:nrow(y)] - beta[-c(1:nrow(y))])
+  idx <- which(coef != 0)
   fitted <- matrix(coef %*% Q, nrow = m)
   svr <- list('X' = X, 'y' = y,
-              'coef' = coef,
+              'coef' = as.matrix(coef[coef!=0]),
               'epsilon' = eps,
               'fitted' = fitted,
               'kernel' = kernel,
               'gamma' = gamma,
               'call' = match.call(),
+              'SVs' = as.matrix(X[idx, ]),
               "Rcpp" = rcpp)
   class(svr) <- 'eps.svr'
 
@@ -94,7 +96,7 @@ eps.svr <- function(X, y, eps = 0.1,
 #' Print Method for epsilon - Support Vector Regression
 #'
 #' This function prints information about \code{eps.svr} model.
-#' @param x object of class \code{twinsvm}.
+#' @param x object of class \code{eps.svr}.
 #' @param ... unsed argument.
 #' @export
 
@@ -105,56 +107,45 @@ print.eps.svr <- function(x, ...){
   if(x$kernel == 'rbf'){
     cat("gamma : ", x$gamma, "\n")
   }
-  cat("number of observations : ", nrow(x$X), "\n")
+  cat("Number of Observations: ", nrow(x$X), "\n")
+  cat("Number of Support Vectors: ", nrow(x$SVs), "\n")
 }
 
-cv.svr <- function(X, y , K = 5,
-                     eps = 0.1,
-                     kernel = c('linear', 'rbf', 'poly'),
-                     shuffer = TRUE, seed = NULL){
-
-  m <- nrow(X)
-  if(shuffer == TRUE){
-    if(is.null(seed) == FALSE){
-      set.seed(seed)
-    }
-    new_idx <- sample(m)
-
-  }else{
-    new_idx <- 1:m
-  }
-  v_size <- m %/% K
-  indx_cv <- 1
-  mse_list <- c()
-  for(i in 1:K){
-    new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
-    indx_cv <- indx_cv + v_size
-    test_X <- X[new_idx_k, ]
-    train_X <- X[-new_idx_k, ]
-    test_y <- y[new_idx_k]
-    train_y <- y[-new_idx_k]
-    jssvr_model <- svr(train_X, train_y, eps = eps,
-                         max.steps = 800, kernel = 'rbf')
-    pred <- predict(jssvr_model, test_X, test_y)
-    mse <- mean_squared_error(test_y, pred)
-    mse_list <- append(mse_list, mse)
-    cat('MSE in ',K, 'fold cross validation :', mse, '\n')
-  }
-  cat('average MSE in ',K, 'fold cross validation :', mean(mse_list), '\n')
-  cat('Sd of MSE in ',K, 'fold cross validation :', sd(mse_list), '\n')
-}
-
-
-predict.eps.svr <- function(object, X, y = NULL, ...){
-  m <-  nrow(X)
-  X <- X %*% object$Projection
-  Q <- kernel_function(X, object$X%*%object$Projection,
-                       kernel.type = object$kernel,
-                       gamma = object$gamma, degree = object$degree, coef0 = object$coef0,
-                       rcpp = object$Rcpp)
-  pred <- matrix(Q %*% object$coef , nrow = m)
-  return(pred)
-}
+# cv.svr <- function(X, y , K = 5,
+#                      eps = 0.1,
+#                      kernel = c('linear', 'rbf', 'poly'),
+#                      shuffer = TRUE, seed = NULL){
+#
+#   m <- nrow(X)
+#   if(shuffer == TRUE){
+#     if(is.null(seed) == FALSE){
+#       set.seed(seed)
+#     }
+#     new_idx <- sample(m)
+#
+#   }else{
+#     new_idx <- 1:m
+#   }
+#   v_size <- m %/% K
+#   indx_cv <- 1
+#   mse_list <- c()
+#   for(i in 1:K){
+#     new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+#     indx_cv <- indx_cv + v_size
+#     test_X <- X[new_idx_k, ]
+#     train_X <- X[-new_idx_k, ]
+#     test_y <- y[new_idx_k]
+#     train_y <- y[-new_idx_k]
+#     jssvr_model <- svr(train_X, train_y, eps = eps,
+#                          max.steps = 800, kernel = 'rbf')
+#     pred <- predict(jssvr_model, test_X, test_y)
+#     mse <- mean_squared_error(test_y, pred)
+#     mse_list <- append(mse_list, mse)
+#     cat('MSE in ',K, 'fold cross validation :', mse, '\n')
+#   }
+#   cat('average MSE in ',K, 'fold cross validation :', mean(mse_list), '\n')
+#   cat('Sd of MSE in ',K, 'fold cross validation :', sd(mse_list), '\n')
+# }
 
 #' Predict Method for epsilon - Support Vector Regression
 #'
@@ -162,58 +153,79 @@ predict.eps.svr <- function(object, X, y = NULL, ...){
 #' @param object A fitted object of class inheriting from \code{eps.svr}.
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
+#'  will print the prediction results and other information.
 #' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
 
-predict.eps.svr <- function(object, X, y, ...){
-  X <- as.matrix(X)
-  y <- as.matrix(y)
-  X <- kernel_function(X, object$X,
-                         kernel.type = object$kernel,
-                         gamma = object$gamma, degree = object$degree,
-                         coef0 = object$coef0,
-                         rcpp = object$Rcpp)
-  y_hat <- X %*% object$coef
-  return(y_hat)
+predict.eps.svr <- function(object, X, y = NULL, ...){
+  m <-  nrow(X)
+  Q <- kernel_function(X, object$SVs,
+                       kernel.type = object$kernel,
+                       gamma = object$gamma, degree = object$degree, coef0 = object$coef0,
+                       rcpp = object$Rcpp)
+  pred <- matrix(Q %*% object$coef , nrow = m)
+  return(pred)
 }
 
-cv.eps.svr <- function(X, y , K = 5,
-                     eps = 0.1,
-                     kernel = c('linear', 'rbf', 'poly'),
-                     C = 1, gamma = 1 / ncol(X), degree = 3,
-                     max.steps = 1000, projection.steps = 20,
-                     shuffle = TRUE, seed = NULL){
+#' #' Predict Method for epsilon - Support Vector Regression
+#' #'
+#' #' @author Zhang Jiaqi
+#' #' @param object A fitted object of class inheriting from \code{eps.svr}.
+#' #' @param X A new data frame for predicting.
+#' #' @param y A label data frame corresponding to X.
+#' #' @param ... unused parameter.
+#' #' @importFrom stats predict
+#' #' @export
+#'
+#' predict.eps.svr <- function(object, X, y, ...){
+#'   X <- as.matrix(X)
+#'   y <- as.matrix(y)
+#'   X <- kernel_function(X, object$X,
+#'                          kernel.type = object$kernel,
+#'                          gamma = object$gamma, degree = object$degree,
+#'                          coef0 = object$coef0,
+#'                          rcpp = object$Rcpp)
+#'   y_hat <- X %*% object$coef
+#'   return(y_hat)
+#' }
 
-  m <- nrow(X)
-  if(shuffle == TRUE){
-    if(is.null(seed) == FALSE){
-      set.seed(seed)
-    }
-    new_idx <- sample(m)
-
-  }else{
-    new_idx <- 1:m
-  }
-  v_size <- m %/% K
-  indx_cv <- 1
-  mse_list <- c()
-  for(i in 1:K){
-    new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
-    indx_cv <- indx_cv + v_size
-    test_X <- X[new_idx_k, ]
-    train_X <- X[-new_idx_k, ]
-    test_y <- y[new_idx_k]
-    train_y <- y[-new_idx_k]
-    jssvr_model <- eps.svr(train_X, train_y, eps = eps,
-                         C = C, gamma = gamma, degree = degree, coef0 = coef0,
-                         max.steps = max.steps,
-                         kernel = kernel)
-    pred <- predict(jssvr_model, test_X, test_y)
-    mse <- mean_squared_error(test_y, pred)
-    mse_list <- append(mse_list, mse)
-    cat('MSE in ',K, 'fold cross validation :', mse, '\n')
-  }
-  cat('average MSE in ',K, 'fold cross validation :', mean(mse_list), '\n')
-  cat('Sd of MSE in ',K, 'fold cross validation :', sd(mse_list), '\n')
-}
+# cv.eps.svr <- function(X, y , K = 5,
+#                      eps = 0.1,
+#                      kernel = c('linear', 'rbf', 'poly'),
+#                      C = 1, gamma = 1 / ncol(X), degree = 3,
+#                      max.steps = 1000, projection.steps = 20,
+#                      shuffle = TRUE, seed = NULL){
+#
+#   m <- nrow(X)
+#   if(shuffle == TRUE){
+#     if(is.null(seed) == FALSE){
+#       set.seed(seed)
+#     }
+#     new_idx <- sample(m)
+#
+#   }else{
+#     new_idx <- 1:m
+#   }
+#   v_size <- m %/% K
+#   indx_cv <- 1
+#   mse_list <- c()
+#   for(i in 1:K){
+#     new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+#     indx_cv <- indx_cv + v_size
+#     test_X <- X[new_idx_k, ]
+#     train_X <- X[-new_idx_k, ]
+#     test_y <- y[new_idx_k]
+#     train_y <- y[-new_idx_k]
+#     jssvr_model <- eps.svr(train_X, train_y, eps = eps,
+#                          C = C, gamma = gamma, degree = degree, coef0 = coef0,
+#                          max.steps = max.steps,
+#                          kernel = kernel)
+#     pred <- predict(jssvr_model, test_X, test_y)
+#     mse <- mean_squared_error(test_y, pred)
+#     mse_list <- append(mse_list, mse)
+#     cat('MSE in ',K, 'fold cross validation :', mse, '\n')
+#   }
+#   cat('average MSE in ',K, 'fold cross validation :', mean(mse_list), '\n')
+#   cat('Sd of MSE in ',K, 'fold cross validation :', sd(mse_list), '\n')
+# }
