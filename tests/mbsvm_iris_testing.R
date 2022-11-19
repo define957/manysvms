@@ -11,6 +11,6 @@ pred <-predict(model1, X, y)
 model <- mbsvm(X, y, kernel = 'rbf', kernel_rect = 0.45, gamma = 1)
 pred <-predict(model, X, y)
 
-cv.mbsvm(X, y, kernel = 'linear', reg = 0.05)
+cv.mbsvm(X, y, kernel = 'linear', reg = 0.05, threads.num = 1)
 
-cv.mbsvm(X, y, kernel = 'rbf', reg = 0.05)
+cv.mbsvm(X, y, kernel = 'rbf', reg = 0.05, threads.num = 1)

@@ -8,13 +8,19 @@ cv.mbsvm(
   X,
   y,
   K = 5,
-  Ck = rep(1, length(unique(y))),
+  C = 1,
   kernel = c("linear", "rbf", "poly"),
-  reg = 1,
   gamma = 1/ncol(X),
+  degree = 3,
+  coef0 = 0,
+  reg = 1e-07,
   kernel_rect = 1,
-  shuffer = TRUE,
-  seed = NULL
+  tol = 1e-05,
+  max.steps = 200,
+  rcpp = TRUE,
+  shuffle = TRUE,
+  seed = NULL,
+  threads.num = parallel::detectCores() - 1
 )
 }
 \arguments{
@@ -24,19 +30,31 @@ cv.mbsvm(
 
 \item{K}{Number of folds.}
 
-\item{Ck}{plenty term list.}
+\item{C}{plenty term list.}
 
 \item{kernel}{kernel type. Default value \code{kernel = 'linear'}.}
 
-\item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
+\item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
 
-\item{gamma}{parameter needed for rbf kernel.}
+\item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
+
+\item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
+
+\item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
 
 \item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
 
-\item{shuffer}{if set \code{shuffer==TRUE}, This function will shuffle the dataset.}
+\item{tol}{the precision of the optimization algorithm.}
+
+\item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
+
+\item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle the dataset.}
 
 \item{seed}{random seed for \code{shuffer} option.}
+
+\item{threads.num}{The number of threads used for parallel execution.}
 }
 \description{
 Computes K-fold Cross-Validation Accuracy for MBSVM

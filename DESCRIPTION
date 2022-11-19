@@ -15,7 +15,10 @@ BugReports: https://github.com/define957/manysvms/issues
 RoxygenNote: 7.2.1
 Imports: 
       ggplot2 (>= 3.3.5),
-      Rcpp
+      Rcpp,
+      foreach,
+      doParallel,
+      doSNOW
 Suggests:
       MASS
 LinkingTo: 
