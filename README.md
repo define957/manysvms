@@ -38,11 +38,17 @@ Then you can have `manysvms` package on your PC。
 
 ## SVMs for classification
 
-+ Twin-SVM for binary classification [Rcpp acceleration is available]
-+ Twin-SVM for Multi-classification (One versus Rest strategy) [Rcpp acceleration is available]
-+ Multiple Birth SVM for Multi-classification [Rcpp acceleration is available]
-+ Twin K SVM for Multi-classification (One versus One versus Rest strategy) [Rcpp acceleration is available]
-+ Ramp Twin K SVM for Multi-Classification (One versus One versus Rest strategy) [Rcpp acceleration is available]
++ Twin-SVM for binary classification 
++ + [Rcpp acceleration is available]
++ Twin-SVM for Multi-classification (One versus Rest strategy) 
++ + [Rcpp acceleration is available]
++ Multiple Birth SVM for Multi-classification 
++ + [Rcpp acceleration is available] 
++ + [Parallel execution of grid searches is available]
++ Twin K SVM for Multi-classification (One versus One versus Rest strategy) 
++ + [Rcpp acceleration is available]
++ Ramp Twin K SVM for Multi-Classification (One versus One versus Rest strategy)
++ + [Rcpp acceleration is available]
 
 ## SVMs for regression
 
