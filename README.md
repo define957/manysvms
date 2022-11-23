@@ -42,6 +42,7 @@ Then you can have `manysvms` package on your PC。
 + + [Rcpp acceleration is available]
 + Twin-SVM for Multi-classification (One versus Rest strategy) 
 + + [Rcpp acceleration is available]
++ + [Parallel execution of grid searches is available]
 + Multiple Birth SVM for Multi-classification 
 + + [Rcpp acceleration is available] 
 + + [Parallel execution of grid searches is available]

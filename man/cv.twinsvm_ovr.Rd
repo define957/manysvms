@@ -9,12 +9,16 @@ cv.twinsvm_ovr(
   X,
   y,
   K = 5,
-  Ck = rep(1, length(unique(y))),
+  C = 1,
   kernel = c("linear", "rbf", "poly"),
-  reg = 0.001,
   gamma = 1/ncol(X),
-  shuffer = TRUE,
-  seed = NULL
+  degree = 3,
+  coef0 = 0,
+  reg = 1e-07,
+  kernel_rect = 1,
+  shuffle = TRUE,
+  seed = NULL,
+  threads.num = parallel::detectCores() - 1
 )
 }
 \arguments{
@@ -22,20 +26,25 @@ cv.twinsvm_ovr(
 
 \item{K}{`K = 10` means K-fold cross validation}
 
-\item{Ck}{plenty term vector}
+\item{C}{plenty term.}
 
 \item{kernel}{kernel function}
 
-\item{reg}{regularization tern}
+\item{gamma}{parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.}
 
-\item{gamma}{rbf kernel parameter}
+\item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
 
-\item{shuffer}{`shuffer = TRUE` means shuffer the dataset}
+\item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
+
+\item{reg}{regularization term to take care of problems due to ill-conditioning in dual problem.}
+
+\item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
+
+\item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle the dataset.}
 
 \item{seed}{is shuffer random seed}
-}
-\value{
-average accuracy in K-fold cross validation
+
+\item{threads.num}{The number of threads used for parallel execution.}
 }
 \description{
 Twin SVM for Multi-classification by Using Ones versus Rest Strategy
@@ -47,7 +56,8 @@ data("iris")
 
 X <- iris[, 1:4]
 y <- iris[, 5]
-cv.twinsvm_ovr(X, y, K = 10, kernel = 'rbf', gamma = 1/8, seed = 1234)
+cv.twinsvm_ovr(X, y, K = 10, kernel = 'rbf',
+               gamma = 1/8, seed = 1234, threads.num = 2)
 }
 \author{
 Zhang Jiaqi
