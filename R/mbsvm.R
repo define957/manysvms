@@ -187,7 +187,7 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
 #' @author Zhang Jiaqi
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
-#' @param C plenty term list.
+#' @param C plenty term.
 #' @param K Number of folds.
 #' @param kernel kernel type. Default value \code{kernel = 'linear'}.
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
