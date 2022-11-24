@@ -30,7 +30,7 @@ cv.mbsvm(
 
 \item{K}{Number of folds.}
 
-\item{C}{plenty term list.}
+\item{C}{plenty term.}
 
 \item{kernel}{kernel type. Default value \code{kernel = 'linear'}.}
 

@@ -95,15 +95,16 @@ mbsvm <- function(X, y,
     S <- cbind(S, e1)
     R <- cbind(R, e2)
 
-    RTR_reg_inv <- solve(t(R) %*% R + diag(rep(reg, ncol(R))))
-    H <- S %*% RTR_reg_inv %*% t(S)
+    inv_mat <- t(R) %*% R + diag(rep(reg, ncol(R)))
+    RTR_reg_inv_S <- chol2inv(chol(inv_mat)) %*% t(S)
+    H <- S %*% RTR_reg_inv_S
     lbB <- matrix(0, nrow = mA)
     ubB <- matrix(Ck[k], nrow = mA)
 
     x <- clip_dcd_optimizer(H, e1, lbB, ubB, tol, max.steps, rcpp = rcpp)$x
 
     gammas <- as.matrix(x)
-    Z2 <- RTR_reg_inv %*% t(S) %*% gammas
+    Z2 <- RTR_reg_inv_S %*% gammas
 
     coef_list[, k] <- Z2[1:coef_dim]
     intercept_list[k] <- Z2[coef_dim+1]
