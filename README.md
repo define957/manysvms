@@ -1,9 +1,24 @@
-# many SVMs
+# **manysvms**
+
+<html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+                
 ![GitHub RCMDCHECK](https://img.shields.io/badge/R--CMD--check-passing-brightgreen)
 ![GitHub license](https://img.shields.io/github/license/define957/manysvms)
 ![GitHub ISSUES](https://img.shields.io/github/issues/define957/manysvms)
 ![GitHub STARS](https://img.shields.io/github/stars/define957/manysvms)
-![GitHub STARS](https://img.shields.io/github/forks/define957/manysvms)
+![GitHub FORKS](https://img.shields.io/github/forks/define957/manysvms)
+            </td>
+            <td>
+<div align=center><img src = man\figures\Logo.png width="60%"></div>
+            </td>
+        </tr>
+    </table>
+</html>
+
+***
 
 MBSVM :
 <div align=center><img src = man\figures\MBSVM.png width="60%"></div>
