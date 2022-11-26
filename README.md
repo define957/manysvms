@@ -1,29 +1,12 @@
-# **manysvms**
-
-<html>
-    <table style="margin-left: auto; margin-right: auto;">
-        <tr>
-            <td>
-                
+# **manysvms** <img src="man/figures/Logo.png" align="right" width="150" />
+             
 ![GitHub RCMDCHECK](https://img.shields.io/badge/R--CMD--check-passing-brightgreen)
 ![GitHub license](https://img.shields.io/github/license/define957/manysvms)
 ![GitHub ISSUES](https://img.shields.io/github/issues/define957/manysvms)
 ![GitHub STARS](https://img.shields.io/github/stars/define957/manysvms)
 ![GitHub FORKS](https://img.shields.io/github/forks/define957/manysvms)
-            </td>
-            <td>
-<div align=center><img src = man\figures\Logo.png width="60%"></div>
-            </td>
-        </tr>
-    </table>
-</html>
 
 ***
-
-MBSVM :
-<div align=center><img src = man\figures\MBSVM.png width="60%"></div>
-SVR :
-<div align=center><img src = man\figures\SVR.png width="60%"></div>
 
 
 ## Introduction
@@ -107,3 +90,10 @@ If you find bug in this package, please post an issue on the [issue](https://git
 ## Licenses
 
 GNU GENERAL PUBLIC LICENSE Version 3 (GPL-3.0)
+
+## Examples
+
+MBSVM :
+<div align=center><img src = man\figures\MBSVM.png width="60%"></div>
+SVR :
+<div align=center><img src = man\figures\SVR.png width="60%"></div>
