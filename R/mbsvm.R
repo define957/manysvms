@@ -51,9 +51,9 @@ mbsvm <- function(X, y,
   class_num <- length(class_set)
   kernel_m <- round(m*kernel_rect, 0)
 
-  if(kernel == 'linear'){
+  if (kernel == 'linear') {
     coef_dim <- n
-  }else if(kernel == 'rbf'){
+  }else if (kernel == 'rbf') {
     coef_dim <- round(kernel_rect*m)
   }
   coef_list <- rep(0, coef_dim*class_num)
@@ -62,36 +62,33 @@ mbsvm <- function(X, y,
   coef_list <- as.matrix(coef_list)
   intercept_list <- as.matrix(intercept_list)
 
+  if (kernel != 'linear') {
+    kernel_m <- round(m*kernel_rect, 0)
+    # x_norm <- as.matrix(apply(X, 1, norm, type = '2')^2)
+    # KernelX <- exp(gamma*(- x_norm %*% t(e) - e %*% t(x_norm) + 2* X%*%t(X)))
+    KernelX <- kernel_function(X, X[1:kernel_m, ],
+                               kernel.type = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               rcpp = rcpp)
+    }else{
+      KernelX <- X
+    }
 
-  for(k in 1:class_num){
+  for (k in 1:class_num) {
     idx_Ak <- which(y == class_set[k])
     idx_Bk <- which(y != class_set[k])
 
-    A <- X[idx_Ak, ]
-    dim(A)  <- c(length(idx_Ak), n)
-    B <- X[idx_Bk, ]
-    dim(B)  <- c(length(idx_Bk), n)
+    mA <- length(idx_Ak)
+    mB <- length(idx_Bk)
 
-    mA <- nrow(A)
-    mB <- nrow(B)
+    S <- as.matrix(KernelX[idx_Ak, ])
+    dim(S)  <- c(mA, coef_dim)
+    R <- as.matrix(KernelX[idx_Bk, ])
+    dim(R)  <- c(mB, coef_dim)
 
     e1 <- matrix(1, nrow = mA)
     e2 <- matrix(1, nrow = mB)
 
-    if(kernel == 'linear'){
-      S <- A
-      R <- B
-    }else{
-
-      S <- kernel_function(A, X[1:kernel_m, ],
-                           kernel.type = kernel,
-                           gamma = gamma, degree = degree, coef0 = coef0,
-                           rcpp = rcpp)
-      R <- kernel_function(B, X[1:kernel_m, ],
-                           kernel.type = kernel,
-                           gamma = gamma, degree = degree, coef0 = coef0,
-                           rcpp = rcpp)
-    }
     S <- cbind(S, e1)
     R <- cbind(R, e2)
 
@@ -107,7 +104,7 @@ mbsvm <- function(X, y,
     Z2 <- RTR_reg_inv_S %*% gammas
 
     coef_list[, k] <- Z2[1:coef_dim]
-    intercept_list[k] <- Z2[coef_dim+1]
+    intercept_list[k] <- Z2[coef_dim + 1]
   }
 
   mbsvm <- list('X' = X, 'y' = y,
@@ -118,7 +115,7 @@ mbsvm <- function(X, y,
                       'kernel_rect' = kernel_rect,
                       'Rcpp' = rcpp
                 )
-  class(mbsvm)<-"mbsvm"
+  class(mbsvm) <- "mbsvm"
   return(mbsvm)
 }
 
