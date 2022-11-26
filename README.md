@@ -65,13 +65,21 @@ Then you can have `manysvms` package on your PC。
 
 ## Development environment and dependency
 
-enviroment: R 4.2.1, windows 10 x64 &#x2705;
+My enviroment: R 4.2.1, windows 10 x64 &#x2705;
 
-dependency: 
+Other test environment detail: 
++ Windows 10/11 x64 &#x2705;
++ Mac osx (ARM platform) &#x2705; 
++ Linux : We haven't tested it yet &#x2753;
+
+Dependency: 
 
 + ggplot2 
 + Rcpp
 + RcppArmadillo
++ foreach
++ doParallel
++ doSNOW
 
 ## Bug report
 
