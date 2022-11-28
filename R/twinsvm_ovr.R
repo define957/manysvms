@@ -27,7 +27,7 @@
 #' coef(model)
 #' pred <-predict(model, X, y)
 
-twinsvm_ovr<- function(X, y,
+twinsvm_ovr <- function(X, y,
                        Ck = rep(1, length(unique(y))),
                        kernel = c('linear', 'rbf', 'poly'),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
@@ -44,57 +44,58 @@ twinsvm_ovr<- function(X, y,
   class_set <- unique(as.matrix(y))
   class_num <- length(class_set)
 
-  if(kernel == 'linear'){
+  if (kernel == 'linear') {
     coef_dim <- n
-  }else if(kernel == 'rbf'){
+  }else if (kernel == 'rbf') {
     coef_dim <- m*kernel_rect
   }
 
-  coef_list <- matrix(0, nrow = coef_dim, ncol = class_num)
-  intercept_list <- matrix(0, ncol = class_num)
+  coef_list <- rep(0, coef_dim*class_num)
+  dim(coef_list) <- c(coef_dim, class_num)
+  intercept_list <- rep(0, class_num)
+  coef_list <- as.matrix(coef_list)
+  intercept_list <- as.matrix(intercept_list)
 
 
-  for(k in 1:class_num){
+  if (kernel != 'linear') {
+    kernel_m <- round(m*kernel_rect, 0)
+    KernelX <- kernel_function(X, X[1:kernel_m, ],
+                               kernel.type = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               rcpp = rcpp)
+  }else{
+    KernelX <- X
+  }
+
+  for (k in 1:class_num) {
     idx_Ak <- which(y == class_set[k])
     idx_Bk <- which(y != class_set[k])
 
-    A <- X[idx_Ak, ]
-    B <- X[idx_Bk, ]
+    mA <- length(idx_Ak)
+    mB <- length(idx_Bk)
 
-    mA <- nrow(A)
-    mB <- nrow(B)
+    S <- as.matrix(KernelX[idx_Ak, ])
+    dim(S)  <- c(mA, coef_dim)
+    R <- as.matrix(KernelX[idx_Bk, ])
+    dim(R)  <- c(mB, coef_dim)
 
     e1 <- matrix(1, nrow = mA)
     e2 <- matrix(1, nrow = mB)
 
-    if(kernel == 'linear'){
-      S <- A
-      R <- B
-    }else{
-      kernel_m <- round(m*kernel_rect, 0)
-
-      S <- kernel_function(A, X[1:kernel_m, ],
-                           kernel.type = kernel,
-                           gamma = gamma, degree = degree, coef0 = coef0,
-                           rcpp = rcpp)
-      R <- kernel_function(B, X[1:kernel_m, ],
-                           kernel.type = kernel,
-                           gamma = gamma, degree = degree, coef0 = coef0,
-                           rcpp = rcpp)
-    }
     S <- cbind(S, e1)
     R <- cbind(R, e2)
 
-    STS_reg_inv <- solve(t(S) %*% S + diag(reg, ncol(S)))
-    H <- R %*% STS_reg_inv %*% t(R)
+    inv_mat <- t(S) %*% S + diag(reg, ncol(S))
+    STS_reg_inv_R <- chol2inv(chol(inv_mat)) %*% t(R)
+    H <- R %*% STS_reg_inv_R
     lbA <- matrix(0, nrow = mB)
     ubA <- matrix(Ck[k], nrow = mB)
-    qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA, tol, max.steps, rcpp)
-    alphas <- as.matrix(qp1_solver$x)
-    Z1 <- -STS_reg_inv %*% t(R) %*% alphas
+    x <- clip_dcd_optimizer(H, e2, lbA, ubA, tol, max.steps, rcpp)$x
+    alphas <- as.matrix(x)
+    Z1 <- -STS_reg_inv_R %*% alphas
 
     coef_list[, k] <- Z1[1:coef_dim]
-    intercept_list[k] <- Z1[coef_dim+1]
+    intercept_list[k] <- Z1[coef_dim + 1]
   }
 
   twinsvm_ovr <- list('X' = X, 'y' = y,
@@ -107,7 +108,7 @@ twinsvm_ovr<- function(X, y,
                       )
 
 
-  class(twinsvm_ovr)<-"twinsvm_ovr"
+  class(twinsvm_ovr) <- "twinsvm_ovr"
   return(twinsvm_ovr)
 }
 
@@ -127,7 +128,7 @@ predict.twinsvm_ovr <- function(object, X, y, ...){
   dis_mat <- matrix(0, nrow = m, ncol = object$class_num)
   X <- as.matrix(X)
   km <- nrow(object$X)
-  if(object$kernel == 'linear'){
+  if (object$kernel == 'linear') {
     kernelX <- X
   }else{
     kernel_m <- round(km*object$kernel_rect, 0)
@@ -141,12 +142,12 @@ predict.twinsvm_ovr <- function(object, X, y, ...){
   }
 
   class_num <- object$class_num
-  for(i in 1:class_num){
+  for (i in 1:class_num) {
     dis_mat[, i] <- abs(kernelX %*% object$coef[, i] + object$intercept[i]) /
       norm(as.matrix(object$coef[, i]), type = "2")
   }
   pred <- rep(0, m)
-  for(i in 1:m){
+  for (i in 1:m) {
     idx <- which.min(dis_mat[i, ])
     pred[i] <- object$class_set[idx]
   }
@@ -154,7 +155,7 @@ predict.twinsvm_ovr <- function(object, X, y, ...){
   acc <- sum(pred == y)/length(y)
   cat('kernel type :', object$kernel, '\n')
   cat(paste("total accuracy :", acc*100, '% \n'))
-  predlist <- list("accuracy"= acc,
+  predlist <- list("accuracy" = acc,
                    'distance' = dis_mat, 'predict' = pred)
   return(predlist)
 }

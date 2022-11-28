@@ -38,8 +38,8 @@ cv.twinsvm_ovr <- function(X, y , K = 5, C = 1,
 
   param <- expand.grid(C, gamma, degree, coef0)
   m <- nrow(X)
-  if(shuffle == TRUE){
-    if(is.null(seed) == FALSE){
+  if (shuffle == TRUE) {
+    if (is.null(seed) == FALSE) {
       set.seed(seed)
     }
     new_idx <- sample(m)
@@ -56,11 +56,12 @@ cv.twinsvm_ovr <- function(X, y , K = 5, C = 1,
   opts <- list(progress = progress)
   doSNOW::registerDoSNOW(cl)
   res <- foreach::foreach(j = 1:nrow(param), .combine = rbind,
-                          .packages = c('manysvms', 'Rcpp'), .options.snow = opts)%dopar%{
+                          .packages = c('manysvms', 'Rcpp'),
+                          .options.snow = opts) %dopar% {
     indx_cv <- 1
     accuracy_list <- c()
-    for(i in 1:K){
-      new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+    for (i in 1:K) {
+      new_idx_k <- new_idx[indx_cv:(indx_cv + v_size - 1)] #get test dataset
       indx_cv <- indx_cv + v_size
       test_X <- X[new_idx_k, ]
       train_X <- X[-new_idx_k, ]
@@ -88,7 +89,7 @@ cv.twinsvm_ovr <- function(X, y , K = 5, C = 1,
 
   max_idx <- which.max(res[ ,1])
   call <- match.call()
-  cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep="\n")
+  cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
       "C = ", param[max_idx, 1],
