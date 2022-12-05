@@ -13,20 +13,20 @@ train_test_split <- function(X, y, test_size = 0.3,
                              shuffle = TRUE, seed = NULL){
   X <- as.matrix(X)
   y <- as.matrix(y)
-  m <- nrow(m)
-  if(shuffle == TRUE){
-    if(is.null(seed)==FALSE){
+  m <- nrow(X)
+  if (shuffle == TRUE) {
+    if (is.null(seed) == FALSE) {
       set.seed(seed)
     }
     new_idx <- sample(1:m)
   }else{
     new_idx <- 1:m
   }
-  idx <- round(m*0.3)
+  idx <- round(m*test_size)
   train_X <- X[1:idx, ]
   train_y <- X[1:idx]
-  test_X <- X[(idx+1):m, ]
-  test_y <- y[(idx+1):m]
+  test_X <- X[(idx + 1):m, ]
+  test_y <- y[(idx + 1):m]
   train_test_data <- list("train_X" = train_X, "train_y" = train_y,
                           "test_X" = test_X, "test_y" = test_y)
   return(train_test_data)
