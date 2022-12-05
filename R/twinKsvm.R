@@ -33,11 +33,11 @@ twinKsvm <- function(X, y,
   class_set <- unique(as.matrix(y))
   class_num <- length(class_set)
 
-  if(class_num <=2){
+  if (class_num <= 2) {
     return(0)
   }
 
-  if(kernel == 'linear'){
+  if (kernel == 'linear') {
     coef_dim <- n
   }else{
     coef_dim <- round(m * kernel_rect, 0)
@@ -49,11 +49,21 @@ twinKsvm <- function(X, y,
   intercept_list_pos <- matrix(0, ncol = class_num * (class_num - 1)/2)
   intercept_list_neg <- matrix(0, ncol = class_num * (class_num - 1)/2)
 
+  if (kernel != 'linear') {
+    kernel_m <- round(m*kernel_rect, 0)
+    KernelX <- kernel_function(X, X[1:kernel_m, ],
+                               kernel.type = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               rcpp = rcpp)
+  }else{
+    KernelX <- X
+  }
+
   # solve K * K-1 models
   idx <- 0
-  for(i in 1:class_num){
-    for(j in i:class_num){
-      if(i == j){
+  for (i in 1:class_num) {
+    for (j in i:class_num) {
+      if (i == j) {
         next
       }
       idx <- idx + 1
@@ -62,38 +72,18 @@ twinKsvm <- function(X, y,
       idxB <- which(y == class_set[j])
       idxC <- which(y != class_set[i] & y != class_set[j])
 
-      A <- X[idxA, ]
-      B <- X[idxB, ]
-      C <- X[idxC, ]
+      S <- KernelX[idxA, ]
+      R <- KernelX[idxB, ]
+      W <- KernelX[idxC, ]
 
-      mA <- nrow(A)
-      mB <- nrow(B)
-      mC <- m - mA -mB
+      mA <- nrow(S)
+      mB <- nrow(R)
+      mC <- m - mA - mB
 
       e1 <- matrix(1, nrow = mA)
       e2 <- matrix(1, nrow = mB)
       e3 <- matrix(1, nrow = mC)
 
-      if(kernel == 'linear'){
-        S <- A
-        R <- B
-        W <- C
-      }else{
-        kernel_m <- round(m*kernel_rect, 0)
-
-        S <- kernel_function(A, X[1:kernel_m, ],
-                             kernel.type = kernel,
-                             gamma = gamma, degree = degree, coef0 = coef0,
-                             rcpp = rcpp)
-        R <- kernel_function(B, X[1:kernel_m, ],
-                             kernel.type = kernel,
-                             gamma = gamma, degree = degree, coef0 = coef0,
-                             rcpp = rcpp)
-        W <- kernel_function(C, X[1:kernel_m, ],
-                             kernel.type = kernel,
-                             gamma = gamma, degree = degree, coef0 = coef0,
-                             rcpp = rcpp)
-      }
       S <- cbind(S, e1)
       R <- cbind(R, e2)
       W <- cbind(W, e3)
@@ -109,10 +99,10 @@ twinKsvm <- function(X, y,
       ubA <- rbind(ubA1, ubA2)
       qp1_solver <- clip_dcd_optimizer(H, e4, lbA, ubA, tol, max.steps, rcpp)
       gammas <- as.matrix(qp1_solver$x)
-      Z1 <- - STS_reg_inv %*% (t(R) %*% gammas[0:mB] +
-                               t(W) %*% gammas[(mB+1):length(gammas)])
+      Z1 <- -STS_reg_inv %*% (t(R) %*% gammas[0:mB] +
+                              t(W) %*% gammas[(mB + 1):length(gammas)])
       coef_list_pos[, idx] <- Z1[1:coef_dim, ]
-      intercept_list_pos[idx] <- Z1[coef_dim+1]
+      intercept_list_pos[idx] <- Z1[coef_dim + 1]
 
       RTR_reg_inv <- solve(t(R) %*% R + diag(rep(reg, ncol(R))))
       J <- rbind(S, W)
@@ -126,7 +116,7 @@ twinKsvm <- function(X, y,
       rhos <- as.matrix(qp2_solver$x)
       Z2 <- RTR_reg_inv %*% t(J) %*% rhos
       coef_list_neg[, idx] <- Z2[1:coef_dim, ]
-      intercept_list_neg[idx] <- Z2[coef_dim+1]
+      intercept_list_neg[idx] <- Z2[coef_dim + 1]
     }
   }
   twinKsvm <- list('X' = X, 'y' = y,
@@ -164,7 +154,7 @@ predict.twinKsvm <- function(object, X, y, ...){
   idx <- 0
   class_num <- object$class_num
 
-  if(object$kernel == 'linear'){
+  if (object$kernel == 'linear') {
     kernelX <- X
   }else{
     kernel_m <- round(km*object$kernel_rect, 0)
@@ -176,9 +166,9 @@ predict.twinKsvm <- function(object, X, y, ...){
                          rcpp = object$Rcpp)
   }
 
-  for(i in 1:class_num){
-    for(j in i:class_num){
-      if(i == j){
+  for (i in 1:class_num) {
+    for (j in i:class_num) {
+      if (i == j) {
         next
       }
       idx <- idx + 1
@@ -192,7 +182,7 @@ predict.twinKsvm <- function(object, X, y, ...){
       idx_uni <- unique(idxA, idxB)
       vote_mat[idxA, i] <- vote_mat[idxA, i] + 1
       vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
-      if(length(idx_uni)!=0){
+      if (length(idx_uni) != 0) {
         vote_mat[-idx_uni, i] <- vote_mat[-idx_uni, i] + 1
         vote_mat[-idx_uni, j] <- vote_mat[-idx_uni, j] + 1
       }
@@ -202,13 +192,13 @@ predict.twinKsvm <- function(object, X, y, ...){
   idx <- apply(vote_mat, 1, which.max)
 
   pred <- rep(0, m)
-  for(i in 1:m){
+  for (i in 1:m) {
     pred[i] <- object$class_set[idx[i]]
   }
   acc <- sum(pred == y) / m
   cat('kernel type :', object$kernel, '\n')
   cat(paste("total accuracy :", acc*100, '% \n'))
-  predlist <- list("accuracy"= acc,
+  predlist <- list("accuracy" = acc,
                    'vote_mat' = vote_mat, 'predict' = pred)
   return(predlist)
 }
