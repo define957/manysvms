@@ -47,10 +47,9 @@ twinsvm <- function(X, y,
   y <- as.matrix(y)
 
   m <- nrow(X)
-  n <- ncol(X)
   class_set <- unique(y)
   num_class <- length(class_set)
-  if(num_class > 2){
+  if (num_class > 2) {
     return(0)
   }
 
@@ -66,7 +65,7 @@ twinsvm <- function(X, y,
   e1 <- matrix(1, nrow = mA)
   e2 <- matrix(1, nrow = mB)
 
-  if(kernel == 'linear'){
+  if (kernel == 'linear') {
     S <- A
     R <- B
 
@@ -90,10 +89,9 @@ twinsvm <- function(X, y,
   H <- R %*% STS_reg_inv %*% t(R)
   lbA <- matrix(0, nrow = mB)
   ubA <- matrix(C1, nrow = mB)
-  AA <- diag(rep(1, nrow(H)))
   qp1_solver <- clip_dcd_optimizer(H, e2, lbA, ubA, tol, max.steps, rcpp)
   alphas <- as.matrix(qp1_solver$x)
-  Z1 <- - STS_reg_inv %*% t(R) %*% alphas
+  Z1 <- -STS_reg_inv %*% t(R) %*% alphas
 
   # Solve QP 2
   RTR_reg_inv <- solve(t(R) %*% R + diag(rep(reg, ncol(R))))
@@ -107,8 +105,8 @@ twinsvm <- function(X, y,
   u_idx <- length(Z2) - 1
   u1 <- Z1[1:u_idx]
   u2 <- Z2[1:u_idx]
-  b1 <- Z1[u_idx+1]
-  b2 <- Z2[u_idx+1]
+  b1 <- Z1[u_idx + 1]
+  b2 <- Z2[u_idx + 1]
 
   twinsvm_model <- list('X' = X,
                         'y' = y,
@@ -123,7 +121,7 @@ twinsvm <- function(X, y,
                         'kernel_rect' = kernel_rect,
                         'Rcpp' = rcpp,
                         'call' = match.call())
-  class(twinsvm_model)<-"twinsvm"
+  class(twinsvm_model) <- "twinsvm"
 
   return(twinsvm_model)
 }
@@ -149,7 +147,7 @@ twinsvm <- function(X, y,
 
 coef.twinsvm <- function(object, ...){
   coefs <- list('u1' = object$u1, 'u2' = object$u2,
-                'b1' = object$b1, 'b2'= object$b2)
+                'b1' = object$b1, 'b2' = object$b2)
   return(coefs)
 }
 
@@ -180,7 +178,7 @@ predict.twinsvm <- function(object, X, y, ...){
   X <- as.matrix(X)
   y <- as.matrix(y)
   m <- nrow(object$X)
-  if(object$kernel == 'linear'){
+  if (object$kernel == 'linear') {
     kernelX <- X
   }else{
     kernel_m <- round(m*object$kernel_rect, 0)
@@ -200,11 +198,11 @@ predict.twinsvm <- function(object, X, y, ...){
 
   m <- length(predict_idx)
   predict_value <- rep(0, m)
-  for(i in 1:m){
+  for (i in 1:m) {
     predict_value[i] <- object$class_set[predict_idx[i]]
   }
   accuracy <- sum(predict_value == y) * 100 / m
-  predlist <- list('predict.value' = predict_value, "accuracy"= accuracy,
+  predlist <- list('predict.value' = predict_value, "accuracy" = accuracy,
                    'A.distance' = disA, 'B.distance' = disB)
   cat('use kernel : ', object$kernel, '\n')
   cat('total accuracy :', accuracy, '%\n')
@@ -217,10 +215,10 @@ predict.twinsvm <- function(object, X, y, ...){
 #' @export
 
 print.twinsvm <- function(x, ...){
-  cat("\nCall:", deparse(x$call, 0.8 * getOption("width")), "\n", sep="\n")
+  cat("\nCall:", deparse(x$call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("SVM type : ", class(x), "\n")
   cat("SVM kernel : ", x$kernel, "\n")
-  if(x$kernel == 'rbf'){
+  if (x$kernel == 'rbf') {
     cat("gamma : ", x$gamma, "\n")
   }
   cat("number of observations : ", nrow(x$X), "\n")
