@@ -68,7 +68,7 @@ cv.twinsvm_ovr <- function(X, y , K = 5, C = 1,
       test_y <- y[new_idx_k]
       train_y <- y[-new_idx_k]
       twinsvm_ovr <- twinsvm_ovr(train_X, train_y,
-                                 Ck = param[j, 1]*rep(1, length(unique(y))),
+                                 Ck = param[j, 1]*rep(1, length(unique(train_y))),
                                  kernel = kernel, reg = reg,
                                  gamma = param[j, 2],
                                  degree = param[j, 3],
