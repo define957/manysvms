@@ -217,8 +217,8 @@ cv.mbsvm <- function(X, y , K = 5, C = 1,
 
   param <- expand.grid(C, gamma, degree, coef0)
   m <- nrow(X)
-  if(shuffle == TRUE){
-    if(is.null(seed) == FALSE){
+  if (shuffle == TRUE) {
+    if (is.null(seed) == FALSE) {
       set.seed(seed)
     }
     new_idx <- sample(m)
@@ -234,22 +234,23 @@ cv.mbsvm <- function(X, y , K = 5, C = 1,
   doSNOW::registerDoSNOW(cl)
   j <- 1
   res <- foreach::foreach(j = 1:nrow(param), .combine = rbind,
-                          .packages = c('manysvms', 'Rcpp'), .options.snow = opts)%dopar%{
+                          .packages = c('manysvms', 'Rcpp'),
+                          .options.snow = opts) %dopar% {
     indx_cv <- 1
-    accuracy_list <- c()
-    for(i in 1:K){
-      new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+    accuracy_list <- rep(0, K)
+    for (i in 1:K) {
+      new_idx_k <- new_idx[indx_cv:(indx_cv + v_size - 1)] #get test dataset
       indx_cv <- indx_cv + v_size
       test_X <- X[new_idx_k, ]
       train_X <- X[-new_idx_k, ]
       test_y <- y[new_idx_k]
       train_y <- y[-new_idx_k]
       mbsvm_model <- mbsvm(train_X, train_y,
-                           Ck = param[j, 1]*rep(1, length(unique(y))),
+                           Ck = param[j, 1]*rep(1, length(unique(train_y))),
                            kernel = kernel, reg = reg,
                            gamma = param[j, 2], kernel_rect = kernel_rect)
       pred <- predict(mbsvm_model, test_X, test_y)
-      accuracy_list <- append(accuracy_list, pred$accuracy)
+      accuracy_list[i] <- pred$accuracy
     }
     avg_acc <- mean(accuracy_list)
     sd_acc <- sd(accuracy_list)
@@ -264,7 +265,7 @@ cv.mbsvm <- function(X, y , K = 5, C = 1,
   res <- matrix(res, ncol = 2)
   max_idx <- which.max(res[ ,1])
   call <- match.call()
-  cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep="\n")
+  cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
       "C = ", param[max_idx, 1],
