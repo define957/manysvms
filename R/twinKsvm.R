@@ -312,7 +312,7 @@ cv.twinKsvm <- function(X, y, K = 5,
   cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
-      "C = ", param[max_idx, 1],
+      "C = ", param[max_idx, 1], "eps =", param[max_idx, 5],
       "\n",
       "gamma = ", param[max_idx, 2],
       "degree = ",param[max_idx, 3],
