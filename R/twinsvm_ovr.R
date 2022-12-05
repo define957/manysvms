@@ -7,7 +7,7 @@
 #' @param gamma rbf kernel parameter
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
-#' @param  reg regularization tern
+#' @param reg regularization tern
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param tol the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
@@ -31,8 +31,8 @@ twinsvm_ovr <- function(X, y,
                        Ck = rep(1, length(unique(y))),
                        kernel = c('linear', 'rbf', 'poly'),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                       reg = 1, kernel_rect = 1,
-                       tol = 1e-5, max.steps = 300, rcpp = TRUE){
+                       reg = 1e-7, kernel_rect = 1,
+                       tol = 1e-5, max.steps = 200, rcpp = TRUE){
   kernel <- match.arg(kernel)
 
   m <- nrow(X)

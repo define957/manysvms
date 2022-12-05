@@ -18,6 +18,9 @@ cv.twinsvm_ovr(
   kernel_rect = 1,
   shuffle = TRUE,
   seed = NULL,
+  tol = 1e-05,
+  max.steps = 200,
+  rcpp = TRUE,
   threads.num = parallel::detectCores() - 1
 )
 }
@@ -40,9 +43,15 @@ cv.twinsvm_ovr(
 
 \item{kernel_rect}{set kernel size. \code{0<= kernel_rect <= 1}}
 
-\item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle the dataset.}
+\item{shuffle}{if set \code{shuffer==TRUE}, This function will shuffle the dataset.}
 
-\item{seed}{is shuffer random seed}
+\item{seed}{random seed for \code{shuffle} option.}
+
+\item{tol}{the precision of the optimization algorithm.}
+
+\item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 
 \item{threads.num}{The number of threads used for parallel execution.}
 }

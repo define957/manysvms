@@ -12,10 +12,10 @@ twinsvm_ovr(
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
-  reg = 1,
+  reg = 1e-07,
   kernel_rect = 1,
   tol = 1e-05,
-  max.steps = 300,
+  max.steps = 200,
   rcpp = TRUE
 )
 }

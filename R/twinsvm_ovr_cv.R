@@ -10,8 +10,11 @@
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param reg regularization term to take care of problems due to ill-conditioning in dual problem.
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
-#' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle the dataset.
-#' @param seed is shuffer random seed
+#' @param shuffle if set \code{shuffer==TRUE}, This function will shuffle the dataset.
+#' @param seed random seed for \code{shuffle} option.
+#' @param tol the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param threads.num The number of threads used for parallel execution.
 #' @import foreach
 #' @import doParallel
@@ -32,6 +35,7 @@ cv.twinsvm_ovr <- function(X, y , K = 5, C = 1,
                            gamma = 1/ncol(X), degree = 3, coef0 = 0,
                            reg = 1e-7, kernel_rect = 1,
                            shuffle = TRUE, seed = NULL,
+                           tol = 1e-5, max.steps = 200, rcpp = TRUE,
                            threads.num = parallel::detectCores() - 1){
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -72,7 +76,9 @@ cv.twinsvm_ovr <- function(X, y , K = 5, C = 1,
                                  kernel = kernel, reg = reg,
                                  gamma = param[j, 2],
                                  degree = param[j, 3],
-                                 coef0 = param[j, 4])
+                                 coef0 = param[j, 4],
+                                 max.steps = max.steps,
+                                 rcpp = rcpp)
       pred <- predict(twinsvm_ovr, test_X, test_y)
       accuracy_list <- append(accuracy_list, pred$accuracy)
     }
