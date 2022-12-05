@@ -19,7 +19,7 @@ twinKsvm <- function(X, y,
                      Ck = rep(1, 4),
                      kernel = c('linear', 'rbf', 'poly'),
                      gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                     reg = 1, kernel_rect = 1,
+                     reg = 1e-7, kernel_rect = 1,
                      eps = 0.1,
                      tol = 1e-5, max.steps = 300, rcpp = TRUE){
   kernel <- match.arg(kernel)
@@ -209,10 +209,10 @@ predict.twinKsvm <- function(object, X, y, ...){
 #' @export
 
 print.twinKsvm <- function(x, ...){
-  cat("\nCall:", deparse(x$call, 0.8 * getOption("width")), "\n", sep="\n")
+  cat("\nCall:", deparse(x$call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("SVM type : ", class(x), "\n")
   cat("SVM kernel : ", x$kernel, "\n")
-  if(x$kernel == 'rbf'){
+  if (x$kernel == 'rbf') {
     cat("gamma : ", x$gamma, "\n")
   }
   cat("number of observations : ", nrow(x$X), "\n")
@@ -226,7 +226,7 @@ print.twinKsvm <- function(x, ...){
 #' @param X a new data frame for predicting.
 #' @param y a label data frame corresponding to X.
 #' @param K number of folds.
-#' @param Ck plenty term vector.
+#' @param C plenty term vector.
 #' @param kernel kernel function.
 #' @param gamma rbf kernel parameter.
 #' @param reg regularization term.
@@ -237,21 +237,27 @@ print.twinKsvm <- function(x, ...){
 #' @param tol the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
-#' @param shuffer if set \code{shuffer==TRUE}, This function will shuffle the dataset.
-#' @param seed random seed for \code{shuffer} option.
+#' @param shuffle if set \code{shuffer==TRUE}, This function will shuffle the dataset.
+#' @param threads.num The number of threads used for parallel execution.
+#' @param seed random seed for \code{shuffle} option.
 #' @export
 
 cv.twinKsvm <- function(X, y, K = 5,
-                        Ck = rep(1, 4),
+                        C = rep(1, 4),
                         kernel = c('linear', 'rbf', 'poly'),
                         gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                        reg = 1, kernel_rect = 1,
+                        reg = 1e-7, kernel_rect = 1,
                         eps = 0.1,
-                        tol = 1e-5, max.steps = 300, rcpp = TRUE,
-                        shuffer = TRUE, seed = NULL){
+                        tol = 1e-5, max.steps = 200, rcpp = TRUE,
+                        shuffle = TRUE, seed = NULL,
+                        threads.num = parallel::detectCores() - 1){
+  X <- as.matrix(X)
+  y <- as.matrix(y)
+
+  param <- expand.grid(C, gamma, degree, coef0, eps)
   m <- nrow(X)
-  if(shuffer == TRUE){
-    if(is.null(seed) == FALSE){
+  if (shuffle == TRUE) {
+    if (is.null(seed) == FALSE) {
       set.seed(seed)
     }
     new_idx <- sample(m)
@@ -260,26 +266,59 @@ cv.twinKsvm <- function(X, y, K = 5,
     new_idx <- 1:m
   }
   v_size <- m %/% K
-  indx_cv <- 1
-  accuracy_list <- c()
-  for(i in 1:K){
-    new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
-    indx_cv <- indx_cv + v_size
-    test_X <- X[new_idx_k, ]
-    train_X <- X[-new_idx_k, ]
-    test_y <- y[new_idx_k]
-    train_y <- y[-new_idx_k]
-    twinKsvm_model <- twinKsvm(X, y,
-                               Ck = Ck,
-                               kernel = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               reg = reg, kernel_rect = kernel_rect,
-                               eps = eps,
-                               tol = tol, max.steps = max.steps, rcpp = TRUE)
-    pred <- predict(twinKsvm_model, test_X, test_y)
-    accuracy_list <- append(accuracy_list, pred$accuracy)
+  j <- 1
+
+  cl <- parallel::makeCluster(threads.num)
+  pb <- utils::txtProgressBar(max = nrow(param), style = 3)
+  progress <- function(n){utils::setTxtProgressBar(pb, n)}
+  opts <- list(progress = progress)
+  doSNOW::registerDoSNOW(cl)
+  res <- foreach::foreach(j = 1:nrow(param), .combine = rbind,
+                          .packages = c('manysvms', 'Rcpp'),
+                          .options.snow = opts) %dopar% {
+    indx_cv <- 1
+    accuracy_list <- c()
+    for (i in 1:K) {
+      new_idx_k <- new_idx[indx_cv:(indx_cv + v_size - 1)] #get test dataset
+      indx_cv <- indx_cv + v_size
+      test_X <- X[new_idx_k, ]
+      train_X <- X[-new_idx_k, ]
+      test_y <- y[new_idx_k]
+      train_y <- y[-new_idx_k]
+      twinKsvm_model <- twinKsvm(train_X, train_y,
+                                 Ck = param[j, 1]*rep(1, 4),
+                                 kernel = kernel,
+                                 gamma = param[j, 2],
+                                 degree = param[j, 3], coef0 = param[j, 4],
+                                 reg = reg, kernel_rect = kernel_rect,
+                                 eps = param[j, 5],
+                                 tol = tol, max.steps = max.steps, rcpp = TRUE)
+      pred <- predict(twinKsvm_model, test_X, test_y)
+      accuracy_list <- append(accuracy_list, pred$accuracy)
+    }
+    avg_acc <- mean(accuracy_list)
+    sd_acc <- sd(accuracy_list)
+
+    cv_list <- list("accuracy" = avg_acc,
+                    "sd_acc" = sd_acc)
+    cv_list
   }
-  avg_acc <- mean(accuracy_list)
-  cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%\n')
-  return(avg_acc)
+  close(pb)
+  parallel::stopCluster(cl)
+  res <- matrix(res, ncol = 2)
+
+  max_idx <- which.max(res[ ,1])
+  call <- match.call()
+  cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
+  cat("Total Parameters:", nrow(param), "\n")
+  cat("Best Parameters :",
+      "C = ", param[max_idx, 1],
+      "\n",
+      "gamma = ", param[max_idx, 2],
+      "degree = ",param[max_idx, 3],
+      "coef0 =", param[max_idx, 4],
+      "\n")
+  cat("Accuracy :", as.numeric(res[max_idx, 1]),
+      "Sd :", as.numeric(res[max_idx, 2]), "\n")
+  return(res)
 }

@@ -8,19 +8,20 @@ cv.twinKsvm(
   X,
   y,
   K = 5,
-  Ck = rep(1, 4),
+  C = rep(1, 4),
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
-  reg = 1,
+  reg = 1e-07,
   kernel_rect = 1,
   eps = 0.1,
   tol = 1e-05,
-  max.steps = 300,
+  max.steps = 200,
   rcpp = TRUE,
-  shuffer = TRUE,
-  seed = NULL
+  shuffle = TRUE,
+  seed = NULL,
+  threads.num = parallel::detectCores() - 1
 )
 }
 \arguments{
@@ -30,7 +31,7 @@ cv.twinKsvm(
 
 \item{K}{number of folds.}
 
-\item{Ck}{plenty term vector.}
+\item{C}{plenty term vector.}
 
 \item{kernel}{kernel function.}
 
@@ -52,9 +53,11 @@ cv.twinKsvm(
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 
-\item{shuffer}{if set \code{shuffer==TRUE}, This function will shuffle the dataset.}
+\item{shuffle}{if set \code{shuffer==TRUE}, This function will shuffle the dataset.}
 
-\item{seed}{random seed for \code{shuffer} option.}
+\item{seed}{random seed for \code{shuffle} option.}
+
+\item{threads.num}{The number of threads used for parallel execution.}
 }
 \description{
 Computes K-fold Cross-Validation Accuracy for Twin K svm
