@@ -315,8 +315,8 @@ plot.mbsvm <- function(x, xlab = 'x1', ylab = 'x2', ...){
   Class <- NULL
   X <- x$X
   y <- x$y
-  grid <- expand.grid(seq(min(X[, 1]), max(X[, 1]),length.out=20),
-                      seq(min(X[, 2]), max(X[, 2]),length.out=20))
+  grid <- expand.grid(seq(min(X[, 1]), max(X[, 1]), length.out = 20),
+                      seq(min(X[, 2]), max(X[, 2]), length.out = 20))
   Z <- predict(x, grid, show.info = FALSE)$predict
   contour_data <- data.frame(grid, Z)
   colnames(contour_data) <- c("x1", "x2", "Class")
@@ -327,13 +327,13 @@ plot.mbsvm <- function(x, xlab = 'x1', ylab = 'x2', ...){
   colnames(Xydata) <- c("x1", "x2", "Class")
   Xydata$Class <- as.factor(Xydata$Class)
 
-  p <- ggplot2::ggplot(contour_data, aes(x = x1, y = x2)) +
-       ggplot2::geom_tile(aes(fill = Class,
+  p <- ggplot2::ggplot(contour_data, ggplot2::aes(x = x1, y = x2)) +
+       ggplot2::geom_tile(ggplot2::aes(fill = Class,
                                      alpha = 0.2), show.legend = FALSE) +
        ggplot2::geom_point(data = Xydata,
-                           aes(x = x1, y= x2,
+                           ggplot2::aes(x = x1, y = x2,
                              color = Class, shape = Class), size = 3) +
-       ggplot2::labs(x=xlab,y=ylab) +
+       ggplot2::labs(x = xlab,y = ylab) +
        ggplot2::theme_bw()
   return(p)
 }
