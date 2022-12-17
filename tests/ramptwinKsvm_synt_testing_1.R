@@ -17,7 +17,7 @@ y <- rep(c(1,2,3), rep(n/n_c, n_c))
 
 s <- Sys.time()
 model <- ramptwinKsvm(X, y, kernel = 'rbf',kernel_rect = 1,  reg = 0.2,
-                      eps = 0.1, cccp.steps = 80, max.steps = 300)
+                      eps = 0.1, step_cccp = 10, max.steps = 300)
 e <- Sys.time()
 print(e - s)
 pred <- predict(model, X, y)

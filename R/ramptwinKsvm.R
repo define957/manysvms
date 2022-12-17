@@ -25,7 +25,7 @@ ramptwinKsvm <- function(X, y,
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                          reg = 1, kernel_rect = 1,
                          eps = 0.1,
-                         tol = 1e-5, cccp.steps = 30,max.steps = 300,
+                         tol = 1e-5, step_cccp = 30,max.steps = 300,
                          rcpp = TRUE){
   kernel <- match.arg(kernel)
 
@@ -54,6 +54,16 @@ ramptwinKsvm <- function(X, y,
   intercept_list_pos <- matrix(0, ncol = class_num * (class_num - 1)/2)
   intercept_list_neg <- matrix(0, ncol = class_num * (class_num - 1)/2)
 
+  if (kernel != 'linear') {
+    kernel_m <- round(m*kernel_rect, 0)
+    KernelX <- kernel_function(X, X[1:kernel_m, ],
+                               kernel.type = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               rcpp = rcpp)
+  }else{
+    KernelX <- X
+  }
+
   idx <- 0
   for(i in 1:class_num){
     for(j in i:class_num){
@@ -66,13 +76,16 @@ ramptwinKsvm <- function(X, y,
       idxB <- which(y == class_set[j])
       idxC <- which(y != class_set[i] & y != class_set[j])
 
-      A <- X[idxA, ]
-      B <- X[idxB, ]
-      C <- X[idxC, ]
+      mA <- length(idxA)
+      mB <- length(idxB)
+      mC <- m - mA - mB
 
-      mA <- nrow(A)
-      mB <- nrow(B)
-      mC <- m - mA -mB
+      X1 <- KernelX[idxA, ]
+      dim(X1) <- c(mA, coef_dim)
+      X2 <- KernelX[idxB, ]
+      dim(X2) <- c(mB, coef_dim)
+      X3 <- KernelX[idxC, ]
+      dim(X3) <- c(mC, coef_dim)
 
       delta_pos <- matrix(0, nrow = mB)
       delta_neg <- matrix(0, nrow = mA)
@@ -84,27 +97,6 @@ ramptwinKsvm <- function(X, y,
       e2 <- matrix(1, nrow = mB)
       e3 <- matrix(1, nrow = mC)
 
-      if(kernel == 'linear'){
-        X1 <- A
-        X2 <- B
-        X3 <- C
-      }else{
-        kernel_m <- round(m*kernel_rect, 0)
-
-        X1 <- kernel_function(A, X[1:kernel_m, ],
-                             kernel.type = kernel,
-                             gamma = gamma, degree = degree, coef0 = coef0,
-                             rcpp = rcpp)
-        X2 <- kernel_function(B, X[1:kernel_m, ],
-                             kernel.type = kernel,
-                             gamma = gamma, degree = degree, coef0 = coef0,
-                             rcpp = rcpp)
-        X3 <- kernel_function(C, X[1:kernel_m, ],
-                             kernel.type = kernel,
-                             gamma = gamma, degree = degree, coef0 = coef0,
-                             rcpp = rcpp)
-      }
-
       X1 <- cbind(X1, e1)
       X2 <- cbind(X2, e2)
       X3 <- cbind(X3, e3)
@@ -115,7 +107,7 @@ ramptwinKsvm <- function(X, y,
       e4 <- rbind(e2, e3 * (1 - eps))
       e5 <- rbind(e1, e3 * (1 - eps))
 
-      for (step in 1:cccp.steps){
+      for (step in 1:step_cccp){
 
         X1TX1_reg_inv <- solve(t(X1) %*% X1 + diag(rep(reg, ncol(X1))))
         H <- N %*% X1TX1_reg_inv %*% t(N)
@@ -311,18 +303,21 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @export
 
 cv.ramptwinKsvm <- function(X, y, K = 5,
-                            Ck = rep(1, 4),
-                            sk = rep(0.5, 4),
+                            C = 1, sk = 0.5,
                             kernel = c('linear', 'rbf', 'poly'),
                             gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                            reg = 1, kernel_rect = 1,
+                            reg = 1e-7, kernel_rect = 1,
                             eps = 0.1,
-                            tol = 1e-5, cccp.steps = 30,max.steps = 300,
-                            rcpp = TRUE,
-                            shuffer = TRUE, seed = NULL){
+                            tol = 1e-5, max.steps = 200, step_cccp = 30, rcpp = TRUE,
+                            shuffle = TRUE, seed = NULL,
+                            threads.num = parallel::detectCores() - 1){
+  X <- as.matrix(X)
+  y <- as.matrix(y)
+
+  param <- expand.grid(C, sk, gamma, degree, coef0, eps)
   m <- nrow(X)
-  if(shuffer == TRUE){
-    if(is.null(seed) == FALSE){
+  if (shuffle == TRUE) {
+    if (is.null(seed) == FALSE) {
       set.seed(seed)
     }
     new_idx <- sample(m)
@@ -331,26 +326,106 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
     new_idx <- 1:m
   }
   v_size <- m %/% K
-  indx_cv <- 1
-  accuracy_list <- c()
-  for(i in 1:K){
-    new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
-    indx_cv <- indx_cv + v_size
-    test_X <- X[new_idx_k, ]
-    train_X <- X[-new_idx_k, ]
-    test_y <- y[new_idx_k]
-    train_y <- y[-new_idx_k]
-    ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = rep(1, 4),
-                              sk = rep(0.5, 4),
-                              kernel = c('linear', 'rbf', 'poly'),
-                              gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                              reg = 1, kernel_rect = 1, eps = 0.1,
-                              tol = tol, cccp.steps = cccp.steps,
-                              max.steps = max.steps, rcpp = rcpp)
-    pred <- predict(ramptwinKsvm_model, test_X, test_y)
-    accuracy_list <- append(accuracy_list, pred$accuracy)
+  j <- 1
+
+  cl <- parallel::makeCluster(threads.num)
+  pb <- utils::txtProgressBar(max = nrow(param), style = 3)
+  progress <- function(n){utils::setTxtProgressBar(pb, n)}
+  opts <- list(progress = progress)
+  doSNOW::registerDoSNOW(cl)
+  res <- foreach::foreach(j = 1:nrow(param), .combine = rbind,
+                          .packages = c('manysvms', 'Rcpp'),
+                          .options.snow = opts) %dopar% {
+    indx_cv <- 1
+    accuracy_list <- rep(0, K)
+    for (i in 1:K) {
+      new_idx_k <- new_idx[indx_cv:(indx_cv + v_size - 1)] #get test dataset
+      indx_cv <- indx_cv + v_size
+      test_X <- X[new_idx_k, ]
+      train_X <- X[-new_idx_k, ]
+      test_y <- y[new_idx_k]
+      train_y <- y[-new_idx_k]
+      ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = param[j, 1] * rep(1, 4),
+                                         sk = param[j, 2] * rep(1, 4),
+                                         kernel = c('linear', 'rbf', 'poly'),
+                                         gamma = param[j, 3],
+                                         degree = param[j, 4],
+                                         coef0 = param[j, 5],
+                                         reg = reg, kernel_rect = kernel_rect,
+                                         eps = param[j, 6],
+                                         tol = tol, max.steps = max.steps,
+                                         step_cccp = step_cccp,rcpp = rcpp)
+      pred <- predict(ramptwinKsvm_model, test_X, test_y)
+      accuracy_list[i] <- pred$accuracy
+    }
+    avg_acc <- mean(accuracy_list)
+    sd_acc <- sd(accuracy_list)
+
+    cv_list <- list("accuracy" = avg_acc,
+                    "sd_acc" = sd_acc)
+    cv_list
   }
-  avg_acc <- mean(accuracy_list)
-  cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%\n')
-  return(avg_acc)
+  close(pb)
+  parallel::stopCluster(cl)
+  res <- matrix(res, ncol = 2)
+
+  max_idx <- which.max(res[ ,1])
+  call <- match.call()
+  cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
+  cat("Total Parameters:", nrow(param), "\n")
+  cat("Best Parameters :",
+      "C = ", param[max_idx, 1], "eps =", param[max_idx, 5],
+      "\n",
+      "gamma = ", param[max_idx, 2],
+      "degree = ",param[max_idx, 3],
+      "coef0 =", param[max_idx, 4],
+      "\n")
+  cat("Accuracy :", as.numeric(res[max_idx, 1]),
+      "Sd :", as.numeric(res[max_idx, 2]), "\n")
+  return(res)
 }
+
+# cv.ramptwinKsvm <- function(X, y, K = 5,
+#                             Ck = rep(1, 4),
+#                             sk = rep(0.5, 4),
+#                             kernel = c('linear', 'rbf', 'poly'),
+#                             gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+#                             reg = 1, kernel_rect = 1,
+#                             eps = 0.1,
+#                             tol = 1e-5, cccp.steps = 30,max.steps = 300,
+#                             rcpp = TRUE,
+#                             shuffer = TRUE, seed = NULL){
+#   m <- nrow(X)
+#   if(shuffer == TRUE){
+#     if(is.null(seed) == FALSE){
+#       set.seed(seed)
+#     }
+#     new_idx <- sample(m)
+#
+#   }else{
+#     new_idx <- 1:m
+#   }
+#   v_size <- m %/% K
+#   indx_cv <- 1
+#   accuracy_list <- c()
+#   for(i in 1:K){
+#     new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
+#     indx_cv <- indx_cv + v_size
+#     test_X <- X[new_idx_k, ]
+#     train_X <- X[-new_idx_k, ]
+#     test_y <- y[new_idx_k]
+#     train_y <- y[-new_idx_k]
+#     ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = rep(1, 4),
+#                               sk = rep(0.5, 4),
+#                               kernel = c('linear', 'rbf', 'poly'),
+#                               gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+#                               reg = 1, kernel_rect = 1, eps = 0.1,
+#                               tol = tol, cccp.steps = cccp.steps,
+#                               max.steps = max.steps, rcpp = rcpp)
+#     pred <- predict(ramptwinKsvm_model, test_X, test_y)
+#     accuracy_list <- append(accuracy_list, pred$accuracy)
+#   }
+#   avg_acc <- mean(accuracy_list)
+#   cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%\n')
+#   return(avg_acc)
+# }
