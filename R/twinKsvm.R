@@ -83,8 +83,6 @@ twinKsvm <- function(X, y,
       W <- KernelX[idxC, ]
       dim(W) <- c(mC, coef_dim)
 
-
-
       e1 <- matrix(1, nrow = mA)
       e2 <- matrix(1, nrow = mB)
       e3 <- matrix(1, nrow = mC)
@@ -248,7 +246,7 @@ print.twinKsvm <- function(x, ...){
 #' @export
 
 cv.twinKsvm <- function(X, y, K = 5,
-                        C = rep(1, 4),
+                        C = 1,
                         kernel = c('linear', 'rbf', 'poly'),
                         gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                         reg = 1e-7, kernel_rect = 1,
