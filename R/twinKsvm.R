@@ -72,13 +72,18 @@ twinKsvm <- function(X, y,
       idxB <- which(y == class_set[j])
       idxC <- which(y != class_set[i] & y != class_set[j])
 
-      S <- KernelX[idxA, ]
-      R <- KernelX[idxB, ]
-      W <- KernelX[idxC, ]
-
-      mA <- nrow(S)
-      mB <- nrow(R)
+      mA <- length(idxA)
+      mB <- length(idxB)
       mC <- m - mA - mB
+
+      S <- KernelX[idxA, ]
+      dim(S) <- c(mA, coef_dim)
+      R <- KernelX[idxB, ]
+      dim(R) <- c(mB, coef_dim)
+      W <- KernelX[idxC, ]
+      dim(W) <- c(mC, coef_dim)
+
+
 
       e1 <- matrix(1, nrow = mA)
       e2 <- matrix(1, nrow = mB)
