@@ -246,8 +246,11 @@ cv.mbsvm <- function(X, y , K = 5, C = 1,
       train_y <- y[-new_idx_k]
       mbsvm_model <- mbsvm(train_X, train_y,
                            Ck = param[j, 1]*rep(1, length(unique(train_y))),
-                           kernel = kernel, reg = reg,
-                           gamma = param[j, 2], kernel_rect = kernel_rect)
+                           kernel = kernel, reg = reg, tol = tol,
+                           gamma = param[j, 2], degree = param[j, 3],
+                           coef0 = param[j, 4],
+                           max.steps = max.steps, reg = reg,
+                           kernel_rect = kernel_rect)
       pred <- predict(mbsvm_model, test_X, test_y)
       accuracy_list[i] <- pred$accuracy
     }
