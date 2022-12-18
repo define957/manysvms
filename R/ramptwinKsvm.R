@@ -373,7 +373,7 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
-      "C = ", param[max_idx, 1], "s = ", param[max_idx, 2]，
+      "C = ", param[max_idx, 1], "s = ", param[max_idx, 2],
       "eps =", param[max_idx, 6],
       "\n",
       "gamma = ", param[max_idx, 3],
