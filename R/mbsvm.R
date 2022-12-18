@@ -36,8 +36,8 @@ mbsvm <- function(X, y,
                   Ck = rep(1, length(unique(y))),
                   kernel = c('linear', 'rbf', 'poly'),
                   gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                  reg = 1, kernel_rect = 1,
-                  tol = 1e-6, max.steps = 300, rcpp = TRUE){
+                  reg = 1e-7, kernel_rect = 1,
+                  tol = 1e-5, max.steps = 200, rcpp = TRUE){
 
   kernel <- match.arg(kernel)
 
@@ -249,7 +249,7 @@ cv.mbsvm <- function(X, y , K = 5, C = 1,
                            kernel = kernel, reg = reg, tol = tol,
                            gamma = param[j, 2], degree = param[j, 3],
                            coef0 = param[j, 4],
-                           max.steps = max.steps, reg = reg,
+                           max.steps = max.steps,
                            kernel_rect = kernel_rect)
       pred <- predict(mbsvm_model, test_X, test_y)
       accuracy_list[i] <- pred$accuracy
