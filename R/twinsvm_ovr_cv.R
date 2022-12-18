@@ -78,6 +78,7 @@ cv.twinsvm_ovr <- function(X, y , K = 5, C = 1,
                                  degree = param[j, 3],
                                  coef0 = param[j, 4],
                                  max.steps = max.steps,
+                                 tol = tol,
                                  rcpp = rcpp)
       pred <- predict(twinsvm_ovr, test_X, test_y)
       accuracy_list <- append(accuracy_list, pred$accuracy)
