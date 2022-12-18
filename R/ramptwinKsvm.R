@@ -108,30 +108,31 @@ ramptwinKsvm <- function(X, y,
       e5 <- rbind(e1, e3 * (1 - eps))
 
       X1TX1_reg_inv <- solve(t(X1) %*% X1 + diag(rep(reg, ncol(X1))))
-      H <- N %*% X1TX1_reg_inv %*% t(N)
+      H1 <- N %*% X1TX1_reg_inv %*% t(N)
 
+      X2TX2_reg_inv <- solve(t(X2) %*% X2 + diag(rep(reg, ncol(X2))))
+      H2 <- P %*% X2TX2_reg_inv %*% t(P)
       for (step in 1:step_cccp){
         lb_pos <- matrix(0, nrow = m - mA)
         ub_pos1 <- matrix(Ck[1], nrow = mB)
         ub_pos2 <- matrix(Ck[2], nrow = mC)
         ub_pos <- rbind(ub_pos1, ub_pos2)
 
-        qp1_solver <- clip_dcd_optimizer(H, e4, lb_pos, ub_pos,
+        qp1_solver <- clip_dcd_optimizer(H1, e4, lb_pos, ub_pos,
                                          tol, max.steps, rcpp)
         gammas_pos <- as.matrix(qp1_solver$x)
         u_pos <- - X1TX1_reg_inv %*% (
                    t(X2) %*% (gammas_pos[0:mB] - delta_pos) +
                    t(X3) %*% (gammas_pos[(mB+1):length(gammas_pos)] - theta_pos))
 
-        X2TX2_reg_inv <- solve(t(X2) %*% X2 + diag(rep(reg, ncol(X2))))
-        H <- P %*% X2TX2_reg_inv %*% t(P)
+
 
         lb_neg <- matrix(0, nrow = m - mB)
         ub_neg1 <- matrix(Ck[3], nrow = mA)
         ub_neg2 <- matrix(Ck[4], nrow = mC)
         ub_neg <- rbind(ub_neg1, ub_neg2)
 
-        qp2_solver <- clip_dcd_optimizer(H, e5, lb_neg, ub_neg,
+        qp2_solver <- clip_dcd_optimizer(H2, e5, lb_neg, ub_neg,
                                          tol, max.steps, rcpp)
         gammas_neg <- as.matrix(qp2_solver$x)
         u_neg <- X2TX2_reg_inv %*% (
@@ -346,7 +347,7 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
       train_y <- y[-new_idx_k]
       ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = param[j, 1] * rep(1, 4),
                                          sk = param[j, 2] * rep(1, 4),
-                                         kernel = c('linear', 'rbf', 'poly'),
+                                         kernel = kernel,
                                          gamma = param[j, 3],
                                          degree = param[j, 4],
                                          coef0 = param[j, 5],
