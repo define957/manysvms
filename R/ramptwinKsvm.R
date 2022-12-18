@@ -374,58 +374,14 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
-      "C = ", param[max_idx, 1], "eps =", param[max_idx, 5],
+      "C = ", param[max_idx, 1], "s = ", param[max_idx, 2]，
+      "eps =", param[max_idx, 6],
       "\n",
-      "gamma = ", param[max_idx, 2],
-      "degree = ",param[max_idx, 3],
-      "coef0 =", param[max_idx, 4],
+      "gamma = ", param[max_idx, 3],
+      "degree = ",param[max_idx, 4],
+      "coef0 =", param[max_idx, 5],
       "\n")
   cat("Accuracy :", as.numeric(res[max_idx, 1]),
       "Sd :", as.numeric(res[max_idx, 2]), "\n")
   return(res)
 }
-
-# cv.ramptwinKsvm <- function(X, y, K = 5,
-#                             Ck = rep(1, 4),
-#                             sk = rep(0.5, 4),
-#                             kernel = c('linear', 'rbf', 'poly'),
-#                             gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-#                             reg = 1, kernel_rect = 1,
-#                             eps = 0.1,
-#                             tol = 1e-5, cccp.steps = 30,max.steps = 300,
-#                             rcpp = TRUE,
-#                             shuffer = TRUE, seed = NULL){
-#   m <- nrow(X)
-#   if(shuffer == TRUE){
-#     if(is.null(seed) == FALSE){
-#       set.seed(seed)
-#     }
-#     new_idx <- sample(m)
-#
-#   }else{
-#     new_idx <- 1:m
-#   }
-#   v_size <- m %/% K
-#   indx_cv <- 1
-#   accuracy_list <- c()
-#   for(i in 1:K){
-#     new_idx_k <- new_idx[indx_cv:(indx_cv+v_size - 1)] #get test dataset
-#     indx_cv <- indx_cv + v_size
-#     test_X <- X[new_idx_k, ]
-#     train_X <- X[-new_idx_k, ]
-#     test_y <- y[new_idx_k]
-#     train_y <- y[-new_idx_k]
-#     ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = rep(1, 4),
-#                               sk = rep(0.5, 4),
-#                               kernel = c('linear', 'rbf', 'poly'),
-#                               gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-#                               reg = 1, kernel_rect = 1, eps = 0.1,
-#                               tol = tol, cccp.steps = cccp.steps,
-#                               max.steps = max.steps, rcpp = rcpp)
-#     pred <- predict(ramptwinKsvm_model, test_X, test_y)
-#     accuracy_list <- append(accuracy_list, pred$accuracy)
-#   }
-#   avg_acc <- mean(accuracy_list)
-#   cat('average accuracy in ',K, 'fold cross validation :', 100*avg_acc, '%\n')
-#   return(avg_acc)
-# }
