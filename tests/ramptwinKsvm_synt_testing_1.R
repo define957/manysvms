@@ -22,4 +22,4 @@ e <- Sys.time()
 print(e - s)
 pred <- predict(model, X, y)
 
-cv.ramptwinKsvm(X, y, K=5)
+cv.ramptwinKsvm(X, y, K = 5, threads.num = 2)

@@ -12,7 +12,7 @@
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param eps parameter for rest class.
 #' @param tol the precision of the optimization algorithm.
-#' @param cccp.steps the number of iterations of Concave–Convex Procedure (CCCP).
+#' @param step_cccp the number of iterations of Concave–Convex Procedure (CCCP).
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @return return ramptwinKsvm object
@@ -280,11 +280,10 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' Computes K-fold Cross-Validation Accuracy for ramp Twin K svm
 #'
 #' @author Zhang Jiaqi
-#' @param X a new data frame for predicting.
-#' @param y a label data frame corresponding to X.
+#' @param X,y dataset and label.
 #' @param K number of folds.
-#' @param Ck plenty term vector.
-#' @param sk parameter for ramp loss.
+#' @param C plenty term vector.
+#' @param s parameter for ramp loss.
 #' @param kernel kernel function.
 #' @param gamma rbf kernel parameter.
 #' @param reg regularization term.
@@ -294,15 +293,16 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @param eps parameter for rest class.
 #' @param tol the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
-#' @param cccp.steps the number of iterations of Concave–Convex Procedure (CCCP).
+#' @param step_cccp the number of iterations of Concave–Convex Procedure (CCCP).
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
-#' @param shuffer if set \code{shuffer==TRUE}, This function will shuffle the dataset.
+#' @param shuffle if set \code{shuffer==TRUE}, This function will shuffle the dataset.
 #' @param seed random seed for \code{shuffer} option.
+#' @param threads.num The number of threads used for parallel execution.
 #' @export
 
 cv.ramptwinKsvm <- function(X, y, K = 5,
-                            C = 1, sk = 0.5,
+                            C = 1, s = 0.5,
                             kernel = c('linear', 'rbf', 'poly'),
                             gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                             reg = 1e-7, kernel_rect = 1,
@@ -313,7 +313,7 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   X <- as.matrix(X)
   y <- as.matrix(y)
 
-  param <- expand.grid(C, sk, gamma, degree, coef0, eps)
+  param <- expand.grid(C, s, gamma, degree, coef0, eps)
   m <- nrow(X)
   if (shuffle == TRUE) {
     if (is.null(seed) == FALSE) {

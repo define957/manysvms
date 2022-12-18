@@ -24,9 +24,7 @@ cv.mbsvm(
 )
 }
 \arguments{
-\item{X}{A new data frame for predicting.}
-
-\item{y}{A label data frame corresponding to X.}
+\item{X, y}{dataset and label.}
 
 \item{K}{Number of folds.}
 

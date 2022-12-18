@@ -8,33 +8,32 @@ cv.ramptwinKsvm(
   X,
   y,
   K = 5,
-  Ck = rep(1, 4),
-  sk = rep(0.5, 4),
+  C = 1,
+  s = 0.5,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
-  reg = 1,
+  reg = 1e-07,
   kernel_rect = 1,
   eps = 0.1,
   tol = 1e-05,
-  cccp.steps = 30,
-  max.steps = 300,
+  max.steps = 200,
+  step_cccp = 30,
   rcpp = TRUE,
-  shuffer = TRUE,
-  seed = NULL
+  shuffle = TRUE,
+  seed = NULL,
+  threads.num = parallel::detectCores() - 1
 )
 }
 \arguments{
-\item{X}{a new data frame for predicting.}
-
-\item{y}{a label data frame corresponding to X.}
+\item{X, y}{dataset and label.}
 
 \item{K}{number of folds.}
 
-\item{Ck}{plenty term vector.}
+\item{C}{plenty term vector.}
 
-\item{sk}{parameter for ramp loss.}
+\item{s}{parameter for ramp loss.}
 
 \item{kernel}{kernel function.}
 
@@ -52,15 +51,17 @@ cv.ramptwinKsvm(
 
 \item{tol}{the precision of the optimization algorithm.}
 
-\item{cccp.steps}{the number of iterations of Concave–Convex Procedure (CCCP).}
-
 \item{max.steps}{the number of iterations to solve the optimization problem.}
+
+\item{step_cccp}{the number of iterations of Concave–Convex Procedure (CCCP).}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 
-\item{shuffer}{if set \code{shuffer==TRUE}, This function will shuffle the dataset.}
+\item{shuffle}{if set \code{shuffer==TRUE}, This function will shuffle the dataset.}
 
 \item{seed}{random seed for \code{shuffer} option.}
+
+\item{threads.num}{The number of threads used for parallel execution.}
 }
 \description{
 Computes K-fold Cross-Validation Accuracy for ramp Twin K svm

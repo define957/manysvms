@@ -241,8 +241,8 @@ print.twinKsvm <- function(x, ...){
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param shuffle if set \code{shuffer==TRUE}, This function will shuffle the dataset.
-#' @param threads.num The number of threads used for parallel execution.
 #' @param seed random seed for \code{shuffle} option.
+#' @param threads.num The number of threads used for parallel execution.
 #' @export
 
 cv.twinKsvm <- function(X, y, K = 5,

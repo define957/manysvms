@@ -8,7 +8,7 @@ cv.twinKsvm(
   X,
   y,
   K = 5,
-  C = rep(1, 4),
+  C = 1,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,

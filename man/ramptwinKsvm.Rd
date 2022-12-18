@@ -17,7 +17,7 @@ ramptwinKsvm(
   kernel_rect = 1,
   eps = 0.1,
   tol = 1e-05,
-  cccp.steps = 30,
+  step_cccp = 30,
   max.steps = 300,
   rcpp = TRUE
 )
@@ -45,7 +45,7 @@ ramptwinKsvm(
 
 \item{tol}{the precision of the optimization algorithm.}
 
-\item{cccp.steps}{the number of iterations of Concave–Convex Procedure (CCCP).}
+\item{step_cccp}{the number of iterations of Concave–Convex Procedure (CCCP).}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
