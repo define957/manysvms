@@ -107,11 +107,10 @@ ramptwinKsvm <- function(X, y,
       e4 <- rbind(e2, e3 * (1 - eps))
       e5 <- rbind(e1, e3 * (1 - eps))
 
+      X1TX1_reg_inv <- solve(t(X1) %*% X1 + diag(rep(reg, ncol(X1))))
+      H <- N %*% X1TX1_reg_inv %*% t(N)
+
       for (step in 1:step_cccp){
-
-        X1TX1_reg_inv <- solve(t(X1) %*% X1 + diag(rep(reg, ncol(X1))))
-        H <- N %*% X1TX1_reg_inv %*% t(N)
-
         lb_pos <- matrix(0, nrow = m - mA)
         ub_pos1 <- matrix(Ck[1], nrow = mB)
         ub_pos2 <- matrix(Ck[2], nrow = mC)
@@ -128,8 +127,8 @@ ramptwinKsvm <- function(X, y,
         H <- P %*% X2TX2_reg_inv %*% t(P)
 
         lb_neg <- matrix(0, nrow = m - mB)
-        ub_neg1 <- matrix(Ck[1], nrow = mA)
-        ub_neg2 <- matrix(Ck[2], nrow = mC)
+        ub_neg1 <- matrix(Ck[3], nrow = mA)
+        ub_neg2 <- matrix(Ck[4], nrow = mC)
         ub_neg <- rbind(ub_neg1, ub_neg2)
 
         qp2_solver <- clip_dcd_optimizer(H, e5, lb_neg, ub_neg,
