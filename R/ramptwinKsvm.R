@@ -283,7 +283,7 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @author Zhang Jiaqi
 #' @param X,y dataset and label.
 #' @param K number of folds.
-#' @param C plenty term vector.
+#' @param C1,C3 plenty term vector.
 #' @param s parameter for ramp loss.
 #' @param kernel kernel function.
 #' @param gamma rbf kernel parameter.
@@ -303,7 +303,7 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @export
 
 cv.ramptwinKsvm <- function(X, y, K = 5,
-                            C = 1, s = 0.5,
+                            C1 = 1, C3 = 1, s = 0.5,
                             kernel = c('linear', 'rbf', 'poly'),
                             gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                             reg = 1e-7, kernel_rect = 1,
@@ -314,7 +314,7 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   X <- as.matrix(X)
   y <- as.matrix(y)
 
-  param <- expand.grid(C, s, gamma, degree, coef0, eps)
+  param <- expand.grid(C1, C3, s, gamma, degree, coef0, eps)
   m <- nrow(X)
   if (shuffle == TRUE) {
     if (is.null(seed) == FALSE) {
@@ -345,7 +345,8 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
       train_X <- X[-new_idx_k, ]
       test_y <- y[new_idx_k]
       train_y <- y[-new_idx_k]
-      ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = param[j, 1] * rep(1, 4),
+      ramptwinKsvm_model <- ramptwinKsvm(X, y, Ck = c(param[j, 1], param[j, 2],
+                                                      param[j, 1], param[j, 2]),
                                          sk = param[j, 2] * rep(1, 4),
                                          kernel = kernel,
                                          gamma = param[j, 3],
@@ -374,12 +375,14 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
-      "C = ", param[max_idx, 1], "s = ", param[max_idx, 2],
-      "eps =", param[max_idx, 6],
+      "C1 = C3 = ", param[max_idx, 1],
+      "C2 = C4 = ", param[max_idx, 2],
+      "s = ", param[max_idx, 3],
+      "eps =", param[max_idx, 7],
       "\n",
-      "gamma = ", param[max_idx, 3],
-      "degree = ",param[max_idx, 4],
-      "coef0 =", param[max_idx, 5],
+      "gamma = ", param[max_idx, 4],
+      "degree = ",param[max_idx, 5],
+      "coef0 =", param[max_idx, 6],
       "\n")
   cat("Accuracy :", as.numeric(res[max_idx, 1]),
       "Sd :", as.numeric(res[max_idx, 2]), "\n")
