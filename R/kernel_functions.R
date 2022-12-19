@@ -35,7 +35,6 @@ rbf_kernel <- function(x1, x2, gamma = 1/ncol(x1), rcpp = TRUE){
 #' @author Zhang Jiaqi.
 #' @param x1,x2 input matrices.
 #' @param kernel.type choose kernel type.
-#' @param eps,max.steps error and maximum iterations.
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.

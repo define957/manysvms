@@ -26,8 +26,6 @@ kernel_function(
 \item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
-
-\item{eps, max.steps}{error and maximum iterations.}
 }
 \description{
 Kernel Function
