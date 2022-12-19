@@ -8,7 +8,8 @@ cv.twinKsvm(
   X,
   y,
   K = 5,
-  C = 1,
+  C1 = 1,
+  C3 = 1,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,
@@ -31,7 +32,7 @@ cv.twinKsvm(
 
 \item{K}{number of folds.}
 
-\item{C}{plenty term vector.}
+\item{C1, C3}{plenty term vector.}
 
 \item{kernel}{kernel function.}
 

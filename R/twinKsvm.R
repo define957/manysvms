@@ -229,7 +229,7 @@ print.twinKsvm <- function(x, ...){
 #' @param X a new data frame for predicting.
 #' @param y a label data frame corresponding to X.
 #' @param K number of folds.
-#' @param C plenty term vector.
+#' @param C1,C3 plenty term vector.
 #' @param kernel kernel function.
 #' @param gamma rbf kernel parameter.
 #' @param reg regularization term.
@@ -246,7 +246,7 @@ print.twinKsvm <- function(x, ...){
 #' @export
 
 cv.twinKsvm <- function(X, y, K = 5,
-                        C = 1,
+                        C1 = 1, C3 = 1,
                         kernel = c('linear', 'rbf', 'poly'),
                         gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                         reg = 1e-7, kernel_rect = 1,
@@ -257,7 +257,7 @@ cv.twinKsvm <- function(X, y, K = 5,
   X <- as.matrix(X)
   y <- as.matrix(y)
 
-  param <- expand.grid(C, gamma, degree, coef0, eps)
+  param <- expand.grid(C1, C3, gamma, degree, coef0, eps)
   m <- nrow(X)
   if (shuffle == TRUE) {
     if (is.null(seed) == FALSE) {
@@ -289,7 +289,8 @@ cv.twinKsvm <- function(X, y, K = 5,
       test_y <- y[new_idx_k]
       train_y <- y[-new_idx_k]
       twinKsvm_model <- twinKsvm(train_X, train_y,
-                                 Ck = param[j, 1]*rep(1, 4),
+                                 Ck = c(param[j, 1], param[j, 2],
+                                        param[j, 1], param[j, 2]),
                                  kernel = kernel,
                                  gamma = param[j, 2],
                                  degree = param[j, 3], coef0 = param[j, 4],
@@ -315,7 +316,9 @@ cv.twinKsvm <- function(X, y, K = 5,
   cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
-      "C = ", param[max_idx, 1], "eps =", param[max_idx, 5],
+      "C1 = C3 = ", param[max_idx, 1],
+      "C2 = C4 = ", param[max_idx, 2],
+      "eps =", param[max_idx, 5],
       "\n",
       "gamma = ", param[max_idx, 2],
       "degree = ",param[max_idx, 3],
