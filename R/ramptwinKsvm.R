@@ -23,7 +23,7 @@ ramptwinKsvm <- function(X, y,
                          sk = rep(0.5, 4),
                          kernel = c('linear', 'rbf', 'poly'),
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                         reg = 1, kernel_rect = 1,
+                         reg = 1e-7, kernel_rect = 1,
                          eps = 0.1,
                          tol = 1e-5, step_cccp = 30,max.steps = 300,
                          rcpp = TRUE){
