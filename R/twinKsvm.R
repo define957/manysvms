@@ -181,10 +181,13 @@ predict.twinKsvm <- function(object, X, y, ...){
       idxA <- which(A > object$eps - 1)
       idxB <- which(B < 1 - object$eps)
 
-
-      idx_uni <- unique(idxA, idxB)
+      idx_uni <- unique(rbind(idxA, idxB))
+      if(length(idxA)!=0){
       vote_mat[idxA, i] <- vote_mat[idxA, i] + 1
-      vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
+      }
+      if(length(idxB)!=0){
+        vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
+      }
       if (length(idx_uni) != 0) {
         vote_mat[-idx_uni, i] <- vote_mat[-idx_uni, i] + 1
         vote_mat[-idx_uni, j] <- vote_mat[-idx_uni, j] + 1
@@ -318,11 +321,11 @@ cv.twinKsvm <- function(X, y, K = 5,
   cat("Best Parameters :",
       "C1 = C3 = ", param[max_idx, 1],
       "C2 = C4 = ", param[max_idx, 2],
-      "eps =", param[max_idx, 5],
+      "eps =", param[max_idx, 6],
       "\n",
-      "gamma = ", param[max_idx, 2],
-      "degree = ",param[max_idx, 3],
-      "coef0 =", param[max_idx, 4],
+      "gamma = ", param[max_idx, 3],
+      "degree = ",param[max_idx, 4],
+      "coef0 =", param[max_idx, 5],
       "\n")
   cat("Accuracy :", as.numeric(res[max_idx, 1]),
       "Sd :", as.numeric(res[max_idx, 2]), "\n")
