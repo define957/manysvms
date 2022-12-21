@@ -212,7 +212,7 @@ ramptwinKsvm <- function(X, y,
 #' Predict Method for Twin K Support Vector Machine
 #'
 #' @author Zhang Jiaqi
-#' @param object Object of class `twinKsvm`.
+#' @param object Object of class `ramptwinKsvm`.
 #' @param X A new data frame for predicting.
 #' @param y A label data frame corresponding to X.
 #' @param ... unused parameter.
@@ -252,11 +252,14 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
       idxA <- which(A > object$eps - 1)
       idxB <- which(B < 1 - object$eps)
 
-
-      idx_uni <- unique(idxA, idxB)
-      vote_mat[idxA, i] <- vote_mat[idxA, i] + 1
-      vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
-      if(length(idx_uni)!=0){
+      idx_uni <- unique(rbind(idxA, idxB))
+      if(length(idxA)!=0){
+        vote_mat[idxA, i] <- vote_mat[idxA, i] + 1
+      }
+      if(length(idxB)!=0){
+        vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
+      }
+      if (length(idx_uni) != 0) {
         vote_mat[-idx_uni, i] <- vote_mat[-idx_uni, i] + 1
         vote_mat[-idx_uni, j] <- vote_mat[-idx_uni, j] + 1
       }
