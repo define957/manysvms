@@ -232,7 +232,7 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
   idx <- 0
   class_num <- object$class_num
 
-  if(object$kernel == 'linear'){
+  if (object$kernel == 'linear') {
     kernelX <- X
   }else{
     kernel_m <- round(km*object$kernel_rect, 0)
@@ -244,9 +244,9 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
                                rcpp = object$Rcpp)
   }
 
-  for(i in 1:class_num){
-    for(j in i:class_num){
-      if(i == j){
+  for (i in 1:class_num) {
+    for (j in i:class_num) {
+      if (i == j) {
         next
       }
       idx <- idx + 1
@@ -257,10 +257,10 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
       idxB <- which(B < 1 - object$eps)
 
       idx_uni <- unique(rbind(idxA, idxB))
-      if(length(idxA)!=0){
+      if (length(idxA) != 0) {
         vote_mat[idxA, i] <- vote_mat[idxA, i] + 1
       }
-      if(length(idxB)!=0){
+      if (length(idxB) != 0) {
         vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
       }
       if (length(idx_uni) != 0) {
@@ -273,13 +273,13 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
   idx <- apply(vote_mat, 1, which.max)
 
   pred <- rep(0, m)
-  for(i in 1:m){
+  for (i in 1:m) {
     pred[i] <- object$class_set[idx[i]]
   }
   acc <- sum(pred == y) / m
   cat('kernel type :', object$kernel, '\n')
   cat(paste("total accuracy :", acc*100, '% \n'))
-  predlist <- list("accuracy"= acc,
+  predlist <- list("accuracy" = acc,
                    'vote_mat' = vote_mat, 'predict' = pred)
   return(predlist)
 }
