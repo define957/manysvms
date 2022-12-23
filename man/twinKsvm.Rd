@@ -17,7 +17,7 @@ twinKsvm(
   kernel_rect = 1,
   eps = 0.1,
   tol = 1e-05,
-  max.steps = 300,
+  max.steps = 200,
   rcpp = TRUE
 )
 }

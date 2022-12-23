@@ -182,10 +182,10 @@ predict.twinKsvm <- function(object, X, y, ...){
       idxB <- which(B < 1 - object$eps)
 
       idx_uni <- unique(rbind(idxA, idxB))
-      if(length(idxA)!=0){
+      if (length(idxA) != 0) {
       vote_mat[idxA, i] <- vote_mat[idxA, i] + 1
       }
-      if(length(idxB)!=0){
+      if (length(idxB) != 0) {
         vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
       }
       if (length(idx_uni) != 0) {

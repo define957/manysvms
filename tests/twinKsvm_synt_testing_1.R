@@ -26,7 +26,7 @@ cv.twinKsvm(X, y,  kernel = 'rbf', eps = 0.3, kernel_rect = 1, threads.num = 2)
 e <- Sys.time()
 print(e - s)
 
-X <- manysvms::glass[,1:10]
+X <- manysvms::glass[,1:9]
 y <- manysvms::glass[,10]
 s <- Sys.time()
 cv.twinKsvm(X, y, K = 10, gamma = 1 / 4, kernel = 'rbf',
