@@ -7,7 +7,7 @@
 \method{predict}{ramptwinKsvm}(object, X, y, ...)
 }
 \arguments{
-\item{object}{Object of class `twinKsvm`.}
+\item{object}{Object of class `ramptwinKsvm`.}
 
 \item{X}{A new data frame for predicting.}
 

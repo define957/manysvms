@@ -25,7 +25,7 @@ ramptwinKsvm <- function(X, y,
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                          reg = 1e-7, kernel_rect = 1,
                          eps = 0.1,
-                         tol = 1e-5, step_cccp = 30,max.steps = 300,
+                         tol = 1e-5, step_cccp = 10, max.steps = 200,
                          rcpp = TRUE){
   kernel <- match.arg(kernel)
 
@@ -38,11 +38,11 @@ ramptwinKsvm <- function(X, y,
   class_set <- unique(as.matrix(y))
   class_num <- length(class_set)
 
-  if(class_num <=2){
+  if (class_num <= 2) {
     return(0)
   }
 
-  if(kernel == 'linear'){
+  if (kernel == 'linear') {
     coef_dim <- n
   }else{
     coef_dim <- m * kernel_rect
@@ -65,9 +65,9 @@ ramptwinKsvm <- function(X, y,
   }
 
   idx <- 0
-  for(i in 1:class_num){
-    for(j in i:class_num){
-      if(i == j){
+  for (i in 1:class_num) {
+    for (j in i:class_num) {
+      if (i == j) {
         next
       }
       idx <- idx + 1
@@ -108,41 +108,45 @@ ramptwinKsvm <- function(X, y,
       e5 <- rbind(e1, e3 * (1 - eps))
 
       X1TX1_reg_inv <- solve(t(X1) %*% X1 + diag(rep(reg, ncol(X1))))
-      H1 <- N %*% X1TX1_reg_inv %*% t(N)
+      X1TX1_reg_inv_NT <- X1TX1_reg_inv %*% t(N)
+      H1 <- N %*% X1TX1_reg_inv_NT
 
       X2TX2_reg_inv <- solve(t(X2) %*% X2 + diag(rep(reg, ncol(X2))))
-      H2 <- P %*% X2TX2_reg_inv %*% t(P)
-      for (step in 1:step_cccp){
-        lb_pos <- matrix(0, nrow = m - mA)
-        ub_pos1 <- matrix(Ck[1], nrow = mB)
-        ub_pos2 <- matrix(Ck[2], nrow = mC)
-        ub_pos <- rbind(ub_pos1, ub_pos2)
+      X2TX2_reg_inv_PT <- X2TX2_reg_inv %*% t(P)
+      H2 <- P %*% X2TX2_reg_inv_PT
 
-        qp1_solver <- clip_dcd_optimizer(H1, e4, lb_pos, ub_pos,
+      lb_pos <- matrix(0, nrow = m - mA)
+      ub_pos1 <- matrix(Ck[1], nrow = mB)
+      ub_pos2 <- matrix(Ck[2], nrow = mC)
+      ub_pos <- rbind(ub_pos1, ub_pos2)
+
+      lb_neg <- matrix(0, nrow = m - mB)
+      ub_neg1 <- matrix(Ck[3], nrow = mA)
+      ub_neg2 <- matrix(Ck[4], nrow = mC)
+      ub_neg <- rbind(ub_neg1, ub_neg2)
+
+      for (step in 1:step_cccp) {
+
+        tau_pos <- rbind(delta_pos, theta_pos)
+        tau_neg <- rbind(delta_neg, theta_neg)
+
+        q_pos <- t(t(tau_pos) %*% H1) + e4
+        q_neg <- t(t(tau_neg) %*% H2) + e5
+
+        qp1_solver <- clip_dcd_optimizer(H1, q_pos, lb_pos, ub_pos,
                                          tol, max.steps, rcpp)
         gammas_pos <- as.matrix(qp1_solver$x)
-        u_pos <- - X1TX1_reg_inv %*% (
-                   t(X2) %*% (gammas_pos[0:mB] - delta_pos) +
-                   t(X3) %*% (gammas_pos[(mB+1):length(gammas_pos)] - theta_pos))
+        u_pos <- -X1TX1_reg_inv_NT %*% (gammas_pos - tau_pos)
 
-
-
-        lb_neg <- matrix(0, nrow = m - mB)
-        ub_neg1 <- matrix(Ck[3], nrow = mA)
-        ub_neg2 <- matrix(Ck[4], nrow = mC)
-        ub_neg <- rbind(ub_neg1, ub_neg2)
-
-        qp2_solver <- clip_dcd_optimizer(H2, e5, lb_neg, ub_neg,
+        qp2_solver <- clip_dcd_optimizer(H2, q_neg, lb_neg, ub_neg,
                                          tol, max.steps, rcpp)
         gammas_neg <- as.matrix(qp2_solver$x)
-        u_neg <- X2TX2_reg_inv %*% (
-                 t(X1) %*% (gammas_neg[0:mA] - delta_neg) +
-                 t(X3) %*% (gammas_neg[(mA+1):length(gammas_neg)] - theta_neg))
+        u_neg <- X2TX2_reg_inv_PT %*% (gammas_neg - tau_neg)
 
-        idx_delta_pos <- which(- X2 %*% u_pos < sk[1])
+        idx_delta_pos <- which(-X2 %*% u_pos < sk[1])
         idx_delta_neg <- which(X1 %*% u_neg < sk[3])
 
-        idx_theta_pos <- which(- X3 %*% u_pos < sk[2])
+        idx_theta_pos <- which(-X3 %*% u_pos < sk[2])
         idx_theta_neg <- which(X3 %*% u_neg < sk[4])
 
         delta_pos_new <- matrix(0, nrow = mB)
@@ -164,32 +168,32 @@ ramptwinKsvm <- function(X, y,
         theta_neg_new[-idx_theta_neg] <- 0
 
         cnt <- 0
-        if(sum(delta_pos_new == delta_pos)!=mB){
+        if (sum(delta_pos_new == delta_pos) != mB) {
           delta_pos <- delta_pos_new
           cnt <- cnt + 1
         }
-        if(sum(delta_neg_new == delta_neg)!=mA){
+        if (sum(delta_neg_new == delta_neg) != mA) {
           delta_neg <- delta_neg_new
           cnt <- cnt + 1
         }
-        if(sum(theta_pos_new == theta_pos)!=mC){
+        if (sum(theta_pos_new == theta_pos) != mC) {
           theta_pos <- theta_pos_new
           cnt <- cnt + 1
         }
-        if(sum(theta_neg_new == theta_neg)!=mC){
+        if (sum(theta_neg_new == theta_neg) != mC) {
           theta_neg <- theta_neg_new
           cnt <- cnt + 1
         }
-        if(cnt == 0){
+        if (cnt == 0) {
           break
         }
       }
 
       coef_list_pos[, idx] <- u_pos[1:coef_dim, ]
-      intercept_list_pos[idx] <- u_pos[coef_dim+1]
+      intercept_list_pos[idx] <- u_pos[coef_dim + 1]
 
       coef_list_neg[, idx] <- u_neg[1:coef_dim, ]
-      intercept_list_neg[idx] <- u_neg[coef_dim+1]
+      intercept_list_neg[idx] <- u_neg[coef_dim + 1]
     }
   }
   ramptwinKsvm <- list('X' = X, 'y' = y,
