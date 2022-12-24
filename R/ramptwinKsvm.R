@@ -107,11 +107,13 @@ ramptwinKsvm <- function(X, y,
       e4 <- rbind(e2, e3 * (1 - eps))
       e5 <- rbind(e1, e3 * (1 - eps))
 
-      X1TX1_reg_inv <- solve(t(X1) %*% X1 + diag(rep(reg, ncol(X1))))
+      inv_mat <- t(X1) %*% X1 + diag(rep(reg, ncol(X1)))
+      X1TX1_reg_inv <- chol2inv(chol(inv_mat))
       X1TX1_reg_inv_NT <- X1TX1_reg_inv %*% t(N)
       H1 <- N %*% X1TX1_reg_inv_NT
 
-      X2TX2_reg_inv <- solve(t(X2) %*% X2 + diag(rep(reg, ncol(X2))))
+      inv_mat <- t(X2) %*% X2 + diag(rep(reg, ncol(X2)))
+      X2TX2_reg_inv <- chol2inv(chol(inv_mat))
       X2TX2_reg_inv_PT <- X2TX2_reg_inv %*% t(P)
       H2 <- P %*% X2TX2_reg_inv_PT
 
@@ -354,13 +356,13 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
       train_y <- y[-new_idx_k]
       ramptwinKsvm_model <- ramptwinKsvm(train_X, train_y, Ck = c(param[j, 1], param[j, 2],
                                                       param[j, 1], param[j, 2]),
-                                         sk = param[j, 2] * rep(1, 4),
+                                         sk = param[j, 3] * rep(1, 4),
                                          kernel = kernel,
-                                         gamma = param[j, 3],
-                                         degree = param[j, 4],
-                                         coef0 = param[j, 5],
+                                         gamma = param[j, 4],
+                                         degree = param[j, 5],
+                                         coef0 = param[j, 6],
                                          reg = reg, kernel_rect = kernel_rect,
-                                         eps = param[j, 6],
+                                         eps = param[j, 7],
                                          tol = tol, max.steps = max.steps,
                                          step_cccp = step_cccp,rcpp = rcpp)
       pred <- predict(ramptwinKsvm_model, test_X, test_y)
