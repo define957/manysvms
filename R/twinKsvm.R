@@ -249,7 +249,7 @@ print.twinKsvm <- function(x, ...){
 #' @export
 
 cv.twinKsvm <- function(X, y, K = 5,
-                        C1 = 1, C3 = 1,
+                        C1 = 1, C2 = 1,
                         kernel = c('linear', 'rbf', 'poly'),
                         gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                         reg = 1e-7, kernel_rect = 1,
@@ -260,7 +260,7 @@ cv.twinKsvm <- function(X, y, K = 5,
   X <- as.matrix(X)
   y <- as.matrix(y)
 
-  param <- expand.grid(C1, C3, gamma, degree, coef0, eps)
+  param <- expand.grid(C1, C2, gamma, degree, coef0, eps)
   m <- nrow(X)
   if (shuffle == TRUE) {
     if (is.null(seed) == FALSE) {
