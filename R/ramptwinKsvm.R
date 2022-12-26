@@ -312,7 +312,7 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @export
 
 cv.ramptwinKsvm <- function(X, y, K = 5,
-                            C1 = 1, C3 = 1, s = 0.5,
+                            C1 = 1, C2 = 1, s = 0.5,
                             kernel = c('linear', 'rbf', 'poly'),
                             gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                             reg = 1e-7, kernel_rect = 1,
@@ -323,7 +323,7 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   X <- as.matrix(X)
   y <- as.matrix(y)
 
-  param <- expand.grid(C1, C3, s, gamma, degree, coef0, eps)
+  param <- expand.grid(C1, C2, s, gamma, degree, coef0, eps)
   m <- nrow(X)
   if (shuffle == TRUE) {
     if (is.null(seed) == FALSE) {
@@ -354,8 +354,9 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
       train_X <- X[-new_idx_k, ]
       test_y <- y[new_idx_k]
       train_y <- y[-new_idx_k]
-      ramptwinKsvm_model <- ramptwinKsvm(train_X, train_y, Ck = c(param[j, 1], param[j, 2],
-                                                      param[j, 1], param[j, 2]),
+      ramptwinKsvm_model <- ramptwinKsvm(train_X, train_y,
+                                         Ck = c(param[j, 1], param[j, 2],
+                                                param[j, 1], param[j, 2]),
                                          sk = param[j, 3] * rep(1, 4),
                                          kernel = kernel,
                                          gamma = param[j, 4],
