@@ -1,4 +1,4 @@
-#' Ramp loss Twin K Support Vector Machine for Multi-classification
+#' Ramp loss Twin K-Class Support Vector Machine for Multi-classification
 #'
 #' @author Zhang Jiaqi
 #' @param X,y dataset and label.
@@ -215,7 +215,7 @@ ramptwinKsvm <- function(X, y,
 }
 
 
-#' Predict Method for Twin K Support Vector Machine
+#' Predict Method for Ramp loss Twin K-Class Support Vector Machine
 #'
 #' @author Zhang Jiaqi
 #' @param object Object of class `ramptwinKsvm`.
@@ -255,8 +255,8 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
       A <- kernelX %*% object$coef_pos[, idx] + object$intercept_pos[idx]
       B <- kernelX %*% object$coef_neg[, idx] + object$intercept_neg[idx]
 
-      idxA <- which(A > object$eps - 1)
-      idxB <- which(B < 1 - object$eps)
+      idxA <- as.matrix(which(A > object$eps - 1))
+      idxB <- as.matrix(which(B < 1 - object$eps))
 
       idx_uni <- unique(rbind(idxA, idxB))
       if (length(idxA) != 0) {
