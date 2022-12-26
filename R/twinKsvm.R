@@ -178,8 +178,8 @@ predict.twinKsvm <- function(object, X, y, ...){
       A <- kernelX %*% object$coef_pos[, idx] + object$intercept_pos[idx]
       B <- kernelX %*% object$coef_neg[, idx] + object$intercept_neg[idx]
 
-      idxA <- which(A > object$eps - 1)
-      idxB <- which(B < 1 - object$eps)
+      idxA <- as.matrix(which(A > object$eps - 1))
+      idxB <- as.matrix(which(B < 1 - object$eps))
 
       idx_uni <- unique(rbind(idxA, idxB))
       if (length(idxA) != 0) {
