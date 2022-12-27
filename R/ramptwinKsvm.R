@@ -355,7 +355,7 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   doSNOW::registerDoSNOW(cl)
   res <- foreach::foreach(j = 1:nrow(param), .combine = rbind,
                           .packages = c('manysvms', 'Rcpp'),
-                          .options.snow = opts) %do% {
+                          .options.snow = opts) %dopar% {
     indx_cv <- 1
     accuracy_list <- rep(0, K)
     for (i in 1:K) {
