@@ -232,7 +232,7 @@ print.twinKsvm <- function(x, ...){
 #' @param X a new data frame for predicting.
 #' @param y a label data frame corresponding to X.
 #' @param K number of folds.
-#' @param C1,C3 plenty term vector.
+#' @param C1,C2 plenty term.
 #' @param kernel kernel function.
 #' @param gamma rbf kernel parameter.
 #' @param reg regularization term.
