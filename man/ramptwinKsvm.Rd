@@ -2,7 +2,7 @@
 % Please edit documentation in R/ramptwinKsvm.R
 \name{ramptwinKsvm}
 \alias{ramptwinKsvm}
-\title{Ramp loss Twin K Support Vector Machine for Multi-classification}
+\title{Ramp loss Twin K-Class Support Vector Machine for Multi-classification}
 \usage{
 ramptwinKsvm(
   X,
@@ -19,7 +19,8 @@ ramptwinKsvm(
   tol = 1e-05,
   step_cccp = 10,
   max.steps = 200,
-  rcpp = TRUE
+  rcpp = TRUE,
+  sig = 0.1
 )
 }
 \arguments{
@@ -50,12 +51,14 @@ ramptwinKsvm(
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
+
+\item{sig}{the precision of the CCCP algorithm.}
 }
 \value{
 return ramptwinKsvm object
 }
 \description{
-Ramp loss Twin K Support Vector Machine for Multi-classification
+Ramp loss Twin K-Class Support Vector Machine for Multi-classification
 }
 \author{
 Zhang Jiaqi

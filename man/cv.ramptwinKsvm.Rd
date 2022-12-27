@@ -9,7 +9,7 @@ cv.ramptwinKsvm(
   y,
   K = 5,
   C1 = 1,
-  C3 = 1,
+  C2 = 1,
   s = 0.5,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
@@ -32,7 +32,7 @@ cv.ramptwinKsvm(
 
 \item{K}{number of folds.}
 
-\item{C1, C3}{plenty term vector.}
+\item{C1, C2}{plenty term.}
 
 \item{s}{parameter for ramp loss.}
 

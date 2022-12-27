@@ -2,7 +2,7 @@
 % Please edit documentation in R/ramptwinKsvm.R
 \name{predict.ramptwinKsvm}
 \alias{predict.ramptwinKsvm}
-\title{Predict Method for Twin K Support Vector Machine}
+\title{Predict Method for Ramp loss Twin K-Class Support Vector Machine}
 \usage{
 \method{predict}{ramptwinKsvm}(object, X, y, ...)
 }
@@ -16,7 +16,7 @@
 \item{...}{unused parameter.}
 }
 \description{
-Predict Method for Twin K Support Vector Machine
+Predict Method for Ramp loss Twin K-Class Support Vector Machine
 }
 \author{
 Zhang Jiaqi

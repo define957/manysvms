@@ -1,6 +1,5 @@
 library(manysvms)
 library(MASS)
-library(ggplot2)
 
 
 set.seed(112)

@@ -12,6 +12,7 @@
 #' @param kernel_rect set kernel size. \code{0<= kernel_rect <= 1}
 #' @param eps parameter for rest class.
 #' @param tol the precision of the optimization algorithm.
+#' @param sig the precision of the CCCP algorithm.
 #' @param step_cccp the number of iterations of Concave–Convex Procedure (CCCP).
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
@@ -26,7 +27,7 @@ ramptwinKsvm <- function(X, y,
                          reg = 1e-7, kernel_rect = 1,
                          eps = 0.1,
                          tol = 1e-5, step_cccp = 10, max.steps = 200,
-                         rcpp = TRUE){
+                         rcpp = TRUE, sig = 1e-1){
   kernel <- match.arg(kernel)
 
   X <- as.matrix(X)
@@ -127,6 +128,8 @@ ramptwinKsvm <- function(X, y,
       ub_neg2 <- matrix(Ck[4], nrow = mC)
       ub_neg <- rbind(ub_neg1, ub_neg2)
 
+      u0_pos <- (lb_pos + ub_pos) / 2
+      u0_neg <- (lb_neg + ub_neg) / 2
       for (step in 1:step_cccp) {
 
         tau_pos <- rbind(delta_pos, theta_pos)
@@ -169,26 +172,34 @@ ramptwinKsvm <- function(X, y,
         theta_neg_new[idx_theta_neg] <- Ck[4]
         theta_neg_new[-idx_theta_neg] <- 0
 
-        cnt <- 0
-        if (sum(delta_pos_new == delta_pos) != mB) {
-          delta_pos <- delta_pos_new
-          cnt <- cnt + 1
-        }
-        if (sum(delta_neg_new == delta_neg) != mA) {
-          delta_neg <- delta_neg_new
-          cnt <- cnt + 1
-        }
-        if (sum(theta_pos_new == theta_pos) != mC) {
-          theta_pos <- theta_pos_new
-          cnt <- cnt + 1
-        }
-        if (sum(theta_neg_new == theta_neg) != mC) {
-          theta_neg <- theta_neg_new
-          cnt <- cnt + 1
-        }
-        if (cnt == 0) {
+        if ((norm(u0_pos - gammas_pos, type = "2") < sig) &&
+            (norm(u0_neg - gammas_neg, type = "2") < sig)) {
           break
+        }else{
+          u0_pos <- gammas_pos
+          u0_neg <- gammas_neg
         }
+
+        # cnt <- 0
+        # if (sum(delta_pos_new == delta_pos) != mB) {
+        #   delta_pos <- delta_pos_new
+        #   cnt <- cnt + 1
+        # }
+        # if (sum(delta_neg_new == delta_neg) != mA) {
+        #   delta_neg <- delta_neg_new
+        #   cnt <- cnt + 1
+        # }
+        # if (sum(theta_pos_new == theta_pos) != mC) {
+        #   theta_pos <- theta_pos_new
+        #   cnt <- cnt + 1
+        # }
+        # if (sum(theta_neg_new == theta_neg) != mC) {
+        #   theta_neg <- theta_neg_new
+        #   cnt <- cnt + 1
+        # }
+        # if (cnt == 0) {
+        #   break
+        # }
       }
 
       coef_list_pos[, idx] <- u_pos[1:coef_dim, ]
@@ -292,7 +303,7 @@ predict.ramptwinKsvm <- function(object, X, y, ...){
 #' @author Zhang Jiaqi
 #' @param X,y dataset and label.
 #' @param K number of folds.
-#' @param C1,C3 plenty term vector.
+#' @param C1,C2 plenty term.
 #' @param s parameter for ramp loss.
 #' @param kernel kernel function.
 #' @param gamma rbf kernel parameter.
@@ -344,7 +355,7 @@ cv.ramptwinKsvm <- function(X, y, K = 5,
   doSNOW::registerDoSNOW(cl)
   res <- foreach::foreach(j = 1:nrow(param), .combine = rbind,
                           .packages = c('manysvms', 'Rcpp'),
-                          .options.snow = opts) %dopar% {
+                          .options.snow = opts) %do% {
     indx_cv <- 1
     accuracy_list <- rep(0, K)
     for (i in 1:K) {
