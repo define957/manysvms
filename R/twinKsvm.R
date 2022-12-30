@@ -189,8 +189,8 @@ predict.twinKsvm <- function(object, X, y, ...){
         vote_mat[idxB, j] <- vote_mat[idxB, j] + 1
       }
       if (length(idx_uni) != 0) {
-        vote_mat[-idx_uni, i] <- vote_mat[-idx_uni, i] + 1
-        vote_mat[-idx_uni, j] <- vote_mat[-idx_uni, j] + 1
+        vote_mat[-idx_uni, i] <- vote_mat[-idx_uni, i] - 1
+        vote_mat[-idx_uni, j] <- vote_mat[-idx_uni, j] - 1
       }
     }
   }
