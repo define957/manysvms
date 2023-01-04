@@ -178,6 +178,8 @@ ramptwinKsvm <- function(X, y,
         }else{
           u0_pos <- gammas_pos
           u0_neg <- gammas_neg
+          delta_pos <- delta_pos_new
+          theta_neg <- theta_neg_new
         }
 
         # cnt <- 0
