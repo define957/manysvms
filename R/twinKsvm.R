@@ -295,10 +295,10 @@ cv.twinKsvm <- function(X, y, K = 5,
                                  Ck = c(param[j, 1], param[j, 2],
                                         param[j, 1], param[j, 2]),
                                  kernel = kernel,
-                                 gamma = param[j, 2],
-                                 degree = param[j, 3], coef0 = param[j, 4],
+                                 gamma = param[j, 3],
+                                 degree = param[j, 4], coef0 = param[j, 5],
                                  reg = reg, kernel_rect = kernel_rect,
-                                 eps = param[j, 5],
+                                 eps = param[j, 6],
                                  tol = tol, max.steps = max.steps, rcpp = TRUE)
       pred <- predict(twinKsvm_model, test_X, test_y)
       accuracy_list <- append(accuracy_list, pred$accuracy)
