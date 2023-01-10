@@ -160,7 +160,7 @@ predict.svm_ovr <- function(object, X, y, ...) {
 cv.svm_ovr <- function(X, y , K = 5, C = 1,
                        kernel = c('linear', 'rbf', 'poly'),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                       reg = 1e-7, kernel_rect = 1, tol = 1e-5,
+                       tol = 1e-5,
                        max.steps = 200, rcpp = TRUE, shuffle = TRUE, seed = NULL,
                        threads.num = parallel::detectCores() - 1){
 
