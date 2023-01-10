@@ -139,7 +139,7 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
   dis_mat <- matrix(0, nrow = m, ncol = object$class_num)
   X <- as.matrix(X)
   # get Kernel X
-  if(object$kernel == 'linear'){
+  if (object$kernel == 'linear') {
     kernelX <- X
   }else{
     kernel_m <- round(km*object$kernel_rect, 0)
@@ -153,23 +153,23 @@ predict.mbsvm <- function(object, X, y = NULL, show.info = TRUE, ...){
 
 
   class_num <- object$class_num
-  for(i in 1:class_num){
+  for (i in 1:class_num) {
     dis_mat[, i] <- abs(kernelX %*% object$coef[, i] + object$intercept[i]) /
       norm(as.matrix(object$coef[, i]), type = "2")
   }
   pred <- rep(0, m)
-  for(i in 1:m){
+  for (i in 1:m) {
     idx <- which.max(dis_mat[i, ])
     pred[i] <- object$class_set[idx]
   }
-  if(is.null(y) == FALSE){
+  if (is.null(y) == FALSE) {
     y <- as.matrix(y)
     acc <- sum(pred == y)/length(y)
-    if(show.info == TRUE){
+    if (show.info == TRUE) {
       cat('kernel type :', object$kernel, '\n')
       cat(paste("total accuracy :", acc*100, '% \n'))
     }
-    predlist <- list("accuracy"= acc,
+    predlist <- list("accuracy" = acc,
                      'distance' = dis_mat,
                      'predict' = pred)
   }else{
