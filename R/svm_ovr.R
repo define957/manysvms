@@ -17,14 +17,17 @@
 #' @param tol the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
-#' @return return svm object.
+#' @param fit_intercept if set \code{fit_intercept = TRUE},
+#'                      the function will evaluates intercept.
+#' @return return \code{svm_ovr} object.
 #' @export
 
 svm_ovr <- function(X, y,
                     C = 1.0,
                     kernel = c('linear', 'rbf', 'poly'),
                     gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                    tol = 1e-5, max.steps = 200, rcpp = TRUE) {
+                    tol = 1e-5, max.steps = 200,
+                    rcpp = TRUE, fit_intercept = TRUE) {
   kernel <- match.arg(kernel)
 
   X <- as.matrix(X)
@@ -64,19 +67,25 @@ svm_ovr <- function(X, y,
 
     alphas <- as.matrix(x)
     coef_list[, k] <- y_temp_mat %*% alphas
-    intercept_list[k] <- mean(y_temp[alphas > 0] -
+    if (fit_intercept == TRUE) {
+      intercept_list[k] <- mean(y_temp[alphas > 0] -
                                 KernelX[alphas > 0] %*% t(coef_list[, k]))
+    }
   }
 
   svm_model <- list('X' = X, 'y' = y,
-                'class_set' = class_set,'class_num' = class_num,
-                'coef' = coef_list, 'intercept' = intercept_list,
-                'kernel' = kernel,
-                'gamma' = gamma,
-                'degree' = degree,
-                'coef0' = coef0,
-                'Rcpp' = rcpp
-  )
+                    'class_set' = class_set,'class_num' = class_num,
+                    'coef' = coef_list,
+                    'kernel' = kernel,
+                    'gamma' = gamma,
+                    'degree' = degree,
+                    'coef0' = coef0,
+                    'Rcpp' = rcpp,
+                    'fit_intercept' = fit_intercept
+                    )
+  if (fit_intercept == TRUE) {
+    svm_model$intercept <- intercept_list
+  }
   class(svm_model) <- "svm_ovr"
   return(svm_model)
 }
@@ -101,11 +110,14 @@ predict.svm_ovr <- function(object, X, y, ...) {
                              gamma = object$gamma, degree = object$degree,
                              coef0 = object$coef0,
                              rcpp = object$Rcpp)
-
-  intercept_mat <- as.matrix(rep(object$intercept, m))
-  dim(intercept_mat) <- c(object$class_num, m)
-  intercept_mat <- t(intercept_mat)
-  pred_value <- KernelX %*% object$coef + intercept_mat
+  if (object$fit_intercept == TRUE) {
+    intercept_mat <- as.matrix(rep(object$intercept, m))
+    dim(intercept_mat) <- c(object$class_num, m)
+    intercept_mat <- t(intercept_mat)
+    pred_value <- KernelX %*% object$coef + intercept_mat
+  } else {
+    pred_value <- KernelX %*% object$coef
+  }
   vote_mat <- matrix(0, nrow = m, ncol = object$class_num)
   for (i in 1:object$class_num) {
     idx <- which(pred_value[, i] > 0)
@@ -148,6 +160,8 @@ predict.svm_ovr <- function(object, X, y, ...) {
 #' @param tol the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @param fit_intercept if set \code{fit_intercept = TRUE},
+#'                      the function will evaluates intercept.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle the dataset.
 #' @param seed random seed for \code{shuffer} option.
 #' @param threads.num The number of threads used for parallel execution.
@@ -161,8 +175,9 @@ cv.svm_ovr <- function(X, y , K = 5, C = 1,
                        kernel = c('linear', 'rbf', 'poly'),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                        tol = 1e-5,
-                       max.steps = 200, rcpp = TRUE, shuffle = TRUE, seed = NULL,
-                       threads.num = parallel::detectCores() - 1){
+                       max.steps = 200, rcpp = TRUE, fit_intercept = TRUE,
+                       shuffle = TRUE, seed = NULL,
+                       threads.num = parallel::detectCores() - 1) {
 
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -202,7 +217,8 @@ cv.svm_ovr <- function(X, y , K = 5, C = 1,
                              kernel = kernel, tol = tol,
                              gamma = param[j, 2], degree = param[j, 3],
                              coef0 = param[j, 4],
-                             max.steps = max.steps)
+                             max.steps = max.steps,
+                             fit_intercept = fit_intercept)
       pred <- predict(mbsvm_model, test_X, test_y)
       accuracy_list[i] <- pred$accuracy
     }
@@ -222,9 +238,8 @@ cv.svm_ovr <- function(X, y , K = 5, C = 1,
   cat("\nCall:", deparse(call, 0.8 * getOption("width")), "\n", sep = "\n")
   cat("Total Parameters:", nrow(param), "\n")
   cat("Best Parameters :",
-      "C = ", param[max_idx, 1],
-      "\n",
-      "gamma = ", param[max_idx, 2],
+      "C = ", param[max_idx, 1], "\n")
+  cat("gamma = ", param[max_idx, 2],
       "degree = ",param[max_idx, 3],
       "coef0 =", param[max_idx, 4],
       "\n")
