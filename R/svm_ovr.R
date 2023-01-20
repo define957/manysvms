@@ -68,8 +68,8 @@ svm_ovr <- function(X, y,
     alphas <- as.matrix(x)
     coef_list[, k] <- y_temp_mat %*% alphas
     if (fit_intercept == TRUE) {
-      intercept_list[k] <- mean(y_temp[alphas > 0] -
-                                KernelX[alphas > 0] %*% t(coef_list[, k]))
+      temp <- y_temp - KernelX %*% coef_list[, k]
+      intercept_list[k] <- mean(temp[ub > alphas && alphas > lb ])
     }
   }
 
