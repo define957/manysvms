@@ -36,6 +36,10 @@ Then you can have `manysvms` package on your PC。
 
 ## SVMs for classification
 
++ Support Vector Machine for Multi-classification (One versus Rest strategy) 
++ + [Rcpp acceleration is available]
++ Least Squares Support Vector Machine for Multi-classification (One versus Rest strategy) 
++ + [Rcpp acceleration is available]
 + Twin-SVM for binary classification 
 + + [Rcpp acceleration is available]
 + Twin-SVM for Multi-classification (One versus Rest strategy) 
