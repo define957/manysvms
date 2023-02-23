@@ -64,15 +64,33 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     solver.res <- hinge_svm_dual_solver(KernelX, y, C, eps,
                                         max.steps, rcpp)
   }
-  HingeSVMClassifier <- list("C" = C, "kernel" = kernel,
+  HingeSVMClassifier <- list("X" = X, "y" = y,
+                             "C" = C, "kernel" = kernel,
                              "gamma" = gamma, "degree" = degree, "coef0" = coef0,
-                             "solver" = solver,
-                             "coef" = solver.res$coef)
+                             "solver" = solver, "coef" = solver.res$coef,
+                             "fit_intercept" = fit_intercept)
   class(HingeSVMClassifier) <- "HingeSVMClassifier"
   return(HingeSVMClassifier)
 }
 
-
+predict.hinge_svm <- function(object, X, y, ...) {
+  if (object$fit_intercept == TRUE) {
+    X <- cbind(X, 1)
+  }
+  if (object$kernel == "linear") {
+    KernelX <- X
+  } else {
+    KernelX <- kernel_function(X, object$X,
+                               kernel.type = object$kernel,
+                               gamma = object$gamma,
+                               degree = object$degree,
+                               coef0 = object$coef0,
+                               rcpp = object$rcpp)
+  }
+  print(dim(object$coef))
+  fx <- KernelX %*% object$coef
+  return(sign(fx))
+}
 
 
 

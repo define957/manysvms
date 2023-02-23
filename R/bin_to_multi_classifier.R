@@ -13,4 +13,3 @@ OVR_Classifier <- function(X, y, model, ...) {
   class(Classifiers_OVR) <- "Classifiers_OVR"
   return(Classifiers_OVR)
 }
-
