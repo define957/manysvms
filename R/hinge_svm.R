@@ -29,17 +29,10 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
   }
   xn <- nrow(X)
   xp <- ncol(X)
-  xx <- cbind(X, 1)
-  w0 <- matrix(0, nrow = xp+1, ncol = 1)
-  wt <- pegasos(xx, y, w0, batch_size, max.steps, sgHinge, C = C)
+  w0 <- matrix(0, nrow = xp, ncol = 1)
+  wt <- pegasos(X, y, w0, batch_size, max.steps, sgHinge, C = C)
   wnorm <- norm(wt[1:xp], type = "2")
-  if (fit_intercept == TRUE) {
-    BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]),
-                                         intercept = wt[xp+1])
-  } else {
-    BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]),
-                                         intercept = 0)
-  }
+  BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalHingeSVMClassifier) <- "BasePrimalHingeSVMClassifier"
   return(BasePrimalHingeSVMClassifier)
 }
@@ -47,11 +40,15 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
 hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                        eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                       solver = c("dual", "primal"), rcpp = TRUE) {
+                       solver = c("dual", "primal"), rcpp = TRUE,
+                       fit_intercept = TRUE) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   kernel <- match.arg(kernel)
   solver <- match.arg(solver)
+  if (fit_intercept == TRUE) {
+    X <- cbind(X, 1)
+  }
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
   } else {
