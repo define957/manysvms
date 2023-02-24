@@ -8,7 +8,7 @@ X2 <- mvrnorm(100, mu = c(3, 3), Sigma = diag(1, nrow = 2))
 X <- rbind(X1, X2)
 
 y <- rep(c(-1, 1), c(100, 100))
-svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 10, solver = "primal", max.steps = 50)
+svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 0.1, solver = "primal", max.steps = 50)
 model1 <- svm_ovr_model[[1]]
 
 dataXy <- data.frame(X, y)
