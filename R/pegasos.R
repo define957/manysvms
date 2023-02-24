@@ -1,15 +1,17 @@
-#  Primal Estimated sub-Gradient SOlver for SVM (Pegasos)
+#'  Primal Estimated sub-Gradient SOlver for SVM (Pegasos)
 #'
 #' @author Zhang Jiaqi.
 #' @param X,y dataset and label.
 #' @param w initial point.
+#' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
+#' @param seed random seed for subsample sampling.
+#' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
-#' @examples
 pegasos <- function(X, y, w, m, max.steps, fx, seed, ...) {
-  if (is.null(seed)==FALSE) {
+  if (is.null(seed) == FALSE) {
     set.seed(seed)
   }
   C <- list(...)$C

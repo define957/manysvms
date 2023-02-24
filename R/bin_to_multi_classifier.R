@@ -1,3 +1,14 @@
+#' Convert Binary Classifier to multiclass classifier
+#' by Using Ones versus Rest Strategy
+#'
+#' \code{pegasos} is an R implementation of Pegasos algorithm
+#'
+#' @author Zhang Jiaqi.
+#' @param X,y dataset and label.
+#' @param model binary classifier
+#' @param ... parameter of model.
+#' @return return \code{Classifiers_OVR} object.
+#' @export
 OVR_Classifier <- function(X, y, model, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -22,6 +33,18 @@ OVR_Classifier <- function(X, y, model, ...) {
   return(Classifiers_OVR)
 }
 
+#' Predict Method of OVR Classifier
+#'
+#'
+#' \code{pegasos} is an R implementation of Pegasos algorithm
+#'
+#' @author Zhang Jiaqi.
+#' @param object a fitted object of class inheriting from \code{Classifiers_OVR}.
+#' @param X,y dataset and label.
+#' @param predict_func predict function of your model.
+#' @param ... parameters of your model.
+#' @return return predict results.
+#' @export
 predic.OVR_Classifier <- function(object, X, y, predict_func = predict, ...) {
   n <-  nrow(X)
   classifiers <- object$classifier_list

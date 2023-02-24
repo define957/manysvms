@@ -38,6 +38,32 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
   return(BasePrimalHingeSVMClassifier)
 }
 
+
+#' SVM for Multi-classification by Using Ones versus Rest Strategy
+#'
+#' \code{hinge_svm} is an R implementation of Hinge-SVM
+#'
+#' @author Zhang Jiaqi.
+#' @param X,y dataset and label.
+#' @param C plenty term.
+#' @param kernel kernel function. The definitions of various kernel functions are as follows:
+#' \describe{
+#'     \item{linear:}{\eqn{u'v}{u'*v}}
+#'     \item{poly:}{\eqn{(\gamma u'v + coef0)^{degree}}{(gamma*u'*v + coef0)^degree}}
+#'     \item{rbf:}{\eqn{e^{(-\gamma |u-v|^2)}}{exp(-gamma*|u-v|^2)}}
+#' }
+#' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
+#' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
+#' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
+#' @param eps the precision of the optimization algorithm.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param batch_size mini-batch size for primal solver.
+#' @param solver \code{"dual"} and \code{"primal"} are available.
+#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @param fit_intercept if set \code{fit_intercept = TRUE},
+#'                      the function will evaluates intercept.
+#' @return return \code{HingeSVMClassifier} object.
+#' @export
 hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                        eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
@@ -78,6 +104,16 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   return(HingeSVMClassifier)
 }
 
+
+#' Predict Method for Hinge Support Vector Machine
+#'
+#' @author Zhang Jiaqi
+#' @param object a fitted object of class inheriting from \code{HingeSVMClassifier}.
+#' @param X a new data frame for predicting.
+#' @param y a label data frame corresponding to X.
+#' @param ... unused parameter.
+#' @importFrom stats predict
+#' @export
 predict.hinge_svm <- function(object, X, y, ...) {
   if (object$fit_intercept == TRUE) {
     X <- cbind(X, 1)
@@ -96,13 +132,5 @@ predict.hinge_svm <- function(object, X, y, ...) {
   decf <- sign(fx)
   decf[decf > 0] <- object$class_set[1]
   decf[decf < 0] <- object$class_set[2]
-  print(object$class_set[2])
   return(decf)
 }
-
-
-
-
-
-
-
