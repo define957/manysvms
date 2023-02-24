@@ -17,7 +17,8 @@ hinge_svm(
   batch_size = nrow(X)/10,
   solver = c("dual", "primal"),
   rcpp = TRUE,
-  fit_intercept = TRUE
+  fit_intercept = TRUE,
+  ...
 )
 }
 \arguments{
@@ -50,6 +51,8 @@ hinge_svm(
 
 \item{fit_intercept}{if set \code{fit_intercept = TRUE},
 the function will evaluates intercept.}
+
+\item{...}{unused parameters.}
 }
 \value{
 return \code{HingeSVMClassifier} object.

@@ -13,7 +13,7 @@ svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 10, solver = "primal",
                                 max.steps = 500, batch_size = 1)
 e <- Sys.time()
 print(e - s)
-res <- predic.OVR_Classifier(svm_ovr_model, X, y, predict.hinge_svm)
+res <- predict(svm_ovr_model, X)
 model1 <- svm_ovr_model$classifier_list[[1]]
 
 dataXy <- data.frame(X, y)
@@ -53,6 +53,14 @@ ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
 
 cat(model1$coef, "\n")
 
+cross_validation(OVR_Classifier, X, y, bin_model = hinge_svm, shuffle = TRUE,
+                 metric = accuracy, K = 5, max.steps = 2000)
 
-
-
+C <- rep(0, 4)
+for (i in 1:4) {
+  C[i] <- 2^(i)
+}
+param_list <- list("C" = C)
+grid_search_cv(OVR_Classifier, X, y, metric = accuracy,
+               param_list = param_list, seed = 1234, K = 5,
+               max.steps = 500, bin_model = hinge_svm, threads.num = 2)

@@ -5,12 +5,12 @@
 \title{Convert Binary Classifier to multiclass classifier
 by Using Ones versus Rest Strategy}
 \usage{
-OVR_Classifier(X, y, model, ...)
+OVR_Classifier(X, y, bin_model, ...)
 }
 \arguments{
 \item{X, y}{dataset and label.}
 
-\item{model}{binary classifier}
+\item{bin_model}{binary classifier}
 
 \item{...}{parameter of model.}
 }

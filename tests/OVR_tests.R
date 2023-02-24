@@ -19,8 +19,6 @@ svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 100, solver = "primal",
 e <- Sys.time()
 print(e - s)
 model <- svm_ovr_model$classifier_list[[3]]
-
-res <- predic.OVR_Classifier(svm_ovr_model, X, y, predict.hinge_svm)
 dataXy <- data.frame(X, y)
 dataXy$y <- as.factor(dataXy$y)
 

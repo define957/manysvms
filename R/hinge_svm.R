@@ -62,16 +62,20 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
+#' @param ... unused parameters.
 #' @return return \code{HingeSVMClassifier} object.
 #' @export
 hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                        eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
                        solver = c("dual", "primal"), rcpp = TRUE,
-                       fit_intercept = TRUE) {
+                       fit_intercept = TRUE, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
+  idx <- which(y == class_set[1])
+  y[idx] <- 1
+  y[-idx] <- -1
   if (length(class_set) > 2) {
     cat(errorCondition("Error: The number of class should less 2!"))
   }
@@ -109,12 +113,11 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
 #'
 #' @author Zhang Jiaqi
 #' @param object a fitted object of class inheriting from \code{HingeSVMClassifier}.
-#' @param X a new data frame for predicting.
-#' @param y a label data frame corresponding to X.
+#' @param X new data for predicting.
 #' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
-predict.hinge_svm <- function(object, X, y, ...) {
+predict.HingeSVMClassifier <- function(object, X, ...) {
   if (object$fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }

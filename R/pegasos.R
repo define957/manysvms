@@ -9,6 +9,7 @@
 #' @param seed random seed for subsample sampling.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
+#' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
 pegasos <- function(X, y, w, m, max.steps, fx, seed, ...) {
   if (is.null(seed) == FALSE) {

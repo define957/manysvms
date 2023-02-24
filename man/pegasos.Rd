@@ -27,6 +27,9 @@ return optimal solution.
 \description{
 Primal Estimated sub-Gradient SOlver for SVM (Pegasos)
 }
+\references{
+${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
+}
 \author{
 Zhang Jiaqi.
 }
