@@ -15,7 +15,8 @@ hinge_svm_dual_solver <- function (KernelX, y, C = 1,
 
 
 hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
-                                     max.steps = 80, batch_size = nrow(X) / 10, ...) {
+                                     max.steps = 80, batch_size = nrow(X) / 10,
+                                     seed = NULL, ...) {
   sgHinge <- function(X, y, v, ...) { # sub-gradient of hinge loss function
     C <- list(...)$C
     xn <- nrow(X)
@@ -30,7 +31,7 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
   xn <- nrow(X)
   xp <- ncol(X)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  wt <- pegasos(X, y, w0, batch_size, max.steps, sgHinge, C = C)
+  wt <- pegasos(X, y, w0, batch_size, max.steps, sgHinge, seed, C = C)
   wnorm <- norm(wt[1:xp], type = "2")
   BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalHingeSVMClassifier) <- "BasePrimalHingeSVMClassifier"
@@ -44,6 +45,10 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                        fit_intercept = TRUE) {
   X <- as.matrix(X)
   y <- as.matrix(y)
+  class_set <- unique(y)
+  if (length(class_set) > 2) {
+    cat(errorCondition("Error: The number of class should less 2!"))
+  }
   kernel <- match.arg(kernel)
   solver <- match.arg(solver)
   if (fit_intercept == TRUE) {
@@ -64,7 +69,7 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     solver.res <- hinge_svm_dual_solver(KernelX, y, C, eps,
                                         max.steps, rcpp)
   }
-  HingeSVMClassifier <- list("X" = X, "y" = y,
+  HingeSVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                              "C" = C, "kernel" = kernel,
                              "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                              "solver" = solver, "coef" = solver.res$coef,
@@ -77,7 +82,7 @@ predict.hinge_svm <- function(object, X, y, ...) {
   if (object$fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
-  if (object$kernel == "linear") {
+  if (object$kernel == "linear" & object$solver == "primal") {
     KernelX <- X
   } else {
     KernelX <- kernel_function(X, object$X,
@@ -87,9 +92,12 @@ predict.hinge_svm <- function(object, X, y, ...) {
                                coef0 = object$coef0,
                                rcpp = object$rcpp)
   }
-  print(dim(object$coef))
   fx <- KernelX %*% object$coef
-  return(sign(fx))
+  decf <- sign(fx)
+  decf[decf > 0] <- object$class_set[1]
+  decf[decf < 0] <- object$class_set[2]
+  print(object$class_set[2])
+  return(decf)
 }
 
 

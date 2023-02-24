@@ -1,4 +1,7 @@
-pegasos <- function(X, y, w, m, max.steps, fx, ...) {
+pegasos <- function(X, y, w, m, max.steps, fx, seed, ...) {
+  if (is.null(seed)==FALSE) {
+    set.seed(seed)
+  }
   C <- list(...)$C
   v <- w
   nx = nrow(X)
@@ -6,6 +9,7 @@ pegasos <- function(X, y, w, m, max.steps, fx, ...) {
   for (t in 1:max.steps) {
     At <- sample(nx, m)
     xm <- X[At, ]
+    dim(xm) <- c(m, px)
     ym <- y[At]
     # update parameter
     dF <- fx(xm, ym, v, ...)
