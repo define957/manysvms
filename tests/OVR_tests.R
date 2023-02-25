@@ -3,13 +3,13 @@ library(ggplot2)
 library(manysvms)
 
 set.seed(112)
-n <- 300
+n <- 90
 n_c <- 3
 sig <- diag(c(0.02, 0.03))
 
 x1 <- mvrnorm(n/n_c, mu = c(-0.6, 0), Sigma = sig)
 x2 <- mvrnorm(n/n_c, mu = c(0.6, 0), Sigma = sig)
-x3 <- mvrnorm(n/n_c, mu = c(0, 0.6), Sigma = sig)
+x3 <- mvrnorm(n/n_c, mu = c(0, 1), Sigma = sig)
 
 X <- rbind(x1, x2, x3)
 y <- rep(c(1, 2, 3), rep(n/n_c, n_c))
@@ -35,3 +35,26 @@ for (i in 1:n_c) {
 }
 p <- p + theme_bw()
 p
+
+s <- Sys.time()
+svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 100, solver = "dual", kernel = "linear",
+                                max.steps = 5000, batch_size = 50)
+e <- Sys.time()
+print(e - s)
+res <- predict(svm_ovr_model, X)
+accuracy(y, res)
+
+s <- Sys.time()
+svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 100, solver = "dual", kernel = "rbf",
+                                max.steps = 500, batch_size = 50)
+e <- Sys.time()
+print(e - s)
+
+C <- rep(0, 4)
+for (i in 1:4) {
+  C[i] <- 2^(i)
+}
+param_list <- list("C" = C)
+grid_search_cv(OVR_Classifier, X, y, metric = accuracy,
+               param_list = param_list, seed = 1234, K = 5,
+               max.steps = 500, bin_model = hinge_svm, threads.num = 12)
