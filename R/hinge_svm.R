@@ -103,7 +103,8 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                              "C" = C, "kernel" = kernel,
                              "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                              "solver" = solver, "coef" = solver.res$coef,
-                             "fit_intercept" = fit_intercept)
+                             "fit_intercept" = fit_intercept,
+                             "rcpp" = rcpp)
   class(HingeSVMClassifier) <- "HingeSVMClassifier"
   return(HingeSVMClassifier)
 }
