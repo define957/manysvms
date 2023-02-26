@@ -10,13 +10,15 @@ hinge_svm_dual_solver <- function (KernelX, y, C = 1,
   alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp)$x
   coef <- D %*% alphas
   BaseDualHingeSVMClassifier <- list(coef = as.matrix(coef))
+  class(BaseDualHingeSVMClassifier) <- "BaseDualHingeSVMClassifier"
   return(BaseDualHingeSVMClassifier)
 }
 
 
 hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
                                      max.steps = 80, batch_size = nrow(X) / 10,
-                                     seed = NULL, ...) {
+                                     seed = NULL, sample_seed = NULL,
+                                     optimizer = pegasos, ...) {
   sgHinge <- function(X, y, v, ...) { # sub-gradient of hinge loss function
     C <- list(...)$C
     xn <- nrow(X)
@@ -31,7 +33,7 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
   xn <- nrow(X)
   xp <- ncol(X)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  wt <- pegasos(X, y, w0, batch_size, max.steps, sgHinge, seed, C = C)
+  wt <- optimizer(X, y, w0, batch_size, max.steps, sgHinge, sample_seed, C = C, ...)
   wnorm <- norm(wt[1:xp], type = "2")
   BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalHingeSVMClassifier) <- "BasePrimalHingeSVMClassifier"
@@ -39,7 +41,7 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
 }
 
 
-#' SVM for Multi-classification by Using Ones versus Rest Strategy
+#' Hinge Support Vector Machine
 #'
 #' \code{hinge_svm} is an R implementation of Hinge-SVM
 #'
@@ -69,7 +71,7 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                        eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
                        solver = c("dual", "primal"), rcpp = TRUE,
-                       fit_intercept = TRUE, ...) {
+                       fit_intercept = TRUE, optimizer = pegasos, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
@@ -94,7 +96,8 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   if (solver == "primal") {
     solver.res <- hinge_svm_primal_solver(KernelX, y, C, eps,
-                                          max.steps, batch_size)
+                                          max.steps, batch_size,
+                                          optimizer, ...)
   } else if(solver == "dual") {
     solver.res <- hinge_svm_dual_solver(KernelX, y, C, eps,
                                         max.steps, rcpp)
