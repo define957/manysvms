@@ -6,14 +6,14 @@
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
-#' @param seed random seed for subsample sampling.
+#' @param sample_seed random seed for subsample sampling.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
-pegasos <- function(X, y, w, m, max.steps, fx, seed, ...) {
-  if (is.null(seed) == FALSE) {
-    set.seed(seed)
+pegasos <- function(X, y, w, m, max.steps, fx, sample_seed, ...) {
+  if (is.null(sample_seed) == FALSE) {
+    set.seed(sample_seed)
   }
   C <- list(...)$C
   v <- w
