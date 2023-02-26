@@ -27,12 +27,15 @@ Make sure you have installed `devtools`, if you don't have `devtools` installed,
 ```{r}
 install.packages("devtools")
 ```
-After you installed `devtools`, remember to instal `RTools`. You can find suitable `RTools` on the website https://cran.r-project.org/bin/windows/Rtools/. 
+After you installed `devtools`, remember to instal `RTools`. You can find suitable `RTools` on the website https://cran.r-project.org/bin/windows/Rtools/. （on Mac OSX you should install suitable `clang` and `gfortran`, see more: https://cran.r-project.org/bin/macosx/tools/ and https://mac.r-project.org/tools/）
 After above steps, please run the following command :
 ```{r}
 devtools::install_github("define957/manysvms")
 ```
 Then you can have `manysvms` package on your PC。
+## Important notice
+This project is currently being redesigned !!! 🔧
+The old version of the function will be deprecated in the new version !!!
 
 ## SVMs for classification
 
