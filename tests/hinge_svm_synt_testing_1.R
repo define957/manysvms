@@ -9,8 +9,8 @@ X <- rbind(X1, X2)
 
 y <- rep(c(1, 2), c(100, 100))
 s <- Sys.time()
-svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 10, solver = "primal",
-                                max.steps = 500, batch_size = 1)
+svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 0.1, solver = "primal",
+                                max.steps = 5000, batch_size = 10)
 e <- Sys.time()
 print(e - s)
 res <- predict(svm_ovr_model, X)
@@ -54,13 +54,19 @@ ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
 cat(model1$coef, "\n")
 
 cross_validation(OVR_Classifier, X, y, bin_model = hinge_svm, shuffle = TRUE,
-                 metric = accuracy, K = 5, max.steps = 2000)
+                 metric = accuracy, K = 5, max.steps = 50)
 
 C <- rep(0, 4)
 for (i in 1:4) {
   C[i] <- 2^(i)
 }
-param_list <- list("C" = C)
+param_list <- list("C" = C, "gamma " = C)
+
+data("iris")
+X <- iris[ ,1:4]
+y <- iris[ ,5]
 grid_search_cv(OVR_Classifier, X, y, metric = accuracy,
                param_list = param_list, seed = 1234, K = 5,
-               max.steps = 500, bin_model = hinge_svm, threads.num = 2)
+               max.steps = 5000, bin_model = hinge_svm, threads.num = 2,
+               solver = "primal",
+               kernel = "rbf")
