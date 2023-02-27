@@ -3,7 +3,7 @@
 S3method(coef,twinsvm)
 S3method(plot,mbsvm)
 S3method(predict,Classifiers_OVR)
-S3method(predict,HingeSVMClassifier)
+S3method(predict,SVMClassifier)
 S3method(predict,eps.svr)
 S3method(predict,lssvm_ovr)
 S3method(predict,mbsvm)
