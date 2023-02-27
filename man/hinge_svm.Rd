@@ -2,7 +2,7 @@
 % Please edit documentation in R/hinge_svm.R
 \name{hinge_svm}
 \alias{hinge_svm}
-\title{SVM for Multi-classification by Using Ones versus Rest Strategy}
+\title{Hinge Support Vector Machine}
 \usage{
 hinge_svm(
   X,
@@ -18,6 +18,8 @@ hinge_svm(
   solver = c("dual", "primal"),
   rcpp = TRUE,
   fit_intercept = TRUE,
+  optimizer = pegasos,
+  randx = 0.1,
   ...
 )
 }
@@ -51,6 +53,10 @@ hinge_svm(
 
 \item{fit_intercept}{if set \code{fit_intercept = TRUE},
 the function will evaluates intercept.}
+
+\item{optimizer}{default primal optimizer pegasos.}
+
+\item{randx}{parameter for reduce SVM, default \code{randx = 0.1}.}
 
 \item{...}{unused parameters.}
 }
