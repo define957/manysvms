@@ -10,7 +10,7 @@
 #' @export
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
                                max.steps = 200, rcpp = TRUE,
-                               u =  (lb + ub) / 2){
+                               u =  matraix(0, nrow = nrow(x), ncol = 1)){
   if(rcpp == TRUE){
     x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = eps, max.steps, u)
   }else if(rcpp == FALSE){
