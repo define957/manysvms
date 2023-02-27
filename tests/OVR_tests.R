@@ -57,4 +57,4 @@ for (i in 1:4) {
 param_list <- list("C" = C)
 grid_search_cv(OVR_Classifier, X, y, metric = accuracy,
                param_list = param_list, seed = 1234, K = 5,
-               max.steps = 500, bin_model = hinge_svm, threads.num = 12)
+               max.steps = 500, bin_model = hinge_svm, threads.num = 2)

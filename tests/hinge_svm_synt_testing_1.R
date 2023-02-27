@@ -3,14 +3,15 @@ library(ggplot2)
 library(manysvms)
 
 set.seed(100)
-X1 <- mvrnorm(100, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
-X2 <- mvrnorm(100, mu = c(3, 3), Sigma = diag(1, nrow = 2))
+n <- 150
+X1 <- mvrnorm(n, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
+X2 <- mvrnorm(n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
 X <- rbind(X1, X2)
 
-y <- rep(c(1, 2), c(100, 100))
+y <- rep(c(1, 2), c(n, n))
 s <- Sys.time()
-svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 0.1, solver = "primal",
-                                max.steps = 5000, batch_size = 10)
+svm_ovr_model <- OVR_Classifier(X, y, hinge_svm, C = 120, solver = "primal",
+                                max.steps = 500, batch_size = 1)
 e <- Sys.time()
 print(e - s)
 res <- predict(svm_ovr_model, X)
@@ -56,17 +57,17 @@ cat(model1$coef, "\n")
 cross_validation(OVR_Classifier, X, y, bin_model = hinge_svm, shuffle = TRUE,
                  metric = accuracy, K = 5, max.steps = 50)
 
-C <- rep(0, 4)
-for (i in 1:4) {
+C <- rep(-8, 8)
+for (i in 0:17) {
   C[i] <- 2^(i)
 }
 param_list <- list("C" = C, "gamma " = C)
 
-data("iris")
-X <- iris[ ,1:4]
-y <- iris[ ,5]
-grid_search_cv(OVR_Classifier, X, y, metric = accuracy,
+s <- Sys.time()
+grid_search_cv(hinge_svm, X, y, metric = accuracy,
                param_list = param_list, seed = 1234, K = 5,
-               max.steps = 5000, bin_model = hinge_svm, threads.num = 2,
-               solver = "primal",
+               max.steps = 500, threads.num = 2,
+               solver = "primal", randx = 0.1, batch_size = 1,
                kernel = "rbf")
+e <- Sys.time()
+print(e - s)
