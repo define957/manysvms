@@ -6,7 +6,7 @@ hinge_svm_dual_solver <- function (KernelX, y, C = 1,
   e <- matrix(1, nrow = n)
   lb <- matrix(0, nrow = n)
   ub <- matrix(C, nrow = n)
-  
+
   alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp)$x
   coef <- D %*% alphas
   BaseDualHingeSVMClassifier <- list(coef = as.matrix(coef))
@@ -21,13 +21,13 @@ hinge_svm_primal_solver <- function (KernelX, y, C = 1, eps = 1e-5,
                                      optimizer = pegasos, ...) {
   sgHinge <- function(KernelX, y, v, ...) { # sub-gradient of hinge loss function
     C <- list(...)$C
-    xn <- nrow(X)
-    xp <- ncol(X)
+    xn <- nrow(KernelX)
+    xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
-    u <- 1 - y * (X %*% v)
+    u <- 1 - y * (KernelX %*% v)
     u[u <= 0] <- 0
     u[u > 0] <- 1
-    sg <- v - (C/xn) * t(X)%*%(u*y)
+    sg <- v - (C/xn) * t(KernelX)%*%(u*y)
     return(sg)
   }
   xn <- nrow(KernelX)
@@ -92,7 +92,7 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     KernelX <- X
   } else if (kernel != "linear" & solver == "primal"){
     if(randx > 0 ){
-      randX = x[sample(nrow(X), floor(randx*nrow(X))),] 
+      randX = X[sample(nrow(X), floor(randx*nrow(X))),]
     }
     KernelX <- kernel_function(X, randX,
                                kernel.type = kernel,
