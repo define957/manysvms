@@ -105,7 +105,6 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
   }
-  print(dim(KernelX))
   if (solver == "primal") {
     solver.res <- hinge_svm_primal_solver(KernelX, y, C, eps,
                                           max.steps, batch_size,
