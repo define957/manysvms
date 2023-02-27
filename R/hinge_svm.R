@@ -6,7 +6,7 @@ hinge_svm_dual_solver <- function (KernelX, y, C = 1,
   e <- matrix(1, nrow = n)
   lb <- matrix(0, nrow = n)
   ub <- matrix(C, nrow = n)
-
+  
   alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp)$x
   coef <- D %*% alphas
   BaseDualHingeSVMClassifier <- list(coef = as.matrix(coef))
@@ -15,11 +15,11 @@ hinge_svm_dual_solver <- function (KernelX, y, C = 1,
 }
 
 
-hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
-                                     max.steps = 80, batch_size = nrow(X) / 10,
+hinge_svm_primal_solver <- function (KernelX, y, C = 1, eps = 1e-5,
+                                     max.steps = 80, batch_size = nrow(KernelX) / 10,
                                      seed = NULL, sample_seed = NULL,
                                      optimizer = pegasos, ...) {
-  sgHinge <- function(X, y, v, ...) { # sub-gradient of hinge loss function
+  sgHinge <- function(KernelX, y, v, ...) { # sub-gradient of hinge loss function
     C <- list(...)$C
     xn <- nrow(X)
     xp <- ncol(X)
@@ -30,10 +30,10 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
     sg <- v - (C/xn) * t(X)%*%(u*y)
     return(sg)
   }
-  xn <- nrow(X)
-  xp <- ncol(X)
+  xn <- nrow(KernelX)
+  xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  wt <- optimizer(X, y, w0, batch_size, max.steps, sgHinge, sample_seed, C = C, ...)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgHinge, sample_seed, C = C, ...)
   wnorm <- norm(wt[1:xp], type = "2")
   BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalHingeSVMClassifier) <- "BasePrimalHingeSVMClassifier"
@@ -64,6 +64,8 @@ hinge_svm_primal_solver <- function (X, y, C = 1, eps = 1e-5,
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
+#' @param optimizer default primal optimizer pegasos.
+#' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
 #' @param ... unused parameters.
 #' @return return \code{HingeSVMClassifier} object.
 #' @export
@@ -71,7 +73,7 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                        eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
                        solver = c("dual", "primal"), rcpp = TRUE,
-                       fit_intercept = TRUE, optimizer = pegasos, ...) {
+                       fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
@@ -88,7 +90,16 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
-  } else {
+  } else if (kernel != "linear" & solver == "primal"){
+    if(randx > 0 ){
+      randX = x[sample(nrow(X), floor(randx*nrow(X))),] 
+    }
+    KernelX <- kernel_function(X, randX,
+                               kernel.type = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               rcpp = rcpp)
+    X <- randx
+  } else if (solver == "dual"){
     KernelX <- kernel_function(X, X,
                                kernel.type = kernel,
                                gamma = gamma, degree = degree, coef0 = coef0,
@@ -103,11 +114,11 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                         max.steps, rcpp)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
-                             "C" = C, "kernel" = kernel,
-                             "gamma" = gamma, "degree" = degree, "coef0" = coef0,
-                             "solver" = solver, "coef" = solver.res$coef,
-                             "fit_intercept" = fit_intercept,
-                             "rcpp" = rcpp)
+                        "C" = C, "kernel" = kernel,
+                        "gamma" = gamma, "degree" = degree, "coef0" = coef0,
+                        "solver" = solver, "coef" = solver.res$coef,
+                        "fit_intercept" = fit_intercept,
+                        "rcpp" = rcpp)
   class(SVMClassifier) <- "SVMClassifier"
   return(SVMClassifier)
 }
@@ -141,3 +152,7 @@ predict.SVMClassifier <- function(object, X, ...) {
   decf[decf < 0] <- object$class_set[2]
   return(decf)
 }
+
+
+
+
