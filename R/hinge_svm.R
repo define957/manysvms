@@ -102,14 +102,14 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     solver.res <- hinge_svm_dual_solver(KernelX, y, C, eps,
                                         max.steps, rcpp)
   }
-  HingeSVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
+  SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                              "C" = C, "kernel" = kernel,
                              "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                              "solver" = solver, "coef" = solver.res$coef,
                              "fit_intercept" = fit_intercept,
                              "rcpp" = rcpp)
-  class(HingeSVMClassifier) <- "HingeSVMClassifier"
-  return(HingeSVMClassifier)
+  class(SVMClassifier) <- "SVMClassifier"
+  return(SVMClassifier)
 }
 
 
@@ -121,7 +121,7 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
 #' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
-predict.HingeSVMClassifier <- function(object, X, ...) {
+predict.SVMClassifier <- function(object, X, ...) {
   if (object$fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
