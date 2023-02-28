@@ -15,7 +15,8 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
                              shuffle = TRUE, seed = NULL, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
-  index = c(0:K)*nrow(data)/K
+  n <- nrow(X)
+  index = c(0:K)*n/K
   if (is.null(seed) ==FALSE) {
     set.seed(seed)
   }
@@ -73,16 +74,16 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
   cv_res <- foreach::foreach(i = 1:n_param, .combine = rbind,
                              .packages = c('manysvms', 'Rcpp'),
                              .options.snow = opts) %dopar% {
-                               temp <- data.frame(param_grid[i, ])
-                               colnames(temp) <- param_names
-                               params_cv <- append(list("model" = model,
-                                                        "X" = X, "y" = y, "K" = K,
-                                                        "metric" = metric,
-                                                        "predict_func" =  predict_func,
-                                                        "shuffle" = shuffle, "seed" = seed, ...),
-                                                   temp)
-                               cv_res <- do.call("cross_validation", params_cv)
-                             }
+    temp <- data.frame(param_grid[i, ])
+    colnames(temp) <- param_names
+    params_cv <- append(list("model" = model,
+                              "X" = X, "y" = y, "K" = K,
+                              "metric" = metric,
+                              "predict_func" =  predict_func,
+                              "shuffle" = shuffle, "seed" = seed, ...),
+                               temp)
+    cv_res <- do.call("cross_validation", params_cv)
+  }
   close(pb)
   parallel::stopCluster(cl)
   return(cv_res)
