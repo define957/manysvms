@@ -86,5 +86,7 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
   }
   close(pb)
   parallel::stopCluster(cl)
+  cv_res = cbind(apply(cv_res, 1, mean),cv_res,param_grid)
+  colnames(cv_res) = c("mean accu", "1", "2", "3", "4", "5", names(param_list))
   return(cv_res)
 }
