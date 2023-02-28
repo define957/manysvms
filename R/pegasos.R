@@ -27,7 +27,7 @@ pegasos <- function(X, y, w, m, max.steps, fx, sample_seed, ...) {
     # update parameter
     dF <- fx(xm, ym, v, ...)
     v <- v - (C/t)*dF
-   # v <- min(1, sqrt(C)/norm(v, type = 2)*v)
+    v <- min(1, sqrt(C)/norm(v, type = 2)*v)
   }
   return(v)
 }
