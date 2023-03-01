@@ -2,19 +2,19 @@
 % Please edit documentation in R/hinge_svm.R
 \name{predict.SVMClassifier}
 \alias{predict.SVMClassifier}
-\title{Predict Method for Hinge Support Vector Machine}
+\title{Predict Method for Support Vector Machine}
 \usage{
 \method{predict}{SVMClassifier}(object, X, ...)
 }
 \arguments{
-\item{object}{a fitted object of class inheriting from \code{HingeSVMClassifier}.}
+\item{object}{a fitted object of class inheriting from \code{SVMClassifier}.}
 
 \item{X}{new data for predicting.}
 
 \item{...}{unused parameter.}
 }
 \description{
-Predict Method for Hinge Support Vector Machine
+Predict Method for Support Vector Machine
 }
 \author{
 Zhang Jiaqi
