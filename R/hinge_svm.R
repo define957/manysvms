@@ -148,8 +148,10 @@ predict.SVMClassifier <- function(object, X, ...) {
   }
   fx <- KernelX %*% object$coef
   decf <- sign(fx)
-  decf[decf > 0] <- object$class_set[1]
-  decf[decf < 0] <- object$class_set[2]
+  idx_pos <- which(decf > 0)
+  idx_neg <- which(decf < 0)
+  decf[idx_pos] <- object$class_set[1]
+  decf[idx_neg] <- object$class_set[2]
   return(decf)
 }
 
