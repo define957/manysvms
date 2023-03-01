@@ -81,7 +81,7 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   y[idx] <- 1
   y[-idx] <- -1
   if (length(class_set) > 2) {
-    cat(errorCondition("Error: The number of class should less 2!"))
+    stop("The number of class should less 2!")
   }
   kernel <- match.arg(kernel)
   solver <- match.arg(solver)
@@ -91,7 +91,7 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
   } else if (kernel != "linear" & solver == "primal"){
-    if(randx > 0 ){
+    if (randx > 0) {
       randX = X[sample(nrow(X), floor(randx*nrow(X))),]
     }
     KernelX <- kernel_function(X, randX,
@@ -124,10 +124,10 @@ hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
 }
 
 
-#' Predict Method for Hinge Support Vector Machine
+#' Predict Method for Support Vector Machine
 #'
 #' @author Zhang Jiaqi
-#' @param object a fitted object of class inheriting from \code{HingeSVMClassifier}.
+#' @param object a fitted object of class inheriting from \code{SVMClassifier}.
 #' @param X new data for predicting.
 #' @param ... unused parameter.
 #' @importFrom stats predict
@@ -154,7 +154,3 @@ predict.SVMClassifier <- function(object, X, ...) {
   decf[idx_neg] <- object$class_set[2]
   return(decf)
 }
-
-
-
-
