@@ -33,27 +33,28 @@ sigmoid_svm_primal_solver <- function (KernelX, y, C = 1, update_deltak,
                                        max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                        seed = NULL, sample_seed = NULL,
                                        optimizer = pegasos, ...) {
-  sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, ...) { # sub-gradient of Sigmoid loss function
+  sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, At, ...) { # sub-gradient of Sigmoid loss function
     C <- list(...)$C
-    D <- diag(as.matrix(y))
+    D <- diag(as.vector(y))
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
-    u <- 1 - D %*% (KernelX %*% v) - epsilon
+    u <- 1 - D %*% KernelX %*% v - epsilon
     u[u < 0] <- 0
     u[u >= 0] <- 1
-    sg <- v - lambda*(C/xn) * t(KernelX)%*%(u*y) + C/xn*t(KernelX)%*%D%*%deltak
+    sg <- v - lambda*(C/xn) * t(KernelX)%*%(u*y) + C/xn*t(KernelX)%*%D%*%deltak[At, ]
     return(sg)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   D <- diag(as.vector(y))
   wt <- matrix(0, nrow = xp, ncol = 1)
-  for (i in 1:cccp.steps)
-    delta_k <- update_deltak(KernelX, D, wt, epsilon, lambda)
-  wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
-                  sgSigmoid, sample_seed, C = C,
-                  epsilon = epsilon, lambda = lambda, delta_k = delta_k, ...)
+  for (i in 1:cccp.steps) {
+    deltak <- update_deltak(KernelX, D, wt, epsilon, lambda)
+    wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
+                    sgSigmoid, sample_seed, C = C,
+                    epsilon = epsilon, lambda = lambda, deltak = deltak, ...)
+  }
   BasePrimalSigmoidSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalSigmoidSVMClassifier) <- "BasePrimalSigmoidSVMClassifier"
   return(BasePrimalSigmoidSVMClassifier)
@@ -90,7 +91,7 @@ sigmoid_svm_primal_solver <- function (KernelX, y, C = 1, update_deltak,
 #' @param optimizer default primal optimizer pegasos.
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
 #' @param ... unused parameters.
-#' @return return \code{HingeSVMClassifier} object.
+#' @return return \code{SVMClassifier} object.
 #' @export
 sigmoid_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
@@ -131,7 +132,7 @@ sigmoid_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                rcpp = rcpp)
   }
   update_deltak <- function (KernelX, D, u, epsilon, lambda) {
-    f <- 1 - D %*% t(u)%*%KernelX - epsilon
+    f <- 1 - D %*% KernelX %*% u - epsilon
     idx <- which(f >= 0)
     ef <- exp(-lambda*f)
     delta_k <- lambda*(1 - 2*ef/((1 + ef)^2))
