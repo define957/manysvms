@@ -23,9 +23,9 @@ pegasos <- function(X, y, w, m, max.steps, fx, sample_seed, ...) {
     At <- sample(nx, m)
     xm <- X[At, ]
     dim(xm) <- c(m, px)
-    ym <- y[At]
+    ym <- as.matrix(y[At])
     # update parameter
-    dF <- fx(xm, ym, v, At, ...)
+    dF <- fx(xm, ym, v, At = At, ...)
     v <- v - (C/t)*dF
     v <- min(1, sqrt(C)/norm(v, type = "2"))*v
   }
