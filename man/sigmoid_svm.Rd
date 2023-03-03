@@ -73,7 +73,7 @@ the function will evaluates intercept.}
 \item{...}{unused parameters.}
 }
 \value{
-return \code{HingeSVMClassifier} object.
+return \code{SVMClassifier} object.
 }
 \description{
 \code{sigmoid_svm} is an R implementation of Sigmoid-SVM
