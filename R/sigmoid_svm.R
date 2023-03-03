@@ -35,14 +35,14 @@ sigmoid_svm_primal_solver <- function (KernelX, y, C = 1, update_deltak,
                                        optimizer = pegasos, ...) {
   sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, At, ...) { # sub-gradient of Sigmoid loss function
     C <- list(...)$C
-    D <- diag(as.vector(y))
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
-    u <- 1 - D %*% KernelX %*% v - epsilon
+    u <- 1 - y*(KernelX %*% v) - epsilon
     u[u < 0] <- 0
     u[u >= 0] <- 1
-    sg <- v - lambda*(C/xn) * t(KernelX)%*%(u*y) + C/xn*t(KernelX)%*%D%*%deltak[At, ]
+    sg <- v - lambda*(C/xn) * t(KernelX) %*% (u*y) +
+          C/xn*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
   }
   xn <- nrow(KernelX)
@@ -132,7 +132,7 @@ sigmoid_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                rcpp = rcpp)
   }
   update_deltak <- function (KernelX, D, u, epsilon, lambda) {
-    f <- 1 - D %*% KernelX %*% u - epsilon
+    f <- 1 - diag(D)*(KernelX %*% u) - epsilon
     idx <- which(f >= 0)
     ef <- exp(-lambda*f)
     delta_k <- lambda*(1 - 2*ef/((1 + ef)^2))
