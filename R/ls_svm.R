@@ -1,9 +1,8 @@
-ls_svm_dual_solver <- function (KernelX, y, C = 1,
-                                   eps = 1e-5, max.steps = 80, rcpp = TRUE) {
+ls_svm_dual_solver <- function (KernelX, y, C = 1, rcpp = TRUE) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- D %*% KernelX %*% D
-  m <- nrow(X)
+  m <- nrow(KernelX)
   alphas <- solve(H + diag(rep(1/C, m)), matrix(1, nrow = m))
   coef <- D %*% alphas
   BaseDualLeastSquaresSVMClassifier <- list(coef = as.matrix(coef))
