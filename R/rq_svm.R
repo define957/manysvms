@@ -140,7 +140,7 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     idx <- which(f >= 0)
     delta_k <- matrix(0, nrow = nrow(KernelX))
     delta_k[idx] <- eta*(1 - exp(-f[idx]/lambda))/lambda
-    delta_k[-idx] <- -tau*eta*(1 - exp(-f[idx]/lambda))/lambda
+    delta_k[-idx] <- -tau*eta*(1 - exp(tau*f[-idx]/lambda))/lambda
     return(delta_k)
   }
   if (solver == "primal") {
