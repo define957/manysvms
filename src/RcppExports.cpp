@@ -2,6 +2,7 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include <RcppArmadillo.h>
+#include <RcppEigen.h>
 #include <Rcpp.h>
 
 using namespace Rcpp;
@@ -56,11 +57,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_spd_solve
+SEXP cpp_spd_solve(Eigen::MatrixXd A, Eigen::MatrixXd b);
+RcppExport SEXP _manysvms_cpp_spd_solve(SEXP ASEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_spd_solve(A, b));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_manysvms_cpp_clip_dcd_optimizer", (DL_FUNC) &_manysvms_cpp_clip_dcd_optimizer, 7},
     {"_manysvms_cpp_rbf_kernel", (DL_FUNC) &_manysvms_cpp_rbf_kernel, 3},
     {"_manysvms_cpp_poly_kernel", (DL_FUNC) &_manysvms_cpp_poly_kernel, 5},
+    {"_manysvms_cpp_spd_solve", (DL_FUNC) &_manysvms_cpp_spd_solve, 2},
     {NULL, NULL, 0}
 };
 

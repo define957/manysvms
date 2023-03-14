@@ -13,3 +13,7 @@ cpp_poly_kernel <- function(x1, x2, gamma, degree, coef0) {
     .Call(`_manysvms_cpp_poly_kernel`, x1, x2, gamma, degree, coef0)
 }
 
+cpp_spd_solve <- function(A, b) {
+    .Call(`_manysvms_cpp_spd_solve`, A, b)
+}
+
