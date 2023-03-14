@@ -54,7 +54,7 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   D <- diag(as.vector(y))
   wt <- matrix(0, nrow = xp, ncol = 1)
   for (i in 1:cccp.steps) {
-    deltak <- update_deltak(KernelX, D, wt, tau, lambda)
+    deltak <- update_deltak(D %*% KernelX, D, wt, tau, lambda)
     wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
                     sgRq, sample_seed, C = C,
                     tau = tau, lambda = lambda, deltak = deltak, ...)
@@ -138,7 +138,7 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   update_deltak <- function(KernelX, D, u, tau, lambda) {
     eta <- 1/(1 - exp(-1/lambda))
-    f <- 1 - diag(D)*(KernelX %*% u)
+    f <- 1 - diag(D) * t(t(u) %*% KernelX) - epsilon
     idx <- which(f >= 0)
     delta_k <- matrix(0, nrow = nrow(KernelX))
     delta_k[idx] <- eta*(1 - exp(-f[idx]/lambda))/lambda
