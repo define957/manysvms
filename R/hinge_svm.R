@@ -27,14 +27,13 @@ hinge_svm_primal_solver <- function (KernelX, y, C = 1, eps = 1e-5,
     u <- 1 - y * (KernelX %*% v)
     u[u <= 0] <- 0
     u[u > 0] <- 1
-    sg <- v - (C/xn) * t(KernelX)%*%(u*y)
+    sg <- v - (C/xn) * t(KernelX) %*% (u*y)
     return(sg)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
   wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgHinge, sample_seed, C = C, ...)
-  wnorm <- norm(wt[1:xp], type = "2")
   BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalHingeSVMClassifier) <- "BasePrimalHingeSVMClassifier"
   return(BasePrimalHingeSVMClassifier)
@@ -91,7 +90,7 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
-  } else if (kernel != "linear" & solver == "primal"){
+  } else if (kernel != "linear" & solver == "primal") {
     if (randx > 0) {
       randX = X[sample(nrow(X), floor(randx*nrow(X))),]
     }
@@ -100,7 +99,7 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
     X <- randX
-  } else if (solver == "dual"){
+  } else if (solver == "dual") {
     KernelX <- kernel_function(X, X,
                                kernel.type = kernel,
                                gamma = gamma, degree = degree, coef0 = coef0,
@@ -110,7 +109,7 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     solver.res <- hinge_svm_primal_solver(KernelX, y, C, eps,
                                           max.steps, batch_size,
                                           optimizer, ...)
-  } else if(solver == "dual") {
+  } else if (solver == "dual") {
     solver.res <- hinge_svm_dual_solver(KernelX, y, C, eps,
                                         max.steps, rcpp)
   }
