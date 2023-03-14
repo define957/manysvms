@@ -1,7 +1,7 @@
 sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
-                                     epsilon = 0, lambda = 1,
-                                     eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
-                                     rcpp = TRUE) {
+                                    epsilon = 0, lambda = 1,
+                                    eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
+                                    rcpp = TRUE) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- D %*% KernelX %*% D
@@ -26,11 +26,11 @@ sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
 
 
 sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
-                                       epsilon = 0, lambda = 1,
-                                       eps = 1e-5, eps.cccp = 1e-2,
-                                       max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
-                                       seed = NULL, sample_seed = NULL,
-                                       optimizer = pegasos, ...) {
+                                      epsilon = 0, lambda = 1,
+                                      eps = 1e-5, eps.cccp = 1e-2,
+                                      max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
+                                      seed = NULL, sample_seed = NULL,
+                                      optimizer = pegasos, ...) {
   sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, At, ...) { # sub-gradient of Sigmoid loss function
     C <- list(...)$C
     xn <- nrow(KernelX)
@@ -40,7 +40,7 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     u[u < 0] <- 0
     u[u >= 0] <- 1
     sg <- v - lambda*(C/xn) * t(KernelX) %*% (u*y) +
-          C/xn*t(KernelX) %*% (y*deltak[At, ])
+      C/xn*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
   }
   xn <- nrow(KernelX)
@@ -92,12 +92,12 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
 #' @return return \code{SVMClassifier} object.
 #' @export
 sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
-                         gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                         epsilon = 0, lambda = 1,
-                         eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
-                         batch_size = nrow(X) / 10,
-                         solver = c("dual", "primal"), rcpp = TRUE,
-                         fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
+                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                        epsilon = 0, lambda = 1,
+                        eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
+                        batch_size = nrow(X) / 10,
+                        solver = c("dual", "primal"), rcpp = TRUE,
+                        fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
@@ -129,8 +129,8 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
   }
-  update_deltak <- function(KernelX, D, u, epsilon, lambda) {
-    f <- 1 - diag(D) * t(t(u) %*% kernelx) - epsilon
+  update_deltak <- function( KernelX, D, u, epsilon, lambda) {
+    f <- 1 - diag(D) * t(t(u) %*% KernelX) - epsilon
     idx <- which(f >= 0)
     ef <- exp(-lambda*f)
     delta_k <- lambda*(1 - 2*ef/((1 + ef)^2))
