@@ -1,4 +1,4 @@
-sigmoid_svm_dual_solver <- function (KernelX, y, C = 1, update_deltak,
+sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
                                      epsilon = 0, lambda = 1,
                                      eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
                                      rcpp = TRUE) {
@@ -7,27 +7,25 @@ sigmoid_svm_dual_solver <- function (KernelX, y, C = 1, update_deltak,
   H <- D %*% KernelX %*% D
   e <- matrix(1, nrow = n, ncol = 1)
   u0 <- matrix(0, nrow = n, ncol = 1)
-  delta_k_old <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {
     delta_k <- update_deltak(KernelX, D, u0, epsilon, lambda)
     lb <- -C*delta_k
     ub <- -C*delta_k + lambda*C
-    u <- clip_dcd_optimizer(H, (1-epsilon)*e, lb, ub, eps, max.steps, rcpp)$x
+    u <- clip_dcd_optimizer(H, (1 - epsilon)*e, lb, ub, eps, max.steps, rcpp)$x
     if (norm(u - u0, type = "2") < eps.cccp) {
       break
     } else {
-      delta_k_old <- delta_k
       u0 <- u
     }
   }
-  coef <- D %*% u
+  coef <- D %*% u0
   BaseDualSigmoidSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualSigmoidSVMClassifier) <- "BaseDualSigmoidSVMClassifier"
   return(BaseDualSigmoidSVMClassifier)
 }
 
 
-sigmoid_svm_primal_solver <- function (KernelX, y, C = 1, update_deltak,
+sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                        epsilon = 0, lambda = 1,
                                        eps = 1e-5, eps.cccp = 1e-2,
                                        max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
@@ -93,7 +91,7 @@ sigmoid_svm_primal_solver <- function (KernelX, y, C = 1, update_deltak,
 #' @param ... unused parameters.
 #' @return return \code{SVMClassifier} object.
 #' @export
-sigmoid_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
+sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                          epsilon = 0, lambda = 1,
                          eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
@@ -116,7 +114,7 @@ sigmoid_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
-  } else if (kernel != "linear" & solver == "primal"){
+  } else if (kernel != "linear" & solver == "primal") {
     if (randx > 0) {
       randX = X[sample(nrow(X), floor(randx*nrow(X))),]
     }
@@ -125,14 +123,15 @@ sigmoid_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
     X <- randX
-  } else if (solver == "dual"){
+  } else if (solver == "dual") {
     KernelX <- kernel_function(X, X,
                                kernel.type = kernel,
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
   }
-  update_deltak <- function (KernelX, D, u, epsilon, lambda) {
-    f <- 1 - diag(D)*(KernelX %*% u) - epsilon
+  update_deltak <- function(KernelX, D, u, epsilon, lambda) {
+    Dkernelx = D %*% KernelX
+    f <- 1 - diag(D) * (t(u) %*% Dkernelx) - epsilon
     idx <- which(f >= 0)
     ef <- exp(-lambda*f)
     delta_k <- lambda*(1 - 2*ef/((1 + ef)^2))
@@ -144,7 +143,7 @@ sigmoid_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                             epsilon, lambda,
                                             eps, eps.cccp, max.steps, cccp.steps, batch_size,
                                             optimizer, ...)
-  } else if(solver == "dual") {
+  } else if (solver == "dual") {
     solver.res <- sigmoid_svm_dual_solver(KernelX, y, C, update_deltak,
                                           epsilon, lambda, eps, eps.cccp,
                                           max.steps, cccp.steps, rcpp)
