@@ -138,7 +138,7 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   update_deltak <- function(KernelX, D, u, tau, lambda) {
     eta <- 1/(1 - exp(-1/lambda))
-    f <- 1 - diag(D) * t(t(u) %*% KernelX) - epsilon
+    f <- 1 - diag(D) * t(t(u) %*% KernelX)
     idx <- which(f >= 0)
     delta_k <- matrix(0, nrow = nrow(KernelX))
     delta_k[idx] <- eta*(1 - exp(-f[idx]/lambda))/lambda
