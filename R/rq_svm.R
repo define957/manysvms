@@ -10,7 +10,7 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   e <- matrix(1, nrow = n, ncol = 1)
   delta_k_old <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {
-    delta_k <- update_deltak(KernelX, D, u0, tau, lambda)
+    delta_k <- update_deltak(KernelX, D, D %*% u0, tau, lambda)
     lb <- -C*delta_k - C*eta*tau/lambda
     ub <- -C*delta_k + C*eta/lambda
     u <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp,
@@ -41,9 +41,10 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
-    u <- 1 - y*(KernelX %*% v)
-    u[u < 0] <- tau
-    u[u >= 0] <- 1
+    f <- 1 - y*(KernelX %*% v)
+    u <- matrix(0, nrow = xn)
+    u[f < 0] <- tau
+    u[f >= 0] <- 1
     sg <- v - eta*(C/xn) * t(KernelX) %*% (u*y)/lambda +
       C/xn*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
@@ -109,6 +110,7 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   idx <- which(y == class_set[1])
   y[idx] <- 1
   y[-idx] <- -1
+  y <- as.matrix(as.numeric(y))
   if (length(class_set) > 2) {
     stop("The number of class should less 2!")
   }
