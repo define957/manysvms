@@ -69,17 +69,18 @@ hinge_svm_primal_solver <- function (KernelX, y, C = 1, eps = 1e-5,
 #' @param ... unused parameters.
 #' @return return \code{HingeSVMClassifier} object.
 #' @export
-hinge_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
-                       gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                       eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                       solver = c("dual", "primal"), rcpp = TRUE,
-                       fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
+hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
+                      gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                      eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
+                      solver = c("dual", "primal"), rcpp = TRUE,
+                      fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
   idx <- which(y == class_set[1])
   y[idx] <- 1
   y[-idx] <- -1
+  y <- as.matrix(as.numeric(y))
   if (length(class_set) > 2) {
     stop("The number of class should less 2!")
   }
