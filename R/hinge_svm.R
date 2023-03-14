@@ -1,5 +1,5 @@
-hinge_svm_dual_solver <- function (KernelX, y, C = 1,
-                                   eps = 1e-5, max.steps = 80, rcpp = TRUE) {
+hinge_svm_dual_solver <- function(KernelX, y, C = 1,
+                                  eps = 1e-5, max.steps = 80, rcpp = TRUE) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- D %*% KernelX %*% D
@@ -15,10 +15,10 @@ hinge_svm_dual_solver <- function (KernelX, y, C = 1,
 }
 
 
-hinge_svm_primal_solver <- function (KernelX, y, C = 1, eps = 1e-5,
-                                     max.steps = 80, batch_size = nrow(KernelX) / 10,
-                                     seed = NULL, sample_seed = NULL,
-                                     optimizer = pegasos, ...) {
+hinge_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
+                                    max.steps = 80, batch_size = nrow(KernelX) / 10,
+                                    seed = NULL, sample_seed = NULL,
+                                    optimizer = pegasos, ...) {
   sgHinge <- function(KernelX, y, v, ...) { # sub-gradient of hinge loss function
     C <- list(...)$C
     xn <- nrow(KernelX)
