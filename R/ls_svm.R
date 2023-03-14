@@ -1,9 +1,12 @@
-ls_svm_dual_solver <- function (KernelX, y, C = 1, rcpp = TRUE) {
+ls_svm_dual_solver <- function(KernelX, y, C = 1, rcpp = TRUE) {
   D <- diag(as.vector(y))
-  n <- nrow(KernelX)
   H <- D %*% KernelX %*% D
   m <- nrow(KernelX)
-  alphas <- solve(H + diag(rep(1/C, m)), matrix(1, nrow = m))
+  if (rcpp == TRUE) {
+    alphas <- cpp_chol_solve(H + diag(1/C, m), matrix(1, nrow = m))
+  } else {
+    alphas <- chol2inv(chol((H + diag(1/C, m)))) %*% matrix(1, nrow = m)
+  }
   coef <- D %*% alphas
   BaseDualLeastSquaresSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualLeastSquaresSVMClassifier) <- "BaseDualLeastSquaresSVMClassifier"
@@ -11,24 +14,23 @@ ls_svm_dual_solver <- function (KernelX, y, C = 1, rcpp = TRUE) {
 }
 
 
-ls_svm_primal_solver <- function (KernelX, y, C = 1, eps = 1e-5,
-                                     max.steps = 80, batch_size = nrow(KernelX) / 10,
-                                     seed = NULL, sample_seed = NULL,
-                                     optimizer = pegasos, ...) {
+ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
+                                 max.steps = 80, batch_size = nrow(KernelX) / 10,
+                                 seed = NULL, sample_seed = NULL,
+                                 optimizer = pegasos, ...) {
    gLeastSquares <- function(KernelX, y, v, ...) { # gradient of Least Squares loss function
     C <- list(...)$C
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
     u <- 1 - y * (KernelX %*% v)
-    sg <- v - (C/xn) * t(KernelX)%*%(u*y)
+    sg <- v - (C/xn) * t(KernelX) %*% (u*y)
     return(sg)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
   wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gLeastSquares, sample_seed, C = C, ...)
-  wnorm <- norm(wt[1:xp], type = "2")
   BasePrimalLeastSquaresSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalLeastSquaresSVMClassifier) <- "BasePrimalLeastSquaresSVMClassifier"
   return(BasePrimalLeastSquaresSVMClassifier)
@@ -63,11 +65,11 @@ ls_svm_primal_solver <- function (KernelX, y, C = 1, eps = 1e-5,
 #' @param ... unused parameters.
 #' @return return \code{SVMClassifier} object.
 #' @export
-ls_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
-                    gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                    eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                    solver = c("dual", "primal"), rcpp = TRUE,
-                    fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
+ls_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
+                   gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                   eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
+                   solver = c("dual", "primal"), rcpp = TRUE,
+                   fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
@@ -84,7 +86,7 @@ ls_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
-  } else if (kernel != "linear" & solver == "primal"){
+  } else if (kernel != "linear" & solver == "primal") {
     if (randx > 0) {
       randX = X[sample(nrow(X), floor(randx*nrow(X))),]
     }
@@ -93,7 +95,7 @@ ls_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
     X <- randX
-  } else if (solver == "dual"){
+  } else if (solver == "dual") {
     KernelX <- kernel_function(X, X,
                                kernel.type = kernel,
                                gamma = gamma, degree = degree, coef0 = coef0,
@@ -103,7 +105,7 @@ ls_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     solver.res <- ls_svm_primal_solver(KernelX, y, C, eps,
                                        max.steps, batch_size,
                                        optimizer, ...)
-  } else if(solver == "dual") {
+  } else if (solver == "dual") {
     solver.res <- ls_svm_dual_solver(KernelX, y, C, rcpp)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,

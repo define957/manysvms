@@ -6,7 +6,7 @@ using namespace Eigen;
 // [[Rcpp::depends(RcppEigen)]]
 
 //[[Rcpp::export]]
-SEXP cpp_spd_solve (Eigen::MatrixXd A, Eigen::MatrixXd b) {
+SEXP cpp_chol_solve (Eigen::MatrixXd A, Eigen::MatrixXd b) {
   Eigen::MatrixXd res = A.llt().solve(b);
   return Rcpp::wrap(res);
 }
