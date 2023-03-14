@@ -6,7 +6,7 @@ pin_svm_dual_solver <- function (KernelX, y, C = 1, tau = 0.5,
   e <- matrix(1, nrow = n)
   lb <- matrix(-tau*C, nrow = n)
   ub <- matrix(C, nrow = n)
-  
+
   alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp)$x
   coef <- D %*% alphas
   BaseDualPinSVMClassifier <- list(coef = as.matrix(coef))
@@ -81,6 +81,7 @@ pin_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   idx <- which(y == class_set[1])
   y[idx] <- 1
   y[-idx] <- -1
+  y <- as.matrix(as.numeric(y))
   if (length(class_set) > 2) {
     stop("The number of class should less 2!")
   }
