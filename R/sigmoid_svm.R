@@ -131,7 +131,7 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   update_deltak <- function(KernelX, D, u, epsilon, lambda) {
     Dkernelx = D %*% KernelX
-    f <- 1 - diag(D) * (t(u) %*% Dkernelx) - epsilon
+    f <- 1 - diag(D) * t(t(u) %*% Dkernelx) - epsilon
     idx <- which(f >= 0)
     ef <- exp(-lambda*f)
     delta_k <- lambda*(1 - 2*ef/((1 + ef)^2))
