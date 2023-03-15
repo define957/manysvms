@@ -1,5 +1,5 @@
-pin_svm_dual_solver <- function (KernelX, y, C = 1, tau = 0.5,
-                                 eps = 1e-5, max.steps = 80, rcpp = TRUE) {
+pin_svm_dual_solver <- function(KernelX, y, C = 1, tau = 0.5,
+                                eps = 1e-5, max.steps = 80, rcpp = TRUE) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- D %*% KernelX %*% D
@@ -15,10 +15,10 @@ pin_svm_dual_solver <- function (KernelX, y, C = 1, tau = 0.5,
 }
 
 
-pin_svm_primal_solver <- function (KernelX, y, C = 1, tau = 0.5, eps = 1e-5,
-                                   max.steps = 80, batch_size = nrow(KernelX) / 10,
-                                   seed = NULL, sample_seed = NULL,
-                                   optimizer = pegasos, ...) {
+pin_svm_primal_solver <- function(KernelX, y, C = 1, tau = 0.5, eps = 1e-5,
+                                  max.steps = 80, batch_size = nrow(KernelX) / 10,
+                                  seed = NULL, sample_seed = NULL,
+                                  optimizer = pegasos, ...) {
   sgpinball <- function(KernelX, y, v, ...) { # sub-gradient of hinge loss function
     C <- list(...)$C
     xn <- nrow(KernelX)
@@ -27,7 +27,7 @@ pin_svm_primal_solver <- function (KernelX, y, C = 1, tau = 0.5, eps = 1e-5,
     u <- 1 - y * (KernelX %*% v)
     u[u <= 0] <- -tau
     u[u > 0] <- 1
-    sg <- v - (C/xn) * t(KernelX)%*%(u*y)
+    sg <- v - (C/xn) * t(KernelX) %*% (u*y)
     return(sg)
   }
   xn <- nrow(KernelX)
@@ -69,12 +69,12 @@ pin_svm_primal_solver <- function (KernelX, y, C = 1, tau = 0.5, eps = 1e-5,
 #' @param ... unused parameters.
 #' @return return \code{SVMClassifier} object.
 #' @export
-pin_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
-                     tau = 0.5,
-                     gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                     eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                     solver = c("dual", "primal"), rcpp = TRUE,
-                     fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
+pin_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
+                    tau = 0.5,
+                    gamma = 1 / ncol(X), degree = 3, coef0 = 0,
+                    eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
+                    solver = c("dual", "primal"), rcpp = TRUE,
+                    fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
@@ -92,7 +92,7 @@ pin_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
-  } else if (kernel != "linear" & solver == "primal"){
+  } else if (kernel != "linear" & solver == "primal") {
     if (randx > 0) {
       randX = X[sample(nrow(X), floor(randx*nrow(X))),]
     }
@@ -101,7 +101,7 @@ pin_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
     X <- randX
-  } else if (solver == "dual"){
+  } else if (solver == "dual") {
     KernelX <- kernel_function(X, X,
                                kernel.type = kernel,
                                gamma = gamma, degree = degree, coef0 = coef0,
@@ -111,7 +111,7 @@ pin_svm <- function (X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     solver.res <- pin_svm_primal_solver(KernelX, y, C, tau, eps,
                                         max.steps, batch_size,
                                         optimizer, ...)
-  } else if(solver == "dual") {
+  } else if (solver == "dual") {
     solver.res <- pin_svm_dual_solver(KernelX, y, C, tau, eps,
                                       max.steps, rcpp)
   }
