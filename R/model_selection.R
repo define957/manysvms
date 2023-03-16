@@ -58,6 +58,7 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
   s <- Sys.time()
   X <- as.matrix(X)
   y <- as.matrix(y)
+  n <- nrow(X)
   if (is.null(seed) == FALSE) {
     set.seed(seed)
   }
