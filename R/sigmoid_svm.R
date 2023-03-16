@@ -8,7 +8,8 @@ sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   e <- matrix(1, nrow = n, ncol = 1)
   u0 <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {
-    delta_k <- update_deltak(D %*% KernelX, D, u0, epsilon, lambda)
+    f <- 1 - H %*% u0 - epsilon
+    delta_k <- update_deltak(f, D, u0, epsilon, lambda)
     lb <- -C*delta_k
     ub <- -C*delta_k + lambda*C
     u <- clip_dcd_optimizer(H, (1 - epsilon)*e, lb, ub, eps, max.steps, rcpp)$x
@@ -48,7 +49,8 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   D <- diag(as.vector(y))
   wt <- matrix(0, nrow = xp, ncol = 1)
   for (i in 1:cccp.steps) {
-    deltak <- update_deltak(KernelX, D, wt, epsilon, lambda)
+    f <- 1 - y*(KernelX %*% wt)
+    deltak <- update_deltak(f, D, wt, epsilon, lambda)
     wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
                     sgSigmoid, sample_seed, C = C,
                     epsilon = epsilon, lambda = lambda, deltak = deltak, ...)
@@ -129,8 +131,7 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
   }
-  update_deltak <- function( KernelX, D, u, epsilon, lambda) {
-    f <- 1 - diag(D) * t(t(u) %*% KernelX) - epsilon
+  update_deltak <- function(f, D, u, epsilon, lambda) {
     idx <- which(f >= 0)
     ef <- exp(-lambda*f)
     delta_k <- lambda*(1 - 2*ef/((1 + ef)^2))

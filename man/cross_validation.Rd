@@ -4,17 +4,7 @@
 \alias{cross_validation}
 \title{K-Fold Cross Validation}
 \usage{
-cross_validation(
-  model,
-  X,
-  y,
-  K = 5,
-  metric,
-  predict_func = predict,
-  shuffle = TRUE,
-  seed = NULL,
-  ...
-)
+cross_validation(model, X, y, K = 5, metric, predict_func = predict, ...)
 }
 \arguments{
 \item{model}{your model.}
@@ -27,11 +17,11 @@ cross_validation(
 
 \item{predict_func}{this parameter receive a function for predict.}
 
+\item{...}{additional parameters for your model.}
+
 \item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle the dataset.}
 
 \item{seed}{random seed for \code{shuffle} option.}
-
-\item{...}{additional parameters for your model.}
 }
 \value{
 return a metric matrix

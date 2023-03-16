@@ -9,8 +9,10 @@ X2 <- mvrnorm(n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
 X <- rbind(X1, X2)
 
 y <- rep(c(1, 2), c(n, n))
-
+s <- Sys.time()
 model1 <- sigmoid_svm(X, y, C = 0.5, epsilon = 0.5, max.steps = 500)
+e <- Sys.time()
+print(e - s)
 w <- t(cbind(X, 1)) %*% model1$coef
 dataXy <- data.frame(X, y)
 dataXy$y <- as.factor(dataXy$y)
@@ -47,21 +49,16 @@ ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
 
 cat(model1$coef, "\n")
 
-lambda <- seq(1, 6)
-epsilon <- c(0, 0.1, 0.2, 0.4)
-C <- matrix(0, nrow = 7)
-for (i in -3:3) {
-  C[i] <- 2^(i)
-}
-param_list <- list("C" = C, "gamma " = C,
+C <- 1
+param_list <- list("C" = C, "gamma " = 1/2,
                    "lambda" = c(1, 2, 3),
                    "epsilon" = 0)
 
 s <- Sys.time()
-grid_search_cv(sigmoid_svm, X, y, metric = accuracy,
-               param_list = param_list, seed = 1234, K = 5,
-               max.steps = 500, threads.num = 2,
-               solver = "primal", randx = 0.1, batch_size = 1,
-               kernel = "rbf")
+gscv <-  grid_search_cv(sigmoid_svm, X, y, metric = accuracy,
+                        param_list = param_list, seed = 1234, K = 5,
+                        max.steps = 500, threads.num = 2,
+                        solver = "primal", randx = 0.1, batch_size = 10,
+                        kernel = "rbf")
 e <- Sys.time()
 print(e - s)

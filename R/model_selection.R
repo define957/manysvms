@@ -12,25 +12,18 @@
 #' @return return a metric matrix
 #' @export
 cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
-                             shuffle = TRUE, seed = NULL, ...) {
+                             ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
   index = c(0:K)*n/K
-  if (is.null(seed) ==FALSE) {
-    set.seed(seed)
-  }
-  if (shuffle == TRUE) {
-    idx <- sample(n)
-    X <- X[idx, ]
-    y <- y[idx]
-  }
+
   metric_mat <- matrix(0, nrow = 1, ncol = K)
   for (i in 1:K) {
-    X_test <- X[c(index[i]:index[i+1]), ]
-    y_test <- y[c(index[i]:index[i+1])]
-    X_train <- X[-c(index[i]:index[i+1]), ]
-    y_train <- y[-c(index[i]:index[i+1])]
+    X_test <- X[c(index[i]:index[i + 1]), ]
+    y_test <- y[c(index[i]:index[i + 1])]
+    X_train <- X[-c(index[i]:index[i + 1]), ]
+    y_train <- y[-c(index[i]:index[i + 1])]
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test)
     metric_mat[i] <- metric(y_test, y_test_hat)
@@ -62,6 +55,17 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                            predict_func = predict,
                            shuffle = TRUE, seed = NULL,
                            threads.num = parallel::detectCores() - 1, ...) {
+  s <- Sys.time()
+  X <- as.matrix(X)
+  y <- as.matrix(y)
+  if (is.null(seed) == FALSE) {
+    set.seed(seed)
+  }
+  if (shuffle == TRUE) {
+    idx <- sample(n)
+    X <- X[idx, ]
+    y <- y[idx]
+  }
   param_grid <- expand.grid(param_list)
   n_param <- nrow(param_grid)
   param_names <- colnames(param_grid)
@@ -80,7 +84,7 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                               "X" = X, "y" = y, "K" = K,
                               "metric" = metric,
                               "predict_func" =  predict_func,
-                              "shuffle" = shuffle, "seed" = seed, ...),
+                               ...),
                                temp)
     cv_res <- do.call("cross_validation", params_cv)
   }
@@ -89,5 +93,28 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
   cv_res = cbind(apply(cv_res, 1, mean), apply(cv_res, 1, sd),
                  cv_res,param_grid)
   colnames(cv_res) = c("avg", "sd", as.character(c(1:K)), names(param_list))
-  return(cv_res)
+  e <- Sys.time()
+  idx.best <- which.max(cv_res$avg)
+  cv_model <- list("results" = cv_res,
+                   "idx.best" = idx.best,
+                   "num.parameters" = n_param,
+                   "K" = K,
+                   "time" = e - s)
+  class(cv_model) <- "cv_model"
+  return(cv_model)
+}
+
+#' Print Method for Grid-Search and Cross Validation Results
+#'
+#' @param x object of class \code{eps.svr}.
+#' @param ... unsed argument.
+#' @export
+print.cv_model <- function(x, ...) {
+  cat("Number of Fold", x$K, "\n")
+  cat("Total Parameters:", x$num.parameters, "\n")
+  cat("Time Cost:", x$time, "\n")
+  cat("Best Avg.:", x$results[x$idx.best, 1], "\n")
+  cat("Best Sd:", x$results[x$idx.best, 2], "\n")
+  cat("Best Parameter:", "\n")
+  print(x$results[x$idx.best, (3 + x$K):ncol(x$results)])
 }
