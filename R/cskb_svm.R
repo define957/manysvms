@@ -5,6 +5,7 @@
 #' @author Li Feihong
 #' @param X,y dataset and label.
 #' @param C plenty term.
+#' @param a,b,c parameters for blinex loss.
 #' @param kernel kernel function. The definitions of various kernel functions are as follows:
 #' \describe{
 #'     \item{linear:}{\eqn{u'v}{u'*v}}
@@ -17,11 +18,8 @@
 #' @param eps the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param batch_size mini-batch size for primal solver.
-#' @param solver \code{"dual"} and \code{"primal"} are available.
-#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
-#' @param optimizer default primal optimizer pegasos.
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
 #' @param ... unused parameters.
 #' @return return \code{HingeSVMClassifier} object.

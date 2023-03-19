@@ -25,6 +25,8 @@ cskb_svm(
 \arguments{
 \item{X, y}{dataset and label.}
 
+\item{a, b, c}{parameters for blinex loss.}
+
 \item{C}{plenty term.}
 
 \item{kernel}{kernel function. The definitions of various kernel functions are as follows:
@@ -52,12 +54,6 @@ the function will evaluates intercept.}
 \item{randx}{parameter for reduce SVM, default \code{randx = 0.1}.}
 
 \item{...}{unused parameters.}
-
-\item{solver}{\code{"dual"} and \code{"primal"} are available.}
-
-\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
-
-\item{optimizer}{default primal optimizer pegasos.}
 }
 \value{
 return \code{HingeSVMClassifier} object.
