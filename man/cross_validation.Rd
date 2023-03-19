@@ -18,10 +18,6 @@ cross_validation(model, X, y, K = 5, metric, predict_func = predict, ...)
 \item{predict_func}{this parameter receive a function for predict.}
 
 \item{...}{additional parameters for your model.}
-
-\item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle the dataset.}
-
-\item{seed}{random seed for \code{shuffle} option.}
 }
 \value{
 return a metric matrix
