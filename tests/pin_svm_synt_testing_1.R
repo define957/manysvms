@@ -52,13 +52,19 @@ C <- matrix(0, nrow = 17)
 for (i in -8:8) {
   C[i] <- 2^(i)
 }
-param_list <- list("C" = C, "gamma " = C)
+param_list <- list("C" = C)
 
 s <- Sys.time()
-grid_search_cv(pin_svm, X, y, metric = accuracy,
+res <- grid_search_cv(pin_svm, X, y, metric = accuracy,
                param_list = param_list, seed = 1234, K = 5,
                max.steps = 500, threads.num = 2,
                solver = "dual", randx = 0.1, batch_size = 1,
-               kernel = "rbf")
+               kernel = "linear")
 e <- Sys.time()
 print(e - s)
+
+res <- grid_search_cv(pin_svm, X, y, metric = accuracy,
+                      param_list = res$best.param, seed = 1234, K = 5,
+                      max.steps = 500, threads.num = 2,
+                      solver = "dual", randx = 0.1, batch_size = 1,
+                      kernel = "linear")
