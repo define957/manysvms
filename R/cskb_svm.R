@@ -31,9 +31,10 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
-  idx <- which(y == class_set[1])
+  idx <- which(y == (sort(class_set)[1]))
   y[idx] <- 1
   y[-idx] <- -1
+  y <- as.matrix(as.numeric(y))
   if (length(class_set) > 2) {
     stop("The number of class should less 2!")
   }

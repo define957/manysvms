@@ -4,12 +4,15 @@
 \alias{predict.SVMClassifier}
 \title{Predict Method for Support Vector Machine}
 \usage{
-\method{predict}{SVMClassifier}(object, X, ...)
+\method{predict}{SVMClassifier}(object, X, values = FALSE, ...)
 }
 \arguments{
 \item{object}{a fitted object of class inheriting from \code{SVMClassifier}.}
 
 \item{X}{new data for predicting.}
+
+\item{values}{if set \code{values = TRUE}, this function will return predict
+values: f = wx+b.}
 
 \item{...}{unused parameter.}
 }

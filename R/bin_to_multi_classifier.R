@@ -21,8 +21,8 @@ OVR_Classifier <- function(X, y, bin_model, ...) {
   y_temp <- rep(0, nrow(X))
   for (i in 1:classifier_num) {
     idx_pos <- which(y == class_set[i])
-    y_temp[idx_pos] <- -1
-    y_temp[-idx_pos] <- 1
+    y_temp[idx_pos] <- 1
+    y_temp[-idx_pos] <- 2
     classifier_list[[i]] <- do.call("bin_model", list(X, y_temp, ...))
   }
   Classifiers_OVR$classifier_list <- classifier_list
@@ -44,16 +44,14 @@ OVR_Classifier <- function(X, y, bin_model, ...) {
 predict.Classifiers_OVR <- function(object, X, predict_func = predict, ...) {
   n <-  nrow(X)
   classifiers <- object$classifier_list
-  vote_mat <- matrix(0, nrow = n, ncol = object$class_num)
+  pred_mat <- matrix(0, nrow = n, ncol = object$class_num)
   for (i in 1:length(classifiers)) {
-    pred <- predict_func(classifiers[[i]], X, ...)
-    idx <- which(pred == -1)
-    vote_mat[idx, i] <- vote_mat[idx, i] + 1
+    pred_mat[, i] <- predict_func(classifiers[[i]], X, ...)
   }
-  res_vote <- apply(vote_mat, 1, which.max)
+  res_pred <- apply(pred_mat, 1, which.max)
   res <- matrix(0, nrow = n)
   for (i in 1:object$class_num) {
-    idx <- which(res_vote == i)
+    idx <- which(res_pred == i)
     res[idx] <- object$class_set[i]
   }
   return(res)

@@ -76,7 +76,7 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
-  idx <- which(y == class_set[1])
+  idx <- which(y == (sort(class_set)[1]))
   y[idx] <- 1
   y[-idx] <- -1
   y <- as.matrix(as.numeric(y))
@@ -131,10 +131,12 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
 #' @author Zhang Jiaqi
 #' @param object a fitted object of class inheriting from \code{SVMClassifier}.
 #' @param X new data for predicting.
+#' @param values if set \code{values = TRUE}, this function will return predict
+#'               values: f = wx+b.
 #' @param ... unused parameter.
 #' @importFrom stats predict
 #' @export
-predict.SVMClassifier <- function(object, X, ...) {
+predict.SVMClassifier <- function(object, X, values = FALSE, ...) {
   if (object$fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
@@ -149,10 +151,14 @@ predict.SVMClassifier <- function(object, X, ...) {
                                rcpp = object$rcpp)
   }
   fx <- KernelX %*% object$coef
-  decf <- sign(fx)
-  idx_pos <- which(decf > 0)
-  idx_neg <- which(decf < 0)
-  decf[idx_pos] <- object$class_set[1]
-  decf[idx_neg] <- object$class_set[2]
+  if (values == FALSE) {
+    decf <- sign(fx)
+    idx_pos <- which(decf > 0)
+    idx_neg <- which(decf < 0)
+    decf[idx_pos] <- object$class_set[1]
+    decf[idx_neg] <- object$class_set[2]
+  } else {
+    decf <- fx
+  }
   return(decf)
 }

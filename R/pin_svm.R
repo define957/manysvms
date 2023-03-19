@@ -78,7 +78,7 @@ pin_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- unique(y)
-  idx <- which(y == class_set[1])
+  idx <- which(y == (sort(class_set)[1]))
   y[idx] <- 1
   y[-idx] <- -1
   y <- as.matrix(as.numeric(y))
