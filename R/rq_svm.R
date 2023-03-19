@@ -165,12 +165,3 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   class(SVMClassifier) <- "SVMClassifier"
   return(SVMClassifier)
 }
-
-
-
-
-
-
-
-
-
