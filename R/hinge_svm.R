@@ -93,6 +93,8 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   } else if (kernel != "linear" & solver == "primal") {
     if (randx > 0) {
       randX = X[sample(nrow(X), floor(randx*nrow(X))),]
+    } else {
+      randX <- X
     }
     KernelX <- kernel_function(X, randX,
                                kernel.type = kernel,

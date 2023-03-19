@@ -61,6 +61,8 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
   else if (kernel != "linear") {
     if (randx > 0) {
       randX = X[sample(nrow(X), floor(randx*nrow(X))),]
+    } else {
+      randX <- X
     }
     KernelX <- kernel_function(X, randX,
                                kernel.type = kernel,
