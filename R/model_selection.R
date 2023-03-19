@@ -6,8 +6,6 @@
 #' @param K number of folds.
 #' @param metric this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
-#' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle the dataset.
-#' @param seed random seed for \code{shuffle} option.
 #' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @export
