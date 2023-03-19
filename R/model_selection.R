@@ -90,13 +90,16 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
   close(pb)
   parallel::stopCluster(cl)
   cv_res = cbind(apply(cv_res, 1, mean), apply(cv_res, 1, sd),
-                 cv_res,param_grid)
+                 cv_res, param_grid)
   colnames(cv_res) = c("avg", "sd", as.character(c(1:K)), names(param_list))
   e <- Sys.time()
   idx.best <- which.max(cv_res$avg)
+  best.param <- as.data.frame(param_grid[idx.best, ])
+  colnames(best.param) <- colnames(param_grid)
   cv_model <- list("results" = cv_res,
                    "idx.best" = idx.best,
                    "num.parameters" = n_param,
+                   "best.param" = as.list(best.param),
                    "K" = K,
                    "time" = e - s)
   class(cv_model) <- "cv_model"
