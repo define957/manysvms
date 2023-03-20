@@ -24,7 +24,7 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
     y_train <- y[-c(index[i]:index[i + 1])]
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test)
-    metric_mat[i] <- metric(y_test, y_test_hat)
+    metric_mat[i] <- metric(y_test, y_test_hat, ...)
   }
   return(metric_mat)
 }
