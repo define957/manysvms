@@ -11,7 +11,7 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   delta_k_old <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {
     f <- 1 - H %*% u0
-    delta_k <- update_deltak(f, D, u0, tau, lambda)
+    delta_k <- update_deltak(f, u0, tau, lambda)
     lb <- -C*delta_k - C*eta*tau/lambda
     ub <- -C*delta_k + C*eta/lambda
     u <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp,
@@ -56,7 +56,7 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   wt <- matrix(0, nrow = xp, ncol = 1)
   for (i in 1:cccp.steps) {
     f <- 1 - y*(KernelX %*% wt)
-    deltak <- update_deltak(f, D, wt, tau, lambda)
+    deltak <- update_deltak(f, wt, tau, lambda)
     wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
                     sgRq, sample_seed, C = C,
                     tau = tau, lambda = lambda, deltak = deltak, ...)
@@ -140,7 +140,7 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                gamma = gamma, degree = degree, coef0 = coef0,
                                rcpp = rcpp)
   }
-  update_deltak <- function(f, D, u, tau, lambda) {
+  update_deltak <- function(f, u, tau, lambda) {
     eta <- 1/(1 - exp(-1/lambda))
     idx <- which(f >= 0)
     delta_k <- matrix(0, nrow = nrow(KernelX))
