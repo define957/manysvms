@@ -2,7 +2,7 @@
 % Please edit documentation in R/cskb_svm.R
 \name{cskb_svm}
 \alias{cskb_svm}
-\title{Hinge Support Vector Machine}
+\title{CSKB}
 \usage{
 cskb_svm(
   X,
@@ -59,7 +59,7 @@ the function will evaluates intercept.}
 return \code{HingeSVMClassifier} object.
 }
 \description{
-\code{hinge_svm} is an R implementation of Hinge-SVM
+\code{cskb_svm} is an R implementation of cskb-SVM
 }
 \author{
 Li Feihong
