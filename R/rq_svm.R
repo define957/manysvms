@@ -11,7 +11,7 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   delta_k_old <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {
     f <- 1 - H %*% u0
-    delta_k <- update_deltak(f, D, D %*% u0, tau, lambda)
+    delta_k <- update_deltak(f, D, u0, tau, lambda)
     lb <- -C*delta_k - C*eta*tau/lambda
     ub <- -C*delta_k + C*eta/lambda
     u <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp,
