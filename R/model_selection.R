@@ -14,7 +14,7 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
-  index = c(0:K)*n/K
+  index <- c(0:K)*n/K
 
   metric_mat <- matrix(0, nrow = 1, ncol = K)
   for (i in 1:K) {
@@ -51,6 +51,7 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
 #' @export
 grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                            predict_func = predict,
+                           cross_validation_func = cross_validation,
                            shuffle = TRUE, seed = NULL,
                            threads.num = parallel::detectCores() - 1, ...) {
   s <- Sys.time()
@@ -85,7 +86,7 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                               "predict_func" =  predict_func,
                                ...),
                                temp)
-    cv_res <- do.call("cross_validation", params_cv)
+    cv_res <- do.call("cross_validation_func", params_cv)
   }
   close(pb)
   parallel::stopCluster(cl)
@@ -122,4 +123,42 @@ print.cv_model <- function(x, ...) {
   cat("Best Sd:", x$results[x$idx.best, 2], "\n")
   cat("Best Parameter:", "\n")
   print(x$results[x$idx.best, (3 + x$K):ncol(x$results)])
+}
+
+
+#' K-Fold Cross Validation with Noisy (Simulation Only)
+#'
+#' \code{cross_validation_noisy} function use noisy data for training,
+#' then calculates the average and standard deviation of your metric 
+#' using clean samples
+#' 
+#' @author Zhang Jiaqi.
+#' @param model your model.
+#' @param X,y dataset and label.
+#' @param y_noisy label with label noise.
+#' @param K number of folds.
+#' @param metric this parameter receive a metric function.
+#' @param predict_func this parameter receive a function for predict.
+#' @param ... additional parameters for your model.
+#' @return return a metric matrix
+#' @export
+cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metric, predict_func = predict,
+                             ...) {
+  X <- as.matrix(X)
+  y <- as.matrix(y)
+  y_noisy <- as.matrix(y_noisy)
+  n <- nrow(X)
+  index <- c(0:K)*n/K
+
+  metric_mat <- matrix(0, nrow = 1, ncol = K)
+  for (i in 1:K) {
+    X_test <- X[c(index[i]:index[i + 1]), ]
+    y_test <- y[c(index[i]:index[i + 1])]
+    X_train <- X[-c(index[i]:index[i + 1]), ]
+    y_train <- y_noisy[-c(index[i]:index[i + 1])]
+    model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
+    y_test_hat <- predict_func(model_res, X_test, ...)
+    metric_mat[i] <- metric(y_test, y_test_hat)
+  }
+  return(metric_mat)
 }
