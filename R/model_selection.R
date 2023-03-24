@@ -100,6 +100,8 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                    "idx.best" = idx.best,
                    "num.parameters" = n_param,
                    "best.param" = as.list(best.param),
+                   "best.avg" = cv_res[idx.best, 1],
+                   "best.sd" = cv_res[idx.best, 2],
                    "K" = K,
                    "time" = e - s)
   class(cv_model) <- "cv_model"
@@ -114,7 +116,8 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
 print.cv_model <- function(x, ...) {
   cat("Number of Fold", x$K, "\n")
   cat("Total Parameters:", x$num.parameters, "\n")
-  cat("Time Cost:", x$time, "\n")
+  cat("Time Cost:")
+  print(x$time)
   cat("Best Avg.:", x$results[x$idx.best, 1], "\n")
   cat("Best Sd:", x$results[x$idx.best, 2], "\n")
   cat("Best Parameter:", "\n")
