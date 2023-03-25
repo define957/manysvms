@@ -51,9 +51,105 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
 #' @export
 grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                            predict_func = predict,
-                           cross_validation_func = cross_validation,
                            shuffle = TRUE, seed = NULL,
                            threads.num = parallel::detectCores() - 1, ...) {
+  s <- Sys.time()
+  X <- as.matrix(X)
+  y <- as.matrix(y)
+  n <- nrow(X)
+  if (is.null(seed) == FALSE) {
+    set.seed(seed)
+  }
+  if (shuffle == TRUE) {
+    idx <- sample(n)
+    X <- X[idx, ]
+    y <- y[idx]
+  }
+  param_grid <- expand.grid(param_list)
+  n_param <- nrow(param_grid)
+  param_names <- colnames(param_grid)
+  cl <- parallel::makeCluster(threads.num)
+  pb <- utils::txtProgressBar(max = n_param, style = 3)
+  progress <- function(n){utils::setTxtProgressBar(pb, n)}
+  opts <- list(progress = progress)
+  doSNOW::registerDoSNOW(cl)
+  i <- 1
+  cv_res <- foreach::foreach(i = 1:n_param, .combine = rbind,
+                             .packages = c('manysvms', 'Rcpp'),
+                             .options.snow = opts) %dopar% {
+   temp <- data.frame(param_grid[i, ])
+   colnames(temp) <- param_names
+   params_cv <- append(list("model" = model,
+                            "X" = X, "y" = y, "K" = K,
+                            "metric" = metric,
+                            "predict_func" =  predict_func,
+                            ...),
+                       temp)
+   cv_res <- do.call("cross_validation", params_cv)
+  }
+  close(pb)
+  parallel::stopCluster(cl)
+  cv_res = cbind(apply(cv_res, 1, mean), apply(cv_res, 1, sd),
+                 cv_res, param_grid)
+  colnames(cv_res) = c("avg", "sd", as.character(c(1:K)), names(param_list))
+  e <- Sys.time()
+  idx.best <- which.max(cv_res$avg)
+  best.param <- as.data.frame(param_grid[idx.best, ])
+  colnames(best.param) <- colnames(param_grid)
+  cv_model <- list("results" = cv_res,
+                   "idx.best" = idx.best,
+                   "num.parameters" = n_param,
+                   "best.param" = as.list(best.param),
+                   "best.avg" = cv_res[idx.best, 1],
+                   "best.sd" = cv_res[idx.best, 2],
+                   "K" = K,
+                   "time" = e - s)
+  class(cv_model) <- "cv_model"
+  return(cv_model)
+}
+#' Print Method for Grid-Search and Cross Validation Results
+#'
+#' @param x object of class \code{eps.svr}.
+#' @param ... unsed argument.
+#' @export
+print.cv_model <- function(x, ...) {
+  cat("Number of Fold", x$K, "\n")
+  cat("Total Parameters:", x$num.parameters, "\n")
+  cat("Time Cost:")
+  print(x$time)
+  cat("Best Avg.:", x$results[x$idx.best, 1], "\n")
+  cat("Best Sd:", x$results[x$idx.best, 2], "\n")
+  cat("Best Parameter:", "\n")
+  print(x$results[x$idx.best, (3 + x$K):ncol(x$results)])
+}
+
+
+#' Grid Search and Cross Validation with Noisy (Simulation Only)
+#'
+#' @author Zhang Jiaqi.
+#' @param model your model.
+#' @param X,y dataset and label.
+#' @param y_noisy label (contains label noise)
+#' @param K number of folds.
+#' @param metric this parameter receive a metric function.
+#' @param param_list parameter list.
+#' @param predict_func this parameter receive a function for predict.
+#' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
+#'                the dataset.
+#' @param seed random seed for \code{shuffle} option.
+#' @param threads.num the number of threads used for parallel execution.
+#' @param ... additional parameters for your model.
+#' @return return a metric matrix
+#' @import foreach
+#' @import doParallel
+#' @import doSNOW
+#' @import stats
+#' @export
+grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list,
+                                 predict_func = predict,
+                                 shuffle = TRUE, seed = NULL,
+                                 threads.num = parallel::detectCores() - 1,
+                                 ...) {
   s <- Sys.time()
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -81,12 +177,12 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
     temp <- data.frame(param_grid[i, ])
     colnames(temp) <- param_names
     params_cv <- append(list("model" = model,
-                              "X" = X, "y" = y, "K" = K,
-                              "metric" = metric,
-                              "predict_func" =  predict_func,
-                               ...),
-                               temp)
-    cv_res <- do.call("cross_validation_func", params_cv)
+                            "X" = X, "y" = y, "K" = K,
+                            "metric" = metric,
+                            "predict_func" =  predict_func,
+                            ...),
+                       temp)
+    cv_res <- do.call("cross_validation_noisy", params_cv)
   }
   close(pb)
   parallel::stopCluster(cl)
@@ -109,29 +205,12 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
   return(cv_model)
 }
 
-#' Print Method for Grid-Search and Cross Validation Results
-#'
-#' @param x object of class \code{eps.svr}.
-#' @param ... unsed argument.
-#' @export
-print.cv_model <- function(x, ...) {
-  cat("Number of Fold", x$K, "\n")
-  cat("Total Parameters:", x$num.parameters, "\n")
-  cat("Time Cost:")
-  print(x$time)
-  cat("Best Avg.:", x$results[x$idx.best, 1], "\n")
-  cat("Best Sd:", x$results[x$idx.best, 2], "\n")
-  cat("Best Parameter:", "\n")
-  print(x$results[x$idx.best, (3 + x$K):ncol(x$results)])
-}
-
-
 #' K-Fold Cross Validation with Noisy (Simulation Only)
 #'
 #' \code{cross_validation_noisy} function use noisy data for training,
-#' then calculates the average and standard deviation of your metric 
+#' then calculates the average and standard deviation of your metric
 #' using clean samples
-#' 
+#'
 #' @author Zhang Jiaqi.
 #' @param model your model.
 #' @param X,y dataset and label.

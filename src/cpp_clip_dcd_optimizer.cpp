@@ -64,3 +64,5 @@ Rcpp::List cpp_clip_dcd_optimizer(arma::mat H, arma::mat q,
                                       Rcpp::Named("objectiv.value") = obj_val);
   return res;
 }
+
+
