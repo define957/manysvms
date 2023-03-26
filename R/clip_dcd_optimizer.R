@@ -62,3 +62,5 @@ r_clip_dcd_optimizer <- function(H, q, lb, ub,
   clip_dcd_res <- list('x' = u,'iterations' = i, 'objectiv.value' = obj_val)
   return(clip_dcd_res)
 }
+
+

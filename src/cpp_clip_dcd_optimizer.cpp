@@ -65,4 +65,8 @@ Rcpp::List cpp_clip_dcd_optimizer(arma::mat H, arma::mat q,
   return res;
 }
 
-
+//[[Rcpp::export]]
+SEXP cpp_chol_solve (arma::mat A, arma::mat b) {
+  arma::mat res = arma::solve(A, b, arma::solve_opts::likely_sympd);
+  return Rcpp::wrap(res);
+}

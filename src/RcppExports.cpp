@@ -29,6 +29,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_chol_solve
+SEXP cpp_chol_solve(arma::mat A, arma::mat b);
+RcppExport SEXP _manysvms_cpp_chol_solve(SEXP ASEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_chol_solve(A, b));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_rbf_kernel
 SEXP cpp_rbf_kernel(arma::mat x1, arma::mat x2, double gamma);
 RcppExport SEXP _manysvms_cpp_rbf_kernel(SEXP x1SEXP, SEXP x2SEXP, SEXP gammaSEXP) {
@@ -57,24 +69,12 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_chol_solve
-SEXP cpp_chol_solve(Eigen::MatrixXd A, Eigen::MatrixXd b);
-RcppExport SEXP _manysvms_cpp_chol_solve(SEXP ASEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type A(ASEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_chol_solve(A, b));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_manysvms_cpp_clip_dcd_optimizer", (DL_FUNC) &_manysvms_cpp_clip_dcd_optimizer, 7},
+    {"_manysvms_cpp_chol_solve", (DL_FUNC) &_manysvms_cpp_chol_solve, 2},
     {"_manysvms_cpp_rbf_kernel", (DL_FUNC) &_manysvms_cpp_rbf_kernel, 3},
     {"_manysvms_cpp_poly_kernel", (DL_FUNC) &_manysvms_cpp_poly_kernel, 5},
-    {"_manysvms_cpp_chol_solve", (DL_FUNC) &_manysvms_cpp_chol_solve, 2},
     {NULL, NULL, 0}
 };
 
