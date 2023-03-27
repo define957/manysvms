@@ -23,5 +23,4 @@ Suggests:
       MASS
 LinkingTo: 
       Rcpp, 
-      RcppArmadillo,
-      RcppEigen
+      RcppArmadillo
