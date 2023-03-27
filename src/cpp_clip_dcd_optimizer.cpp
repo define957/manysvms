@@ -14,13 +14,12 @@ Rcpp::List cpp_clip_dcd_optimizer(arma::mat H, arma::mat q,
 
   unsigned int i = 0;
   unsigned int j = 0;
+  arma::mat numerator;
+  arma::vec L_idx_val(n);
+  arma::vec L_val(n);
 
   for(i = 0; i < max_steps; i++){
-
-    arma::mat numerator = q - arma::trans(arma::trans(u) * H);
-    arma::vec L_idx_val(numerator.n_rows);
-    arma::vec L_val(numerator.n_rows);
-
+    numerator = q - arma::trans(arma::trans(u) * H);
     for(j = 0; j < n; j++){
       L_idx_val(j)= numerator(j) / H(j,j);
     }

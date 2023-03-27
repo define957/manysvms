@@ -4,14 +4,12 @@
 // using namespace std;
 // using namespace Eigen;
 // using namespace Rcpp;
-// // [[Rcpp::depends(RcppEigen)]]
 //
 // //[[Rcpp::export]]
 // SEXP cpp_chol_solve (Eigen::MatrixXd A, Eigen::MatrixXd b) {
 //   Eigen::MatrixXd res = A.llt().solve(b);
 //   return Rcpp::wrap(res);
 // }
-// //[[Rcpp::export]]
 // Rcpp::List Eigen_cpp_clip_dcd_optimizer(Eigen::MatrixXd H, Eigen::MatrixXd q,
 //                                         Eigen::MatrixXd lb, Eigen::MatrixXd ub,
 //                                         double eps, unsigned int max_steps,
