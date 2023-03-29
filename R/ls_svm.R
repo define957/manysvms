@@ -39,7 +39,7 @@ ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
 
 #' Least Squares Support Vector Machine
 #'
-#' \code{ls_svm} is an R implementation of Hinge-SVM
+#' \code{ls_svm} is an R implementation of Least Squares-SVM
 #'
 #' @author Zhang Jiaqi.
 #' @param X,y dataset and label.
