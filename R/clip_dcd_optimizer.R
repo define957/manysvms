@@ -21,7 +21,7 @@ clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
 
 r_clip_dcd_optimizer <- function(H, q, lb, ub,
                                  eps = 1e-5, max.steps = 200,
-                                 u = (lb + ub) / 2){
+                                 u = (lb + ub) / 2) {
 
   # Clipping dual coordinate decent optimizer
   # solve quadratic programming like:
@@ -62,5 +62,3 @@ r_clip_dcd_optimizer <- function(H, q, lb, ub,
   clip_dcd_res <- list('x' = u,'iterations' = i, 'objectiv.value' = obj_val)
   return(clip_dcd_res)
 }
-
-
