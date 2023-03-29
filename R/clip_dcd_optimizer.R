@@ -10,9 +10,9 @@
 #' @export
 clip_dcd_optimizer <- function(H, q, lb, ub, eps = 1e-5,
                                max.steps = 200, rcpp = TRUE,
-                               u =  matrix(0, nrow = nrow(H), ncol = 1)) {
+                               u =  (lb + ub) / 2) {
   if (rcpp == TRUE) {
-    x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps = eps, max.steps, u)
+    x <- cpp_clip_dcd_optimizer(H, q, lb, ub, eps, max.steps, u)
   }else if (rcpp == FALSE) {
     x <- r_clip_dcd_optimizer(H, q, lb, ub, eps, max.steps, u)
   }
@@ -42,15 +42,15 @@ r_clip_dcd_optimizer <- function(H, q, lb, ub,
       break
     }
 
-    idx1 = which(u > lb & L_idx_val < 0)
-    idx2 = which(u < ub & L_idx_val > 0)
+    idx1 <- which(u > lb & L_idx_val < 0)
+    idx2 <- which(u < ub & L_idx_val > 0)
     idx <- unique(c(idx1, idx2))
 
     if (length(idx) == 0) {
       break
     }
 
-    L_val[-idx] = -Inf
+    L_val[-idx] <- -Inf
 
     k <- which.max(t(L_val))
     lambda_max <- L_idx_val[k]
