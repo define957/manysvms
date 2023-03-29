@@ -12,7 +12,7 @@ clip_dcd_optimizer(
   eps = 1e-05,
   max.steps = 200,
   rcpp = TRUE,
-  u = matrix(0, nrow = nrow(H), ncol = 1)
+  u = (lb + ub)/2
 )
 }
 \arguments{

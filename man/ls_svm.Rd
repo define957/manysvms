@@ -64,7 +64,7 @@ the function will evaluates intercept.}
 return \code{SVMClassifier} object.
 }
 \description{
-\code{ls_svm} is an R implementation of Hinge-SVM
+\code{ls_svm} is an R implementation of Least Squares-SVM
 }
 \author{
 Zhang Jiaqi.
