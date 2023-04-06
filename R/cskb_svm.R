@@ -30,8 +30,8 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
                      fit_intercept = TRUE, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
-  class_set <- unique(y)
-  idx <- which(y == (sort(class_set)[1]))
+  class_set <- sort(unique(y))
+  idx <- which(y == class_set[1])
   y[idx] <- 1
   y[-idx] <- -1
   y <- as.matrix(as.numeric(y))
@@ -68,7 +68,7 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
                                gamma = gamma, degree = degree, coef0 = coef0)
     X <- randX
   }
-  
+
   if (kernel == "linear") {
     w0 <- matrix(0, nrow = p, ncol = 1) # initial normal vector
     v0 <- matrix(0, nrow = p, ncol = 1) # initial velocity
@@ -76,19 +76,19 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
     gam <- 0.5 # the momentum coefficient
     k <- 0.5 # the learning rate decay factor
     m <- 10 # the number of the randomly selected samples
-    
+
     # the first update
-    
+
     v <- gam*v0 - eta0*sgFun(w0 + gam*v0, sample(n, m))
     w <- w0 + v
     eta <- eta0*exp(-k)
-    
+
     t <- 2
     while (t <= max.steps && sqrt(sum(v^2)) >=  eps) {
       eta0 <- eta
       v0 <- v
       w0 <- w
-      
+
       # update velocity
       v <- gam*v0 - eta0*sgFun(w0 + gam*v0, sample(n, m))
       v[is.na(v)] <- 0

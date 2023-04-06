@@ -108,8 +108,8 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                    fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
-  class_set <- unique(y)
-  idx <- which(y == (sort(class_set)[1]))
+  class_set <- sort(unique(y))
+  idx <- which(y == class_set[1])
   y[idx] <- 1
   y[-idx] <- -1
   y <- as.matrix(as.numeric(y))

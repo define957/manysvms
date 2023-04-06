@@ -14,7 +14,8 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
-  index = c(0:K)*n/K
+  index <- c(0:K)*n/K
+
   metric_mat <- matrix(0, nrow = 1, ncol = K)
   for (i in 1:K) {
     X_test <- X[c(index[i]:index[i + 1]), ]
@@ -22,13 +23,13 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
     X_train <- X[-c(index[i]:index[i + 1]), ]
     y_train <- y[-c(index[i]:index[i + 1])]
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
-    y_test_hat <- predict_func(model_res, X_test)
-    metric_mat[i] <- metric(y_test, y_test_hat, ...)
     y_test_hat <- predict_func(model_res, X_test, ...)
     metric_mat[i] <- metric(y_test, y_test_hat)
   }
   return(metric_mat)
 }
+
+
 #' Grid Search and Cross Validation
 #'
 #' @author Zhang Jiaqi.
@@ -77,15 +78,15 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
   cv_res <- foreach::foreach(i = 1:n_param, .combine = rbind,
                              .packages = c('manysvms', 'Rcpp'),
                              .options.snow = opts) %dopar% {
-   temp <- data.frame(param_grid[i, ])
-   colnames(temp) <- param_names
-   params_cv <- append(list("model" = model,
+    temp <- data.frame(param_grid[i, ])
+    colnames(temp) <- param_names
+    params_cv <- append(list("model" = model,
                             "X" = X, "y" = y, "K" = K,
                             "metric" = metric,
                             "predict_func" =  predict_func,
                             ...),
                        temp)
-   cv_res <- do.call("cross_validation", params_cv)
+    cv_res <- do.call("cross_validation", params_cv)
   }
   close(pb)
   parallel::stopCluster(cl)
@@ -100,11 +101,15 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                    "idx.best" = idx.best,
                    "num.parameters" = n_param,
                    "best.param" = as.list(best.param),
+                   "best.avg" = cv_res[idx.best, 1],
+                   "best.sd" = cv_res[idx.best, 2],
                    "K" = K,
                    "time" = e - s)
   class(cv_model) <- "cv_model"
   return(cv_model)
 }
+
+
 #' Print Method for Grid-Search and Cross Validation Results
 #'
 #' @param x object of class \code{eps.svr}.
@@ -113,7 +118,8 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
 print.cv_model <- function(x, ...) {
   cat("Number of Fold", x$K, "\n")
   cat("Total Parameters:", x$num.parameters, "\n")
-  cat("Time Cost:", x$time, "\n")
+  cat("Time Cost:")
+  print(x$time)
   cat("Best Avg.:", x$results[x$idx.best, 1], "\n")
   cat("Best Sd:", x$results[x$idx.best, 2], "\n")
   cat("Best Parameter:", "\n")
@@ -202,6 +208,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list
   return(cv_model)
 }
 
+
 #' K-Fold Cross Validation with Noisy (Simulation Only)
 #'
 #' \code{cross_validation_noisy} function use noisy data for training,
@@ -219,7 +226,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list
 #' @return return a metric matrix
 #' @export
 cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metric, predict_func = predict,
-                             ...) {
+                                   ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   y_noisy <- as.matrix(y_noisy)
