@@ -14,8 +14,7 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
-  index <- c(0:K)*n/K
-
+  index = c(0:K)*n/K
   metric_mat <- matrix(0, nrow = 1, ncol = K)
   for (i in 1:K) {
     X_test <- X[c(index[i]:index[i + 1]), ]
@@ -23,12 +22,13 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
     X_train <- X[-c(index[i]:index[i + 1]), ]
     y_train <- y[-c(index[i]:index[i + 1])]
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
+    y_test_hat <- predict_func(model_res, X_test)
+    metric_mat[i] <- metric(y_test, y_test_hat, ...)
     y_test_hat <- predict_func(model_res, X_test, ...)
     metric_mat[i] <- metric(y_test, y_test_hat)
   }
   return(metric_mat)
 }
-
 #' Grid Search and Cross Validation
 #'
 #' @author Zhang Jiaqi.
@@ -100,8 +100,6 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
                    "idx.best" = idx.best,
                    "num.parameters" = n_param,
                    "best.param" = as.list(best.param),
-                   "best.avg" = cv_res[idx.best, 1],
-                   "best.sd" = cv_res[idx.best, 2],
                    "K" = K,
                    "time" = e - s)
   class(cv_model) <- "cv_model"
@@ -115,8 +113,7 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
 print.cv_model <- function(x, ...) {
   cat("Number of Fold", x$K, "\n")
   cat("Total Parameters:", x$num.parameters, "\n")
-  cat("Time Cost:")
-  print(x$time)
+  cat("Time Cost:", x$time, "\n")
   cat("Best Avg.:", x$results[x$idx.best, 1], "\n")
   cat("Best Sd:", x$results[x$idx.best, 2], "\n")
   cat("Best Parameter:", "\n")
