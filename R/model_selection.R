@@ -180,7 +180,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list
     temp <- data.frame(param_grid[i, ])
     colnames(temp) <- param_names
     params_cv <- append(list("model" = model,
-                            "X" = X, "y" = y, "K" = K,
+                            "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
                             "metric" = metric,
                             "predict_func" =  predict_func,
                             ...),
