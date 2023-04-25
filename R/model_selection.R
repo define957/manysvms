@@ -22,7 +22,7 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
     y_test <- y[c(index[i]:index[i + 1])]
     X_train <- X[-c(index[i]:index[i + 1]), ]
     y_train <- y[-c(index[i]:index[i + 1])]
-    if(k == 1){
+    if(K == 1){
       X_train <- X_test
       y_train <- y_test
     }
