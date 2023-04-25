@@ -14,22 +14,22 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
-  index <- c(0:K)*n/K
-
   metric_mat <- matrix(0, nrow = 1, ncol = K)
+  index <- c(0:K)*n/K
   for (i in 1:K) {
     X_test <- X[c(index[i]:index[i + 1]), ]
     y_test <- y[c(index[i]:index[i + 1])]
-    X_train <- X[-c(index[i]:index[i + 1]), ]
-    y_train <- y[-c(index[i]:index[i + 1])]
     if(K == 1){
-      X_train <- X_test
-      y_train <- y_test
+      X_train = X_test
+      y_train = y_test
+    }else{
+      X_train <- X[-c(index[i]:index[i + 1]), ]
+      y_train <- y[-c(index[i]:index[i + 1])]
     }
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
     metric_mat[i] <- metric(y_test, y_test_hat)
-  }
+  }  
   return(metric_mat)
 }
 
@@ -236,13 +236,18 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metric, predict_
   y_noisy <- as.matrix(y_noisy)
   n <- nrow(X)
   index <- c(0:K)*n/K
-
+  
   metric_mat <- matrix(0, nrow = 1, ncol = K)
   for (i in 1:K) {
     X_test <- X[c(index[i]:index[i + 1]), ]
     y_test <- y[c(index[i]:index[i + 1])]
-    X_train <- X[-c(index[i]:index[i + 1]), ]
-    y_train <- y_noisy[-c(index[i]:index[i + 1])]
+    if(K == 1){
+      X_train = X_test
+      y_train = y_test
+    }else{
+      X_train <- X[-c(index[i]:index[i + 1]), ]
+      y_train <- y_noisy[-c(index[i]:index[i + 1])]
+    }
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
     metric_mat[i] <- metric(y_test, y_test_hat)
