@@ -69,7 +69,6 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
     idx <- sample(n)
     X <- X[idx, ]
     y <- y[idx]
-    y_noisy <- y_noisy[idx]
   }
   param_grid <- expand.grid(param_list)
   n_param <- nrow(param_grid)
@@ -169,6 +168,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list
     idx <- sample(n)
     X <- X[idx, ]
     y <- y[idx]
+    y_noisy <- y_noisy[idx]
   }
   param_grid <- expand.grid(param_list)
   n_param <- nrow(param_grid)
