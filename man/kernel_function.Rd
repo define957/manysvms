@@ -11,6 +11,7 @@ kernel_function(
   gamma = 1/ncol(x1),
   degree = 3,
   coef0 = 0,
+  symmetric = FALSE,
   rcpp = TRUE
 )
 }
@@ -24,6 +25,8 @@ kernel_function(
 \item{degree}{parameter for polynomial kernel, default: \code{degree = 3}.}
 
 \item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
+
+\item{symmetric}{if \code{x1 == x2} you can set \code{symmetric == TRUE}.}
 
 \item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 }
