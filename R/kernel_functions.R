@@ -63,3 +63,30 @@ kernel_function <- function(x1, x2,
   }
   return(K)
 }
+
+
+kernel_select_option <- function(kernel, solver,
+                                 gamma, degree, coef0, rcpp) {
+
+  if (kernel == "linear" & solver == "primal") {
+    KernelX <- X
+  } else if (kernel != "linear" & solver == "primal") {
+    if (randx > 0) {
+      randX = X[sample(nrow(X), floor(randx*nrow(X))),]
+    } else {
+      randX <- X
+    }
+    KernelX <- kernel_function(X, randX,
+                               kernel.type = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               rcpp = rcpp)
+    X <- randX
+  } else if (solver == "dual") {
+    KernelX <- kernel_function(X, X,
+                               kernel.type = kernel,
+                               gamma = gamma, degree = degree, coef0 = coef0,
+                               rcpp = rcpp, symmetric = T)
+  }
+  K <- list("X" = X, "KernelX" = KernelX)
+  return(K)
+}
