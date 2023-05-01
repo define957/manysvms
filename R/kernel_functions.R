@@ -7,17 +7,16 @@ r_poly_kernel <- function(x1, x2, gamma, degree = 3, coef0 = 0){
   return(K)
 }
 
-r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE) {
+r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE){
   x1 <- as.matrix(x1)
   x2 <- as.matrix(x2)
-
   n1 <- nrow(x1)
   norms1 <- as.matrix(apply(x1^2, 1, sum))
-  e1 <- matrix(1, 1, n2)
+  e2 <- matrix(1, 1, n1)
   if (symmetric == FALSE) {
     n2 <- nrow(x2)
     norms2 <- as.matrix(apply(x2^2, 1, sum))
-    e2 <- matrix(1, 1, n1)
+    e1 <- matrix(1, 1, n2)
   } else {
     n2 <- n1
     norms2 <- norms1
@@ -53,12 +52,12 @@ rbf_kernel <- function(x1, x2, gamma = 1/ncol(x1),
 kernel_function <- function(x1, x2,
                             kernel.type = c('linear', 'rbf', 'poly'),
                             gamma = 1/ncol(x1), degree = 3, coef0 = 0,
-                            symmetric = FALSE, rcpp = TRUE){
+                            rcpp = TRUE, symmetric = FALSE){
   kernel.type <- match.arg(kernel.type)
   if(kernel.type == 'linear'){
     K <- r_linear_kernel(x1, x2)
   }else if(kernel.type == 'rbf'){
-    K <- rbf_kernel(x1, x2, gamma, symmetric, rcpp)
+    K <- rbf_kernel(x1, x2, gamma, symmetric = FALSE, rcpp)
   }else if(kernel.type == 'poly'){
     K <- r_poly_kernel(x1, x2, gamma, degree = 3, coef0 = 0)
   }

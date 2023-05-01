@@ -32,11 +32,11 @@ r_clip_dcd_optimizer <- function(H, q, lb, ub,
   q <- as.matrix(q)
   lb <- as.matrix(lb)
   ub <- as.matrix(ub)
-
+  diagH <- diag(H)
   for (i in 1:max.steps) {
-    numerator <- (q - t(t(u) %*% H))
-    L_idx_val <- numerator / diag(H)
-    L_val <- numerator^(2) / diag(H)
+    numerator <- q - H%*%u
+    L_idx_val <- numerator / diagH
+    L_val <- numerator*L_idx_val
 
     if (max(L_val) < eps) {
       break
@@ -52,7 +52,7 @@ r_clip_dcd_optimizer <- function(H, q, lb, ub,
 
     L_val[-idx] <- -Inf
 
-    k <- which.max(t(L_val))
+    k <- which.max(L_val)
     lambda_max <- L_idx_val[k]
     lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
 
