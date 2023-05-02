@@ -1,13 +1,13 @@
-r_linear_kernel <- function(x1, x2){
+r_linear_kernel <- function(x1, x2) {
   return(x1 %*% t(x2))
 }
 
-r_poly_kernel <- function(x1, x2, gamma, degree = 3, coef0 = 0){
+r_poly_kernel <- function(x1, x2, gamma, degree = 3, coef0 = 0) {
   K <- (gamma * x1 %*% t(x2) + coef0)^(degree)
   return(K)
 }
 
-r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE){
+r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE) {
   x1 <- as.matrix(x1)
   x2 <- as.matrix(x2)
   n1 <- nrow(x1)
@@ -28,9 +28,9 @@ r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE){
 
 rbf_kernel <- function(x1, x2, gamma = 1/ncol(x1),
                        symmetric = FALSE, rcpp = TRUE){
-  if(rcpp == TRUE){
+  if (rcpp == TRUE) {
     K <- cpp_rbf_kernel(x1, x2, gamma)
-  }else if(rcpp == FALSE){
+  }else if (rcpp == FALSE) {
     K <- r_rbf_kernel(x1, x2, gamma)
   }
   return(K)
@@ -54,11 +54,11 @@ kernel_function <- function(x1, x2,
                             gamma = 1/ncol(x1), degree = 3, coef0 = 0,
                             rcpp = TRUE, symmetric = FALSE){
   kernel.type <- match.arg(kernel.type)
-  if(kernel.type == 'linear'){
+  if (kernel.type == 'linear') {
     K <- r_linear_kernel(x1, x2)
-  }else if(kernel.type == 'rbf'){
+  }else if (kernel.type == 'rbf') {
     K <- rbf_kernel(x1, x2, gamma, symmetric = FALSE, rcpp)
-  }else if(kernel.type == 'poly'){
+  }else if (kernel.type == 'poly') {
     K <- r_poly_kernel(x1, x2, gamma, degree = 3, coef0 = 0)
   }
   return(K)
