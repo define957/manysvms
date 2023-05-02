@@ -4,7 +4,7 @@
 \alias{pegasos}
 \title{Primal Estimated sub-Gradient SOlver for SVM (Pegasos)}
 \usage{
-pegasos(X, y, w, m, max.steps, fx, sample_seed, ...)
+pegasos(X, y, w, m, max.steps, fx, ...)
 }
 \arguments{
 \item{X, y}{dataset and label.}
@@ -16,8 +16,6 @@ pegasos(X, y, w, m, max.steps, fx, sample_seed, ...)
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{fx}{sub-gradient of objective function.}
-
-\item{sample_seed}{random seed for subsample sampling.}
 
 \item{...}{additional settings for the sub-gradient.}
 }

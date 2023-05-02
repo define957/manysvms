@@ -5,7 +5,7 @@ ls_svm_dual_solver <- function(KernelX, y, C = 1, rcpp = TRUE) {
   if (rcpp == TRUE) {
     alphas <- cpp_chol_solve(H + diag(1/C, m), matrix(1, nrow = m))
   } else {
-    alphas <- chol2inv(chol((H + diag(1/C, m)))) %*% matrix(1, nrow = m)
+    alphas <- solve((H + diag(1/C, m)), matrix(1, nrow = m))
   }
   coef <- D %*% alphas
   BaseDualLeastSquaresSVMClassifier <- list(coef = as.matrix(coef))
@@ -16,9 +16,8 @@ ls_svm_dual_solver <- function(KernelX, y, C = 1, rcpp = TRUE) {
 
 ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
                                  max.steps = 80, batch_size = nrow(KernelX) / 10,
-                                 seed = NULL, sample_seed = NULL,
                                  optimizer = pegasos, ...) {
-   gLeastSquares <- function(KernelX, y, v, ...) { # gradient of Least Squares loss function
+   sgLeastSquares <- function(KernelX, y, v, ...) { # gradient of Least Squares loss function
     C <- list(...)$C
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
@@ -30,7 +29,7 @@ ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gLeastSquares, sample_seed, C = C, ...)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgLeastSquares, C = C, ...)
   BasePrimalLeastSquaresSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalLeastSquaresSVMClassifier) <- "BasePrimalLeastSquaresSVMClassifier"
   return(BasePrimalLeastSquaresSVMClassifier)
