@@ -88,7 +88,7 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   if (fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
-  kso <- kernel_select_option(kernel, solver, randx,
+  kso <- kernel_select_option(X, kernel, solver, randx,
                               gamma, degree, coef0, rcpp)
   KernelX <- kso$KernelX
   X <- kso$X

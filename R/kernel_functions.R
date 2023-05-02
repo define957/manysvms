@@ -65,7 +65,7 @@ kernel_function <- function(x1, x2,
 }
 
 
-kernel_select_option <- function(kernel, solver, randx,
+kernel_select_option <- function(X, kernel, solver, randx,
                                  gamma, degree, coef0, rcpp) {
   n <- nrow(X)
   if (kernel == "linear" & solver == "primal") {
