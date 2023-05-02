@@ -88,25 +88,10 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   if (fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
-  if (kernel == "linear" & solver == "primal") {
-    KernelX <- X
-  } else if (kernel != "linear" & solver == "primal") {
-    if (randx > 0) {
-      randX = X[sample(nrow(X), floor(randx*nrow(X))),]
-    } else {
-      randX <- X
-    }
-    KernelX <- kernel_function(X, randX,
-                               kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp)
-    X <- randX
-  } else if (solver == "dual") {
-    KernelX <- kernel_function(X, X,
-                               kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp, symmetric = T)
-  }
+  kso <- kernel_select_option(kernel, solver, randx,
+                              gamma, degree, coef0, rcpp)
+  KernelX <- kso$KernelX
+  X <- kso$X
   if (solver == "primal") {
     solver.res <- hinge_svm_primal_solver(KernelX, y, C, eps,
                                           max.steps, batch_size,
