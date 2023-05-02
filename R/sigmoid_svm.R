@@ -114,25 +114,10 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   if (fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
-  if (kernel == "linear" & solver == "primal") {
-    KernelX <- X
-  } else if (kernel != "linear" & solver == "primal") {
-    if (randx > 0) {
-      randX = X[sample(nrow(X), floor(randx*nrow(X))),]
-    } else {
-      randX <- X
-    }
-    KernelX <- kernel_function(X, randX,
-                               kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp)
-    X <- randX
-  } else if (solver == "dual") {
-    KernelX <- kernel_function(X, X,
-                               kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp)
-  }
+  kso <- kernel_select_option(X, kernel, solver, randx,
+                              gamma, degree, coef0, rcpp)
+  KernelX <- kso$KernelX
+  X <- kso$X
   update_deltak <- function(f, D, u, epsilon, lambda) {
     idx <- which(f >= 0)
     ef <- exp(-lambda*f)
