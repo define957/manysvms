@@ -1,12 +1,8 @@
-ls_svm_dual_solver <- function(KernelX, y, C = 1, rcpp = TRUE) {
+ls_svm_dual_solver <- function(KernelX, y, C = 1) {
   D <- diag(as.vector(y))
   H <- D %*% KernelX %*% D
   m <- nrow(KernelX)
-  if (rcpp == TRUE) {
-    alphas <- cpp_chol_solve(H + diag(1/C, m), matrix(1, nrow = m))
-  } else {
-    alphas <- solve((H + diag(1/C, m)), matrix(1, nrow = m))
-  }
+  alphas <- solve((H + diag(1/C, m)), matrix(1, nrow = m))
   coef <- D %*% alphas
   BaseDualLeastSquaresSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualLeastSquaresSVMClassifier) <- "BaseDualLeastSquaresSVMClassifier"
@@ -56,7 +52,6 @@ ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param batch_size mini-batch size for primal solver.
 #' @param solver \code{"dual"} and \code{"primal"} are available.
-#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
 #' @param optimizer default primal optimizer pegasos.
@@ -67,7 +62,7 @@ ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
 ls_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                    gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                    eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                   solver = c("dual", "primal"), rcpp = TRUE,
+                   solver = c("dual", "primal"),
                    fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -84,38 +79,22 @@ ls_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   if (fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
-  if (kernel == "linear" & solver == "primal") {
-    KernelX <- X
-  } else if (kernel != "linear" & solver == "primal") {
-    if (randx > 0) {
-      randX = X[sample(nrow(X), floor(randx*nrow(X))),]
-    } else {
-      randX <- X
-    }
-    KernelX <- kernel_function(X, randX,
-                               kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp)
-    X <- randX
-  } else if (solver == "dual") {
-    KernelX <- kernel_function(X, X,
-                               kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp)
-  }
+  kso <- kernel_select_option(X, kernel, solver, randx,
+                              gamma, degree, coef0)
+  KernelX <- kso$KernelX
+  X <- kso$X
   if (solver == "primal") {
     solver.res <- ls_svm_primal_solver(KernelX, y, C, eps,
                                        max.steps, batch_size,
                                        optimizer, ...)
   } else if (solver == "dual") {
-    solver.res <- ls_svm_dual_solver(KernelX, y, C, rcpp)
+    solver.res <- ls_svm_dual_solver(KernelX, y, C)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                         "C" = C, "kernel" = kernel,
                         "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                         "solver" = solver, "coef" = solver.res$coef,
-                        "fit_intercept" = fit_intercept,
-                        "rcpp" = rcpp)
+                        "fit_intercept" = fit_intercept)
   class(SVMClassifier) <- "SVMClassifier"
   return(SVMClassifier)
 }

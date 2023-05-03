@@ -36,12 +36,12 @@ r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE) {
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param symmetric if \code{x1 == x2} you can set \code{symmetric == TRUE}.
-#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
+#' @param ... redundant parameters.
 #' @export
 kernel_function <- function(x1, x2,
                             kernel.type = c('linear', 'rbf', 'poly'),
                             gamma = 1/ncol(x1), degree = 3, coef0 = 0,
-                            rcpp = TRUE, symmetric = FALSE) {
+                            symmetric = FALSE, ...) {
   kernel.type <- match.arg(kernel.type)
   if (kernel.type == 'linear') {
     K <- r_linear_kernel(x1, x2)

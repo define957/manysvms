@@ -20,7 +20,6 @@ rq_svm(
   cccp.steps = 10,
   batch_size = nrow(X)/10,
   solver = c("dual", "primal"),
-  rcpp = TRUE,
   fit_intercept = TRUE,
   optimizer = pegasos,
   randx = 0.1,
@@ -60,8 +59,6 @@ rq_svm(
 \item{batch_size}{mini-batch size for primal solver.}
 
 \item{solver}{\code{"dual"} and \code{"primal"} are available.}
-
-\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
 
 \item{fit_intercept}{if set \code{fit_intercept = TRUE},
 the function will evaluates intercept.}

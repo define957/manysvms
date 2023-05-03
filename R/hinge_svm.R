@@ -1,5 +1,5 @@
 hinge_svm_dual_solver <- function(KernelX, y, C = 1,
-                                  eps = 1e-5, max.steps = 80, rcpp = TRUE) {
+                                  eps = 1e-5, max.steps = 80) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- D %*% KernelX %*% D
@@ -7,7 +7,7 @@ hinge_svm_dual_solver <- function(KernelX, y, C = 1,
   lb <- matrix(0, nrow = n)
   ub <- matrix(C, nrow = n)
 
-  alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, rcpp)$x
+  alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps)$x
   coef <- D %*% alphas
   BaseDualHingeSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualHingeSVMClassifier) <- "BaseDualHingeSVMClassifier"
@@ -59,7 +59,6 @@ hinge_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param batch_size mini-batch size for primal solver.
 #' @param solver \code{"dual"} and \code{"primal"} are available.
-#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
 #' @param optimizer default primal optimizer pegasos.
@@ -70,7 +69,7 @@ hinge_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
 hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                       gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                       eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                      solver = c("dual", "primal"), rcpp = TRUE,
+                      solver = c("dual", "primal"),
                       fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -88,7 +87,7 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     X <- cbind(X, 1)
   }
   kso <- kernel_select_option(X, kernel, solver, randx,
-                              gamma, degree, coef0, rcpp)
+                              gamma, degree, coef0)
   KernelX <- kso$KernelX
   X <- kso$X
   if (solver == "primal") {
@@ -97,14 +96,13 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                           optimizer, ...)
   } else if (solver == "dual") {
     solver.res <- hinge_svm_dual_solver(KernelX, y, C, eps,
-                                        max.steps, rcpp)
+                                        max.steps)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                         "C" = C, "kernel" = kernel,
                         "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                         "solver" = solver, "coef" = solver.res$coef,
-                        "fit_intercept" = fit_intercept,
-                        "rcpp" = rcpp)
+                        "fit_intercept" = fit_intercept)
   class(SVMClassifier) <- "SVMClassifier"
   return(SVMClassifier)
 }
@@ -131,8 +129,7 @@ predict.SVMClassifier <- function(object, X, values = FALSE, ...) {
                                kernel.type = object$kernel,
                                gamma = object$gamma,
                                degree = object$degree,
-                               coef0 = object$coef0,
-                               rcpp = object$rcpp)
+                               coef0 = object$coef0)
   }
   fx <- KernelX %*% object$coef
   if (values == FALSE) {

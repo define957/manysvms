@@ -55,7 +55,7 @@ ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
 cat(model1$coef, "\n")
 
 cross_validation(OVR_Classifier, X, y, bin_model = hinge_svm, shuffle = TRUE,
-                 metric = accuracy, K = 5, max.steps = 50)
+                 metric = accuracy, K = 5, max.steps = 200, values = T)
 
 C <- rep(-8, 8)
 for (i in 0:17) {

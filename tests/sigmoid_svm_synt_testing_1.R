@@ -10,7 +10,7 @@ X <- rbind(X1, X2)
 
 y <- rep(c(1, 2), c(n, n))
 s <- Sys.time()
-model1 <- sigmoid_svm(X, y, C = 0.5, epsilon = 0.5, max.steps = 500)
+model1 <- sigmoid_svm(X, y, C = 20, epsilon = 0, max.steps = 500)
 e <- Sys.time()
 print(e - s)
 w <- t(cbind(X, 1)) %*% model1$coef

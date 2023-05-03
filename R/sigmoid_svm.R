@@ -1,7 +1,6 @@
 sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
                                     epsilon = 0, lambda = 1,
-                                    eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
-                                    rcpp = TRUE) {
+                                    eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- D %*% KernelX %*% D
@@ -12,7 +11,7 @@ sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
     delta_k <- update_deltak(f, D, u0, epsilon, lambda)
     lb <- -C*delta_k
     ub <- -C*delta_k + lambda*C
-    u <- clip_dcd_optimizer(H, (1 - epsilon)*e, lb, ub, eps, max.steps, rcpp)$x
+    u <- clip_dcd_optimizer(H, (1 - epsilon)*e, lb, ub, eps, max.steps, u0)$x
     if (norm(u - u0, type = "2") < eps.cccp) {
       break
     } else {
@@ -85,7 +84,6 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
 #' @param cccp.steps the number of iterations of CCCP.
 #' @param batch_size mini-batch size for primal solver.
 #' @param solver \code{"dual"} and \code{"primal"} are available.
-#' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
 #' @param optimizer default primal optimizer pegasos.
@@ -98,7 +96,7 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                         epsilon = 0, lambda = 1,
                         eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10,
                         batch_size = nrow(X) / 10,
-                        solver = c("dual", "primal"), rcpp = TRUE,
+                        solver = c("dual", "primal"),
                         fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -115,7 +113,7 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     X <- cbind(X, 1)
   }
   kso <- kernel_select_option(X, kernel, solver, randx,
-                              gamma, degree, coef0, rcpp)
+                              gamma, degree, coef0)
   KernelX <- kso$KernelX
   X <- kso$X
   update_deltak <- function(f, D, u, epsilon, lambda) {
@@ -133,14 +131,13 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   } else if (solver == "dual") {
     solver.res <- sigmoid_svm_dual_solver(KernelX, y, C, update_deltak,
                                           epsilon, lambda, eps, eps.cccp,
-                                          max.steps, cccp.steps, rcpp)
+                                          max.steps, cccp.steps)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                         "C" = C, "kernel" = kernel,
                         "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                         "solver" = solver, "coef" = solver.res$coef,
-                        "fit_intercept" = fit_intercept,
-                        "rcpp" = rcpp)
+                        "fit_intercept" = fit_intercept)
   class(SVMClassifier) <- "SVMClassifier"
   return(SVMClassifier)
 }

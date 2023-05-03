@@ -11,8 +11,8 @@ clip_dcd_optimizer(
   ub,
   eps = 1e-05,
   max.steps = 200,
-  rcpp = TRUE,
-  u = (lb + ub)/2
+  u = (lb + ub)/2,
+  ...
 )
 }
 \arguments{
@@ -22,9 +22,9 @@ clip_dcd_optimizer(
 
 \item{eps, max.steps}{error and maximum iterations.}
 
-\item{rcpp}{speed up your code with Rcpp, default \code{rcpp = TRUE}.}
-
 \item{u}{init solution.}
+
+\item{...}{redundant parameters.}
 }
 \value{
 return results list
