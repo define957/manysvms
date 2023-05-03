@@ -20,19 +20,9 @@ r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE) {
   } else {
     n2 <- n1
     norms2 <- norms1
-    e2 <- e1
+    e1 <- e2
   }
   K <- exp(gamma*(-norms1%*%e1 - t(e2)%*% t(norms2) + 2*(x1%*%t(x2))))
-  return(K)
-}
-
-rbf_kernel <- function(x1, x2, gamma = 1/ncol(x1),
-                       symmetric = FALSE, rcpp = TRUE){
-  if (rcpp == TRUE) {
-    K <- cpp_rbf_kernel(x1, x2, gamma)
-  }else if (rcpp == FALSE) {
-    K <- r_rbf_kernel(x1, x2, gamma)
-  }
   return(K)
 }
 
@@ -48,16 +38,15 @@ rbf_kernel <- function(x1, x2, gamma = 1/ncol(x1),
 #' @param symmetric if \code{x1 == x2} you can set \code{symmetric == TRUE}.
 #' @param rcpp speed up your code with Rcpp, default \code{rcpp = TRUE}.
 #' @export
-
 kernel_function <- function(x1, x2,
                             kernel.type = c('linear', 'rbf', 'poly'),
                             gamma = 1/ncol(x1), degree = 3, coef0 = 0,
-                            rcpp = TRUE, symmetric = FALSE){
+                            rcpp = TRUE, symmetric = FALSE) {
   kernel.type <- match.arg(kernel.type)
   if (kernel.type == 'linear') {
     K <- r_linear_kernel(x1, x2)
   }else if (kernel.type == 'rbf') {
-    K <- rbf_kernel(x1, x2, gamma, symmetric = FALSE, rcpp)
+    K <- r_rbf_kernel(x1, x2, gamma, symmetric = symmetric)
   }else if (kernel.type == 'poly') {
     K <- r_poly_kernel(x1, x2, gamma, degree = 3, coef0 = 0)
   }
@@ -78,14 +67,13 @@ kernel_select_option <- function(X, kernel, solver, randx,
     }
     KernelX <- kernel_function(X, randX,
                                kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp)
+                               gamma = gamma, degree = degree, coef0 = coef0)
     X <- randX
   } else if (solver == "dual") {
     KernelX <- kernel_function(X, X,
                                kernel.type = kernel,
                                gamma = gamma, degree = degree, coef0 = coef0,
-                               rcpp = rcpp, symmetric = T)
+                               symmetric = T)
   }
   K <- list("X" = X, "KernelX" = KernelX)
   return(K)
