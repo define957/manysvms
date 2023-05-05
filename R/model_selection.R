@@ -248,7 +248,7 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metric, predict_
       y_train <- y_test
     }else{
       X_train <- X[-idx, ]
-      y_train <- y[-idx]
+      y_train <- y_noisy[-idx]
     }
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
