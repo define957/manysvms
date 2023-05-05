@@ -20,7 +20,7 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
     idx <- which(index == i)
     X_test <- X[idx, ]
     y_test <- y[idx]
-    if(K == 1){
+    if(K == 1) {
       X_train <- X_test
       y_train <- y_test
     }else{
@@ -243,7 +243,7 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metric, predict_
     idx <- which(index == i)
     X_test <- X[idx, ]
     y_test <- y[idx]
-    if(K == 1){
+    if(K == 1) {
       X_train <- X_test
       y_train <- y_test
     }else{
