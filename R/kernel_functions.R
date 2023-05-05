@@ -18,7 +18,6 @@ r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE) {
     norms2 <- as.matrix(apply(x2^2, 1, sum))
     e1 <- matrix(1, 1, n2)
   } else {
-    n2 <- n1
     norms2 <- norms1
     e1 <- e2
   }
