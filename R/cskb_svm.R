@@ -1,4 +1,4 @@
-#' CSKB
+#' CSKB SVM
 #'
 #' \code{cskb_svm} is an R implementation of cskb-SVM
 #'
@@ -24,9 +24,10 @@
 #' @param ... unused parameters.
 #' @return return \code{HingeSVMClassifier} object.
 #' @export
-cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "poly"),
+cskb_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                      gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                     eps = 1e-2, max.steps = 80, batch_size = nrow(X) / 10,
+                     a = 1, b = 1,
+                     eps = 1e-2, max.steps = 80, batch_size = nrow(X) / 10,solver = c("primal"),
                      fit_intercept = TRUE, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -42,6 +43,7 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
   if (fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
+
   # define a function to compute the stochastic gradient for linear case
   sgFun <- function(w, sqnInd){#
     xiTerm <- 1 - y[sqnInd] * c( X[sqnInd,] %*% w)
@@ -52,22 +54,12 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
     sg <- w/n + (a * b * C / m)*t((sgWeight1/sgWeight2) %*% X[sqnInd,])
     return(sg) # sg is a column vector
   }
+  kso <- manysvms:::kernel_select_option(X, kernel, solver, randx,
+                              gamma, degree, coef0)
+  KernelX <- kso$KernelX
+  X <- kso$X
   n <- nrow(X)
   p <- ncol(X)
-  if (kernel == "linear") {
-    KernelX <- X
-  }
-  else if (kernel != "linear") {
-    if (randx > 0) {
-      randX = X[sample(nrow(X), floor(randx*nrow(X))),]
-    } else {
-      randX <- X
-    }
-    KernelX <- kernel_function(X, randX,
-                               kernel.type = kernel,
-                               gamma = gamma, degree = degree, coef0 = coef0)
-    X <- randX
-  }
 
   if (kernel == "linear") {
     w0 <- matrix(0, nrow = p, ncol = 1) # initial normal vector
@@ -99,13 +91,15 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
       t <- t + 1
     }
     coef <- w
+    BaseprimalCSKBSVMClassifier <- list(coef = as.matrix(coef))
+    class(BaseprimalCSKBSVMClassifier) <- "BaseprimalCSKBSVMClassifier"
   }
-  if (kernel == "gaussian") {
+  if (kernel != "linear") {
     #给定一系列的初始值
     a0 <- c(rep(0,n))
     it <- 1
     buchang <- 1
-    while (it < max.steps && abs(buchang >= eps)) {
+    while (it < max.steps) {
       index <- sample(1:n,size = 1,replace = F)
       if (it == 1) {
         kesai <- 1
@@ -124,11 +118,13 @@ cskb_svm <- function(X, y, a = 1, b = 1, C = 1, kernel = c("linear", "rbf", "pol
       it = it + 1
     }
     coef = a0
+    BaseprimalCSKBSVMClassifier <- list(coef = as.matrix(coef))
+    class(BaseprimalCSKBSVMClassifier) <- "BaseprimalCSKBSVMClassifier"
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                         "C" = C, "kernel" = kernel,
                         "gamma" = gamma, "degree" = degree, "coef0" = coef0,
-                        "coef" = coef, "solver" = "primal",
+                        "solver" = "primal","coef" = BaseprimalCSKBSVMClassifier$coef,
                         "fit_intercept" = fit_intercept)
   class(SVMClassifier) <- "SVMClassifier"
   return(SVMClassifier)
