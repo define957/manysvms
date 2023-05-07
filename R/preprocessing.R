@@ -18,15 +18,14 @@ train_test_split <- function(X, y, test_size = 0.3,
     if (is.null(seed) == FALSE) {
       set.seed(seed)
     }
-    new_idx <- sample(1:m)
+    new_idx <- sample(1:round(m*test_size))
   }else{
     new_idx <- 1:m
   }
-  idx <- round(m*test_size)
-  train_X <- X[1:idx, ]
-  train_y <- X[1:idx]
-  test_X <- X[(idx + 1):m, ]
-  test_y <- y[(idx + 1):m]
+  train_X <- X[-new_idx, ]
+  train_y <- y[-new_idx]
+  test_X <- X[new_idx, ]
+  test_y <- y[new_idx]
   train_test_data <- list("train_X" = train_X, "train_y" = train_y,
                           "test_X" = test_X, "test_y" = test_y)
   return(train_test_data)
