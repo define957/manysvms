@@ -119,6 +119,7 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
 #' @importFrom stats predict
 #' @export
 predict.SVMClassifier <- function(object, X, values = FALSE, ...) {
+  X <- as.matrix(X)
   if (object$fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
