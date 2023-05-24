@@ -27,8 +27,7 @@ Make sure you have installed `devtools`, if you don't have `devtools` installed,
 ```{r}
 install.packages("devtools")
 ```
-After you installed `devtools`, remember to instal `RTools`. You can find suitable `RTools` on the website https://cran.r-project.org/bin/windows/Rtools/. （on Mac OSX you should install suitable `clang` and `gfortran`, see more: https://cran.r-project.org/bin/macosx/tools/ and https://mac.r-project.org/tools/）
-After above steps, please run the following command :
+After you installed `devtools`, please run the following command :
 ```{r}
 devtools::install_github("define957/manysvms")
 ```
@@ -39,28 +38,14 @@ The old version of the function will be deprecated in the new version !!!
 
 ## SVMs for classification
 
-+ Support Vector Machine for Multi-classification (One versus Rest strategy) 
-+ + [Rcpp acceleration is available]
-+ Least Squares Support Vector Machine for Multi-classification (One versus Rest strategy) 
-+ + [Rcpp acceleration is available]
-+ Twin-SVM for binary classification 
-+ + [Rcpp acceleration is available]
-+ Twin-SVM for Multi-classification (One versus Rest strategy) 
-+ + [Rcpp acceleration is available]
-+ + [Parallel execution of grid searches is available]
-+ Multiple Birth SVM for Multi-classification 
-+ + [Rcpp acceleration is available] 
-+ + [Parallel execution of grid searches is available]
-+ Twin K SVM for Multi-classification (One versus One versus Rest strategy) 
-+ + [Rcpp acceleration is available]
-+ Ramp Twin K SVM for Multi-Classification (One versus One versus Rest strategy)
-+ + [Rcpp acceleration is available]
++ Hinge Support Vector Classification
++ Pin Support Vector Classification
++ Least Squares Support Vector Classification
++ Rescaled Quantile Support Vector Classification
++ Sigmoid Support Vector Classification
 
 ## SVMs for regression
 
-+ Epsilon Support Vector Regression [Rcpp acceleration is available]
-+ Twin Support Vector Regression [Rcpp acceleration is available]
-+ Least Squares Support Vector Regression
 
 ## Kernel options
 
@@ -70,7 +55,7 @@ The old version of the function will be deprecated in the new version !!!
 
 ## Development environment and dependency
 
-My enviroment: R 4.2.1, windows 10 x64 &#x2705;
+My enviroment: R 4.3.0, windows 11 x64 &#x2705;
 
 Other test environment detail: 
 + Windows 10/11 x64 &#x2705;
@@ -79,9 +64,6 @@ Other test environment detail:
 
 Dependency: 
 
-+ ggplot2 
-+ Rcpp
-+ RcppArmadillo
 + foreach
 + doParallel
 + doSNOW
@@ -97,10 +79,3 @@ If you find bug in this package, please post an issue on the [issue](https://git
 ## Licenses
 
 GNU GENERAL PUBLIC LICENSE Version 3 (GPL-3.0)
-
-## Examples
-
-MBSVM :
-<div align=center><img src = man\figures\MBSVM.png width="60%"></div>
-SVR :
-<div align=center><img src = man\figures\SVR.png width="60%"></div>
