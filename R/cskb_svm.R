@@ -18,6 +18,7 @@
 #' @param eps the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param batch_size mini-batch size for primal solver.
+#' @param solver \code{"primal"} are available.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
@@ -27,7 +28,8 @@
 cskb_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                      gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                      a = 1, b = 1,
-                     eps = 1e-2, max.steps = 80, batch_size = nrow(X) / 10,solver = c("primal"),
+                     eps = 1e-2, max.steps = 80, batch_size = nrow(X) / 10,
+                     solver = c("primal"),
                      fit_intercept = TRUE, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -54,7 +56,7 @@ cskb_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     sg <- w/n + (a * b * C / m)*t((sgWeight1/sgWeight2) %*% X[sqnInd,])
     return(sg) # sg is a column vector
   }
-  kso <- manysvms:::kernel_select_option(X, kernel, solver, randx,
+  kso <- kernel_select_option(X, kernel, solver, randx,
                               gamma, degree, coef0)
   KernelX <- kso$KernelX
   X <- kso$X

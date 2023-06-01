@@ -2,21 +2,22 @@
 % Please edit documentation in R/cskb_svm.R
 \name{cskb_svm}
 \alias{cskb_svm}
-\title{CSKB}
+\title{CSKB SVM}
 \usage{
 cskb_svm(
   X,
   y,
-  a = 1,
-  b = 1,
   C = 1,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
+  a = 1,
+  b = 1,
   eps = 0.01,
   max.steps = 80,
   batch_size = nrow(X)/10,
+  solver = c("primal"),
   fit_intercept = TRUE,
   randx = 0.1,
   ...
@@ -24,8 +25,6 @@ cskb_svm(
 }
 \arguments{
 \item{X, y}{dataset and label.}
-
-\item{a, b, c}{parameters for blinex loss.}
 
 \item{C}{plenty term.}
 
@@ -42,11 +41,15 @@ cskb_svm(
 
 \item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
+\item{a, b, c}{parameters for blinex loss.}
+
 \item{eps}{the precision of the optimization algorithm.}
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{batch_size}{mini-batch size for primal solver.}
+
+\item{solver}{\code{"primal"} are available.}
 
 \item{fit_intercept}{if set \code{fit_intercept = TRUE},
 the function will evaluates intercept.}
