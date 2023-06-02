@@ -29,7 +29,6 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                       epsilon = 0, lambda = 1,
                                       eps = 1e-5, eps.cccp = 1e-2,
                                       max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
-                                      seed = NULL, sample_seed = NULL,
                                       optimizer = pegasos, ...) {
   sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, At, ...) { # sub-gradient of Sigmoid loss function
     C <- list(...)$C
@@ -51,7 +50,7 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     f <- 1 - y*(KernelX %*% wt)
     deltak <- update_deltak(f, D, wt, epsilon, lambda)
     wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
-                    sgSigmoid, sample_seed, C = C,
+                    sgSigmoid, eps, C = C,
                     epsilon = epsilon, lambda = lambda, deltak = deltak, ...)
   }
   BasePrimalSigmoidSVMClassifier <- list(coef = as.matrix(wt[1:xp]))

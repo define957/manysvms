@@ -58,7 +58,7 @@ s <- Sys.time()
 gscv <-  grid_search_cv(sigmoid_svm, X, y, metric = accuracy,
                         param_list = param_list, seed = 1234, K = 5,
                         max.steps = 500, threads.num = 2,
-                        solver = "primal", randx = 0.1, batch_size = 10,
+                        solver = "primal", randx = 0.1, batch_size = 100,
                         kernel = "rbf")
 e <- Sys.time()
 print(e - s)
