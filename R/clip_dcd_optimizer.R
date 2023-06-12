@@ -26,22 +26,15 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
     numerator <- q - H%*%u
     L_idx_val <- numerator / diagH
     L_val <- numerator*L_idx_val
-
-    if (max(L_val) < eps) {
+    idx <- which((u > lb & L_idx_val < 0) | (u < ub & L_idx_val > 0))
+    k <- which.max(L_val[idx])
+    if (L_val[k] < eps) {
       break
     }
-
-    idx1 <- which(u > lb & L_idx_val < 0)
-    idx2 <- which(u < ub & L_idx_val > 0)
-    idx <- unique(c(idx1, idx2))
 
     if (length(idx) == 0) {
       break
     }
-
-    L_val[-idx] <- -Inf
-
-    k <- which.max(L_val)
     lambda_max <- L_idx_val[k]
     lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
 
