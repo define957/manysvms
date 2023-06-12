@@ -13,7 +13,7 @@ mean_squared_error <- function(y, y_hat, dof = 0){
     stop("y and y_hat should have same rows.")
   }
   n <- n1
-  mse <- sum((y - y_hat)^2) / (n - 0)
+  mse <- sum((y - y_hat)^2) / (n - dof)
   return(mse)
 }
 
@@ -32,4 +32,34 @@ accuracy <- function(y, y_hat){
   }
   acc <- sum((y == y_hat)) / n1
   return(acc)
+}
+
+#' Mean Absolute Error
+#'
+#' @author Zhang Jiaqi
+#' @param y,y_hat real values and fitted values.
+#' @export
+mean_absolute_error <- function(y, y_hat){
+  y <- as.matrix(y)
+  y_hat <- as.matrix(y_hat)
+  n1 <- nrow(y)
+  n2 <- nrow(y_hat)
+  if (n1 != n2) {
+    stop("y and y_hat should have same rows.")
+  }
+  n <- n1
+  mae <- sum(abs((y - y_hat))) / (n)
+  return(mae)
+}
+
+#' Root Mean Squared Error
+#' return Root Mean Squared Error for two vector
+#' @author Zhang Jiaqi
+#' @param y,y_hat real values and fitted values.
+#' @param dof degree of freedom.
+#' @export
+root_mean_squared_error <- function(y, y_hat, dof = 0){
+  mse <- mean_squared_error(y, y_hat, dof)
+  rmse <- sqrt(mse)
+  return(rmse)
 }
