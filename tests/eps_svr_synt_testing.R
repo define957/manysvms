@@ -12,8 +12,11 @@ pred <- predict(model, x)
 param_list <- list("C" = 1:4,
                    "epsilon" = c(0.1, 0.2, 0.5))
 
-# grid_search_cv(eps_svr, x, y, metric = mean_squared_error,
-#                param_list = param_list, max.steps = 1000)
-
+met <- list("mse" = mean_squared_error, "mae" = mean_absolute_error)
+res <- grid_search_cv(eps_svr, x, y, metrics = met, threads.num = 2,
+               param_list = param_list, max.steps = 1000, solver = "dual"
+               )
+res
 plot(x, y, col = "red")
 lines(x, pred)
+

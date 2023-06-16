@@ -10,7 +10,7 @@ cross_validation_noisy(
   y,
   y_noisy,
   K = 5,
-  metric,
+  metrics,
   predict_func = predict,
   ...
 )
@@ -24,7 +24,7 @@ cross_validation_noisy(
 
 \item{K}{number of folds.}
 
-\item{metric}{this parameter receive a metric function.}
+\item{metrics}{this parameter receive a metric function.}
 
 \item{predict_func}{this parameter receive a function for predict.}
 

@@ -55,7 +55,7 @@ ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
 cat(model1$coef, "\n")
 
 cross_validation(OVR_Classifier, X, y, bin_model = hinge_svm, shuffle = TRUE,
-                 metric = accuracy, K = 5, max.steps = 200, values = T)
+                 metrics = list(accuracy), K = 5, max.steps = 200, values = T)
 
 C <- rep(-8, 8)
 for (i in 0:17) {
@@ -64,7 +64,7 @@ for (i in 0:17) {
 param_list <- list("C" = C, "gamma " = C)
 
 s <- Sys.time()
-grid_search_cv(hinge_svm, X, y, metric = accuracy,
+grid_search_cv(hinge_svm, X, y, metrics = accuracy,
                param_list = param_list, seed = 1234, K = 5,
                max.steps = 500, threads.num = 2,
                solver = "primal", randx = 0.1, batch_size = 1,

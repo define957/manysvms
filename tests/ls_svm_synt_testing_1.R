@@ -58,7 +58,7 @@ param_list <- list("C" = C, "gamma " = C,
                    "epsilon" = 0)
 
 s <- Sys.time()
-grid_search_cv(ls_svm, X, y, metric = accuracy,
+grid_search_cv(ls_svm, X, y, metrics = accuracy,
                param_list = param_list, seed = 1234, K = 5,
                max.steps = 500, threads.num = 2,
                solver = "primal", randx = 0.1, batch_size = 1,

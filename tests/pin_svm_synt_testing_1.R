@@ -52,16 +52,13 @@ C <- 2^seq(-8, 8)
 param_list <- list("C" = C)
 
 s <- Sys.time()
-res <- grid_search_cv(pin_svm, X, y, metric = accuracy,
-               param_list = param_list, seed = 4321, K = 5,
-               max.steps = 500, threads.num = 2, cross_validation_func = cross_validation,
-               solver = "dual",
-               kernel = "linear")
+res <- grid_search_cv(pin_svm, X, y, 5, metrics = list("acc" = accuracy),
+                      param_list, threads.num = 2)
 e <- Sys.time()
 print(e - s)
 
-res <- grid_search_cv(pin_svm, X, y, metric = accuracy,
-                      param_list = res$best.param, seed = 1234, K = 5,
-                      max.steps = 500, threads.num = 2, cross_validation_func = cross_validation,
+res <- grid_search_cv(pin_svm, X, y, metrics = list("acc" = accuracy),
+                      param_list = param_list, seed = 1234, K = 5,
+                      max.steps = 500, threads.num = 2,
                       solver = "dual", randx = 0.1, batch_size = 1,
                       kernel = "linear")

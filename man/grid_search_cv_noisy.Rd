@@ -10,7 +10,7 @@ grid_search_cv_noisy(
   y,
   y_noisy,
   K = 5,
-  metric,
+  metrics,
   param_list,
   predict_func = predict,
   shuffle = TRUE,
@@ -28,7 +28,7 @@ grid_search_cv_noisy(
 
 \item{K}{number of folds.}
 
-\item{metric}{this parameter receive a metric function.}
+\item{metrics}{this parameter receive a metric function.}
 
 \item{param_list}{parameter list.}
 

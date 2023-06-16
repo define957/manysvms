@@ -4,17 +4,22 @@
 #' @param model your model.
 #' @param X,y dataset and label.
 #' @param K number of folds.
-#' @param metric this parameter receive a metric function.
+#' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
 #' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @export
-cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
+cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict,
                              ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
-  metric_mat <- matrix(0, nrow = 1, ncol = K)
+  if (is.list(metrics) == F) {
+    metrics <- list(metrics)
+    names(metrics) <- paste("metric", length(metrics), sep = "")
+  }
+  num_metric <- length(metrics)
+  metric_mat <- matrix(0, num_metric, K)
   index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
     idx <- which(index == i)
@@ -29,8 +34,11 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
     }
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
-    metric_mat[i] <- metric(y_test, y_test_hat)
+    for (j in 1:num_metric) {
+      metric_mat[j, i] <- metrics[[j]](y_test, y_test_hat)
+    }
   }
+  rownames(metric_mat) <- names(metrics)
   return(metric_mat)
 }
 
@@ -41,7 +49,7 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
 #' @param model your model.
 #' @param X,y dataset and label.
 #' @param K number of folds.
-#' @param metric this parameter receive a metric function.
+#' @param metrics this parameter receive a metric function.
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
@@ -55,13 +63,17 @@ cross_validation <- function(model, X, y, K = 5, metric, predict_func = predict,
 #' @import doSNOW
 #' @import stats
 #' @export
-grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
+grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                            predict_func = predict,
                            shuffle = TRUE, seed = NULL,
                            threads.num = parallel::detectCores() - 1, ...) {
   s <- Sys.time()
   X <- as.matrix(X)
   y <- as.matrix(y)
+  if (is.list(metrics) == F) {
+    metrics <- list(metrics)
+    names(metrics) <- paste("metric", length(metrics), sep = "")
+  }
   n <- nrow(X)
   if (is.null(seed) == FALSE) {
     set.seed(seed)
@@ -87,29 +99,42 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
     colnames(temp) <- param_names
     params_cv <- append(list("model" = model,
                             "X" = X, "y" = y, "K" = K,
-                            "metric" = metric,
+                            "metrics" = metrics,
                             "predict_func" =  predict_func,
                             ...),
                        temp)
     cv_res <- do.call("cross_validation", params_cv)
+    cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
   close(pb)
   parallel::stopCluster(cl)
-  cv_res = cbind(apply(cv_res, 1, mean), apply(cv_res, 1, sd),
-                 cv_res, param_grid)
-  colnames(cv_res) = c("avg", "sd", as.character(c(1:K)), names(param_list))
+  num_metrics <- length(metrics)
+  name_matrics <- names(metrics)
+  colnames(cv_res)[(num_metrics+1):(2*num_metrics)] <- paste(name_matrics, "- sd")
   e <- Sys.time()
-  idx.best <- which.max(cv_res$avg)
-  best.param <- as.data.frame(param_grid[idx.best, ])
-  colnames(best.param) <- colnames(param_grid)
+  idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
+  idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+  score_mat <- matrix(0, 2, 2*num_metrics)
+  rownames(score_mat) <- c("min", "max")
+  print(dim(score_mat))
+  print(name_matrics)
+  print(length(c(name_matrics, paste(name_matrics, "- sd"))))
+  colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
+  for (i in 1:num_metrics) {
+    score_mat[1, i] <- cv_res[idx_max[i], i]
+    score_mat[2, i] <- cv_res[idx_min[i], i]
+    score_mat[1, num_metrics+i] <- cv_res[idx_max[i], num_metrics+i]
+    score_mat[2, num_metrics+i] <- cv_res[idx_min[i], num_metrics+i]
+  }
+  cv_res <- cbind(cv_res, param_grid)
   cv_model <- list("results" = cv_res,
-                   "idx.best" = idx.best,
+                   "idx_max" = idx_max,
+                   "idx_min" = idx_min,
                    "num.parameters" = n_param,
-                   "best.param" = as.list(best.param),
-                   "best.avg" = cv_res[idx.best, 1],
-                   "best.sd" = cv_res[idx.best, 2],
                    "K" = K,
-                   "time" = e - s)
+                   "time" = e - s,
+                   "score_mat" = score_mat
+                   )
   class(cv_model) <- "cv_model"
   return(cv_model)
 }
@@ -121,14 +146,13 @@ grid_search_cv <- function(model, X, y, K = 5, metric, param_list,
 #' @param ... unsed argument.
 #' @export
 print.cv_model <- function(x, ...) {
+  cat("Results of Grid-Search and cross validation\n\n")
   cat("Number of Fold", x$K, "\n")
-  cat("Total Parameters:", x$num.parameters, "\n")
-  cat("Time Cost:")
+  cat("Total Parameters:", x$num.parameters, "\n\n")
+  cat("Time Cost:\n")
   print(x$time)
-  cat("Best Avg.:", x$results[x$idx.best, 1], "\n")
-  cat("Best Sd:", x$results[x$idx.best, 2], "\n")
-  cat("Best Parameter:", "\n")
-  print(x$results[x$idx.best, (3 + x$K):ncol(x$results)])
+  cat("Summary of Metrics\n\n")
+  print(x$score_mat)
 }
 
 
@@ -139,7 +163,7 @@ print.cv_model <- function(x, ...) {
 #' @param X,y dataset and label.
 #' @param y_noisy label (contains label noise)
 #' @param K number of folds.
-#' @param metric this parameter receive a metric function.
+#' @param metrics this parameter receive a metric function.
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
@@ -153,7 +177,7 @@ print.cv_model <- function(x, ...) {
 #' @import doSNOW
 #' @import stats
 #' @export
-grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list,
+grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_list,
                                  predict_func = predict,
                                  shuffle = TRUE, seed = NULL,
                                  threads.num = parallel::detectCores() - 1,
@@ -161,6 +185,10 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list
   s <- Sys.time()
   X <- as.matrix(X)
   y <- as.matrix(y)
+  if (is.list(metrics) == F) {
+    metrics <- list(metrics)
+    names(metrics) <- paste("metric", length(metrics), sep = "")
+  }
   n <- nrow(X)
   if (is.null(seed) == FALSE) {
     set.seed(seed)
@@ -187,33 +215,44 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list
     colnames(temp) <- param_names
     params_cv <- append(list("model" = model,
                             "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
-                            "metric" = metric,
+                            "metrics" = metrics,
                             "predict_func" =  predict_func,
                             ...),
                        temp)
     cv_res <- do.call("cross_validation_noisy", params_cv)
+    cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
-  close(pb)
   parallel::stopCluster(cl)
-  cv_res = cbind(apply(cv_res, 1, mean), apply(cv_res, 1, sd),
-                 cv_res, param_grid)
-  colnames(cv_res) = c("avg", "sd", as.character(c(1:K)), names(param_list))
+  num_metrics <- length(metrics)
+  name_matrics <- names(metrics)
+  colnames(cv_res)[(num_metrics+1):(2*num_metrics)] <- paste(name_matrics, "- sd")
   e <- Sys.time()
-  idx.best <- which.max(cv_res$avg)
-  best.param <- as.data.frame(param_grid[idx.best, ])
-  colnames(best.param) <- colnames(param_grid)
+  idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
+  idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+  score_mat <- matrix(0, 2, 2*num_metrics)
+  rownames(score_mat) <- c("min", "max")
+  print(dim(score_mat))
+  print(name_matrics)
+  print(length(c(name_matrics, paste(name_matrics, "- sd"))))
+  colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
+  for (i in 1:num_metrics) {
+    score_mat[1, i] <- cv_res[idx_max[i], i]
+    score_mat[2, i] <- cv_res[idx_min[i], i]
+    score_mat[1, num_metrics+i] <- cv_res[idx_max[i], num_metrics+i]
+    score_mat[2, num_metrics+i] <- cv_res[idx_min[i], num_metrics+i]
+  }
+  cv_res <- cbind(cv_res, param_grid)
   cv_model <- list("results" = cv_res,
-                   "idx.best" = idx.best,
+                   "idx_max" = idx_max,
+                   "idx_min" = idx_min,
                    "num.parameters" = n_param,
-                   "best.param" = as.list(best.param),
-                   "best.avg" = cv_res[idx.best, 1],
-                   "best.sd" = cv_res[idx.best, 2],
                    "K" = K,
-                   "time" = e - s)
+                   "time" = e - s,
+                   "score_mat" = score_mat
+  )
   class(cv_model) <- "cv_model"
   return(cv_model)
 }
-
 
 #' K-Fold Cross Validation with Noisy (Simulation Only)
 #'
@@ -226,18 +265,23 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metric, param_list
 #' @param X,y dataset and label.
 #' @param y_noisy label with label noise.
 #' @param K number of folds.
-#' @param metric this parameter receive a metric function.
+#' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
 #' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @export
-cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metric, predict_func = predict,
+cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics, predict_func = predict,
                                    ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   y_noisy <- as.matrix(y_noisy)
+  if (is.list(metrics) == F) {
+    metrics <- list(metrics)
+    names(metrics) <- paste("metric", length(metrics), sep = "")
+  }
   n <- nrow(X)
-  metric_mat <- matrix(0, nrow = 1, ncol = K)
+  num_metric <- length(metrics)
+  metric_mat <- matrix(0, num_metric, K)
   index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
     idx <- which(index == i)
@@ -252,7 +296,9 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metric, predict_
     }
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
-    metric_mat[i] <- metric(y_test, y_test_hat)
+    for (j in 1:num_metric) {
+      metric_mat[j, i] <- metrics[[j]](y_test, y_test_hat)
+    }
   }
   return(metric_mat)
 }
