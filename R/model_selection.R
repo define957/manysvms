@@ -115,10 +115,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
   idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
   score_mat <- matrix(0, 2, 2*num_metrics)
-  rownames(score_mat) <- c("min", "max")
-  print(dim(score_mat))
-  print(name_matrics)
-  print(length(c(name_matrics, paste(name_matrics, "- sd"))))
+  rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
   for (i in 1:num_metrics) {
     score_mat[1, i] <- cv_res[idx_max[i], i]
@@ -146,7 +143,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
 #' @param ... unsed argument.
 #' @export
 print.cv_model <- function(x, ...) {
-  cat("Results of Grid-Search and cross validation\n\n")
+  cat("Results of Grid Search and Cross Validation\n\n")
   cat("Number of Fold", x$K, "\n")
   cat("Total Parameters:", x$num.parameters, "\n\n")
   cat("Time Cost:\n")
@@ -230,10 +227,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
   idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
   score_mat <- matrix(0, 2, 2*num_metrics)
-  rownames(score_mat) <- c("min", "max")
-  print(dim(score_mat))
-  print(name_matrics)
-  print(length(c(name_matrics, paste(name_matrics, "- sd"))))
+  rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
   for (i in 1:num_metrics) {
     score_mat[1, i] <- cv_res[idx_max[i], i]
