@@ -108,6 +108,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   }
   close(pb)
   parallel::stopCluster(cl)
+  cat("\n")
   num_metrics <- length(metrics)
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics+1):(2*num_metrics)] <- paste(name_matrics, "- sd")
@@ -220,6 +221,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
   parallel::stopCluster(cl)
+  cat("\n")
   num_metrics <- length(metrics)
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics+1):(2*num_metrics)] <- paste(name_matrics, "- sd")
