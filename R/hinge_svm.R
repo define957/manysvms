@@ -2,12 +2,12 @@ hinge_svm_dual_solver <- function(KernelX, y, C = 1,
                                   eps = 1e-5, max.steps = 80) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
-  H <- D %*% KernelX %*% D
+  H <- calculate_svm_H(KernelX, y)
   e <- matrix(1, nrow = n)
   lb <- matrix(0, nrow = n)
   ub <- matrix(C, nrow = n)
 
-  alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps)$x
+  alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps)$x #
   coef <- D %*% alphas
   BaseDualHingeSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualHingeSVMClassifier) <- "BaseDualHingeSVMClassifier"
@@ -143,4 +143,16 @@ predict.SVMClassifier <- function(object, X, values = FALSE, ...) {
     decf <- fx
   }
   return(decf)
+}
+
+calculate_svm_H <- function(KernelX, y) {
+  n <- nrow(KernelX)
+  H <- matrix(0, n, n)
+  for (i in 1:n) {
+    H[i,] <- y[i]*KernelX[i, ]
+  }
+  for (i in 1:n) {
+    H[, i] <- y[i]*H[, i]
+  }
+  return(H)
 }

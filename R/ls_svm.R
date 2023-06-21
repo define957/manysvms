@@ -1,6 +1,6 @@
 ls_svm_dual_solver <- function(KernelX, y, C = 1) {
   D <- diag(as.vector(y))
-  H <- D %*% KernelX %*% D
+  H <- calculate_svm_H(KernelX, y)
   m <- nrow(KernelX)
   alphas <- solve((H + diag(1/C, m)), matrix(1, nrow = m))
   coef <- D %*% alphas

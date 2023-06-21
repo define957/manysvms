@@ -3,7 +3,7 @@ sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
                                     eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10) {
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
-  H <- D %*% KernelX %*% D
+  H <- calculate_svm_H(KernelX, y)
   e <- matrix(1, nrow = n, ncol = 1)
   u0 <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {

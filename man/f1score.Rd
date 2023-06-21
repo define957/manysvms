@@ -5,7 +5,7 @@
 \title{F1 Score
 return F1 Score for two vector}
 \usage{
-f1score(y, y_hat, dof = 0)
+f1score(y, y_hat)
 }
 \arguments{
 \item{y, y_hat}{real values and fitted values.}

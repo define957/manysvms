@@ -4,7 +4,7 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   eta <- 1/(1 - exp(-1/lambda))
   D <- diag(as.vector(y))
   n <- nrow(KernelX)
-  H <- D %*% KernelX %*% D
+  H <- calculate_svm_H(KernelX, y)
   u0 <- matrix(0, nrow = n, ncol = 1)
   e <- matrix(1, nrow = n, ncol = 1)
   delta_k_old <- matrix(0, nrow = n, ncol = 1)
