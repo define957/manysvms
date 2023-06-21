@@ -2,7 +2,6 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
                                tau = 0.5, lambda = 1,
                                eps = 1e-5, eps.cccp = 1e-2, max.steps = 80, cccp.steps = 10) {
   eta <- 1/(1 - exp(-1/lambda))
-  D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- calculate_svm_H(KernelX, y)
   u0 <- matrix(0, nrow = n, ncol = 1)
@@ -21,7 +20,7 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
       u0 <- u
     }
   }
-  coef <- D %*% u
+  coef <- y*u
   BaseDualRqSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualRqSVMClassifier) <- "BaseDualRqSVMClassifier"
   return(BaseDualRqSVMClassifier)
