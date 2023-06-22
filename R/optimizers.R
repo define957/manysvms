@@ -34,6 +34,43 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, ...) {
   return(v)
 }
 
+#' Nesterov's Accelerated Gradient Descent
+#'
+#' @author Zhang Jiaqi.
+#' @param X,y dataset and label.
+#' @param w initial point.
+#' @param m mini-batch size for pegasos solver.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param fx sub-gradient of objective function.
+#' @param eps the precision of the optimization algorithm.
+#' @param v initial velocity.
+#' @param eta initial learning rate.
+#' @param gam momentum parameter.
+#' @param k decay rate of learning rate.
+#' @param ... additional settings for the sub-gradient.
+#' @return return optimal solution.
+#' @export
+nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
+                     v = matrix(0, nrow(w)), eta = 1, gam = 0.5, k = 0.5, ...) {
+  nx <- nrow(X)
+  px <- ncol(X)
+  for (t in 1:max.steps) {
+    At <- sample(nx, m)
+    xm <- X[At, ]
+    dim(xm) <- c(m, px)
+    ym <- as.matrix(y[At])
+    v <- gam*v - eta*fx(xm, ym, w, At = At, ...)
+    wk <- w + gam*v
+    eta <- eta*exp(-k)
+    if (norm(wk - w, type = "2") < eps) {
+      break
+    } else {
+      w <- wk
+    }
+  }
+  return(w)
+}
+
 #'  Conjugate Gradient Method for Solving Linear Equation Ax = b
 #'
 #' @author Zhang Jiaqi.
