@@ -10,7 +10,8 @@ X <- rbind(X1, X2)
 
 y <- rep(c(1, 2), c(3*n, 2*n))
 s <- Sys.time()
-model1 <- blinex_cssvm(X, y, 1, "linear", max.steps = 200)
+model1 <- blinex_cssvm(X, y , 0.2, "linear", max.steps = 2000, a = 1, optimizer = pegasos,
+                       batch_size = 50)
 e <- Sys.time()
 print(e - s)
 res <- predict(model1, X)

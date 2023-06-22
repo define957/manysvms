@@ -29,8 +29,7 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                       eps = 1e-5, eps.cccp = 1e-2,
                                       max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                       optimizer = pegasos, ...) {
-  sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, At, ...) { # sub-gradient of Sigmoid loss function
-    C <- list(...)$C
+  sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, At, C, ...) { # sub-gradient of Sigmoid loss function
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
@@ -43,7 +42,6 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
-  D <- diag(as.vector(y))
   wt <- matrix(0, nrow = xp, ncol = 1)
   for (i in 1:cccp.steps) {
     f <- 1 - y*(KernelX %*% wt)

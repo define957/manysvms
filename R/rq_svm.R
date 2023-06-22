@@ -32,9 +32,8 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                  eps = 1e-5, eps.cccp = 1e-2,
                                  max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                  optimizer = pegasos, ...) {
-  sgRq <- function(KernelX, y, v, tau, lambda, deltak, At, ...) { # sub-gradient of RQ loss function
+  sgRq <- function(KernelX, y, v, tau, lambda, deltak, At, C, ...) { # sub-gradient of RQ loss function
     eta <- 1/(1 - exp(-1/lambda))
-    C <- list(...)$C
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)

@@ -12,8 +12,7 @@ ls_svm_dual_solver <- function(KernelX, y, C = 1) {
 ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
                                  max.steps = 80, batch_size = nrow(KernelX) / 10,
                                  optimizer = pegasos, ...) {
-   sgLeastSquares <- function(KernelX, y, v, ...) { # gradient of Least Squares loss function
-    C <- list(...)$C
+   gLeastSquares <- function(KernelX, y, v, C,...) { # gradient of Least Squares loss function
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
@@ -24,7 +23,7 @@ ls_svm_primal_solver <- function(KernelX, y, C = 1, eps = 1e-5,
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgLeastSquares, eps, C = C, ...)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gLeastSquares, eps, C = C, ...)
   BasePrimalLeastSquaresSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalLeastSquaresSVMClassifier) <- "BasePrimalLeastSquaresSVMClassifier"
   return(BasePrimalLeastSquaresSVMClassifier)

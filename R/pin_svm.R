@@ -17,8 +17,7 @@ pin_svm_dual_solver <- function(KernelX, y, C = 1, tau = 0.5,
 pin_svm_primal_solver <- function(KernelX, y, C = 1, tau = 0.5, eps = 1e-5,
                                   max.steps = 80, batch_size = nrow(KernelX) / 10,
                                   optimizer = pegasos, ...) {
-  sgpinball <- function(KernelX, y, v, ...) { # sub-gradient of hinge loss function
-    C <- list(...)$C
+  sgpinball <- function(KernelX, y, v, C, ...) { # sub-gradient of hinge loss function
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
