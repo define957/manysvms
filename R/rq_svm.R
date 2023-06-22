@@ -31,7 +31,6 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                  tau = 0, lambda = 1,
                                  eps = 1e-5, eps.cccp = 1e-2,
                                  max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
-                                 seed = NULL, sample_seed = NULL,
                                  optimizer = pegasos, ...) {
   sgRq <- function(KernelX, y, v, tau, lambda, deltak, At, ...) { # sub-gradient of RQ loss function
     eta <- 1/(1 - exp(-1/lambda))
@@ -54,9 +53,8 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   for (i in 1:cccp.steps) {
     f <- 1 - y*(KernelX %*% wt)
     deltak <- update_deltak(f, wt, tau, lambda)
-    wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
-                    sgRq, sample_seed, C = C,
-                    tau = tau, lambda = lambda, deltak = deltak, ...)
+    wt <- optimizer(KernelX, y, wt, batch_size, max.steps, sgRq, eps,
+                    C = C, tau = tau, lambda = lambda, deltak = deltak, ...)
   }
   BasePrimalRqSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalRqSVMClassifier) <- "BasePrimalRqSVMClassifier"
