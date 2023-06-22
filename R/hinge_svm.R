@@ -1,14 +1,13 @@
 hinge_svm_dual_solver <- function(KernelX, y, C = 1,
                                   eps = 1e-5, max.steps = 80) {
-  D <- diag(as.vector(y))
   n <- nrow(KernelX)
   H <- calculate_svm_H(KernelX, y)
   e <- matrix(1, nrow = n)
   lb <- matrix(0, nrow = n)
   ub <- matrix(C, nrow = n)
-
-  alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps)$x #
-  coef <- D %*% alphas
+  u0 <- lb
+  alphas <- clip_dcd_optimizer(H, e, lb, ub, eps, max.steps, u0)$x #
+  coef <- y*alphas
   BaseDualHingeSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualHingeSVMClassifier) <- "BaseDualHingeSVMClassifier"
   return(BaseDualHingeSVMClassifier)
