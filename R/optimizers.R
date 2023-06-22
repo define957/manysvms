@@ -7,12 +7,12 @@
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
 #' @param eps the precision of the optimization algorithm.
+#' @param C penalty term of SVMs.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
-pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, ...) {
-  C <- list(...)$C
+pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
   v <- w
   nx = nrow(X)
   px = ncol(X)
@@ -22,7 +22,7 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, ...) {
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
     # update parameter
-    dF <- fx(xm, ym, v, At = At, ...)
+    dF <- fx(xm, ym, v, At = At, C = C, ...)
     v <- v - (C/t)*dF
     v <- min(1, sqrt(C)/norm(v, type = "2"))*v
     if (norm(v - w, type = "2") < eps) {
