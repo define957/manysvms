@@ -102,6 +102,7 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   idx <- which(y == class_set[1])
   y[idx] <- 1
   y[-idx] <- -1
+  y <- as.matrix(as.numeric(y))
   if (length(class_set) > 2) {
     stop("The number of class should less 2!")
   }
