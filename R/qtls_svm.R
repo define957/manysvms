@@ -17,6 +17,9 @@ qtls_svm_primal_solver <- function(KernelX, y, C = 1,
       KernelX <- KernelX[idx, ]
       dim(KernelX) <- c(xn, xp)
       g <- v + t(KernelX) %*% sgterm/xn
+      if (sum(is.infinite(g)) > 0) {
+        g <- v
+      }
     } else {
       g <- v
     }
