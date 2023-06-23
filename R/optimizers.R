@@ -13,7 +13,6 @@
 #' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
 pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
-  v <- w
   nx = nrow(X)
   px = ncol(X)
   for (t in 1:max.steps) {
@@ -22,16 +21,11 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
     # update parameter
-    dF <- fx(xm, ym, v, At = At, C = C, ...)
-    v <- v - (C/t)*dF
-    v <- min(1, sqrt(C)/norm(v, type = "2"))*v
-    if (norm(v - w, type = "2") < eps) {
-      break
-    } else {
-      w <- v
-    }
+    dF <- fx(xm, ym, w, At = At, C = C, ...)
+    w <- w - (C/t)*dF
+    w <- min(1, sqrt(C)/norm(w, type = "2"))*w
   }
-  return(v)
+  return(w)
 }
 
 #' Nesterov's Accelerated Gradient Descent
@@ -60,13 +54,8 @@ nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
     v <- gam*v - eta*fx(xm, ym, w, At = At, ...)
-    wk <- w + gam*v
+    w <- w + gam*v
     eta <- eta*exp(-k)
-    if (norm(wk - w, type = "2") < eps) {
-      break
-    } else {
-      w <- wk
-    }
   }
   return(w)
 }
@@ -88,29 +77,23 @@ nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
 #' @export
 rmsprop <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
                     epsilon = 0.001, rho = 0.9, delta = 1e-5,...) {
-  v <- w
   xn <- nrow(X)
   xp <- ncol(X)
   r <- matrix(0.1,nrow = ncol(X),ncol = 1)
-  g <- matrix(0.1,nrow = ncol(X),ncol = 1)
+  g <-r
   for (t in 1:max.steps) {
     At <- sample(xn, m)
     xm <- X[At, ]
     dim(xm) <- c(m, xp)
     ym <- as.matrix(y[At])
     # update parameter
-    dF <- fx(xm, ym, v, ...)
+    dF <- fx(xm, ym, w, ...)
     rk <- rho*r + (1 - rho)*g*g
-    vk <- v - (epsilon/sqrt(delta + rk)) * dF
+    w <- w - (epsilon/sqrt(delta + rk)) * dF
     g <- dF
     r <- rk
-    if (norm(vk - v, type = "2") < eps) {
-      break
-    } else {
-      v <- vk
-    }
   }
-  return(v)
+  return(w)
 }
 
 #'  Conjugate Gradient Method for Solving Linear Equation Ax = b
