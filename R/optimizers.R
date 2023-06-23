@@ -87,7 +87,7 @@ nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
-rmsprop <- function(X, y, w, m, max.steps, fx,
+rmsprop <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
                     epsilon = 0.001, rho = 0.9, delta = 1e-5,...) {
   v <- w
   xn <- nrow(X)
@@ -102,9 +102,14 @@ rmsprop <- function(X, y, w, m, max.steps, fx,
     # update parameter
     dF <- fx(xm, ym, v, ...)
     rk <- rho*r + (1 - rho)*g*g
-    v <- v - (epsilon/sqrt(delta + rk)) * dF
+    vk <- v - (epsilon/sqrt(delta + rk)) * dF
     g <- dF
     r <- rk
+    if (norm(vk - v, type = "2") < eps) {
+      break
+    } else {
+      v <- vk
+    }
   }
   return(v)
 }

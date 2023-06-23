@@ -11,6 +11,7 @@ rmsprop(
   m,
   max.steps,
   fx,
+  eps = 1e-05,
   epsilon = 0.001,
   rho = 0.9,
   delta = 1e-05,
@@ -28,13 +29,13 @@ rmsprop(
 
 \item{fx}{sub-gradient of objective function.}
 
+\item{eps}{the precision of the optimization algorithm.}
+
 \item{epsilon}{initial stepsize.}
 
 \item{delta}{avoid division by 0.}
 
 \item{...}{additional settings for the sub-gradient.}
-
-\item{eps}{the precision of the optimization algorithm.}
 
 \item{eta}{initial learning rate.}
 
