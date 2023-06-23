@@ -9,20 +9,7 @@ qtls_svm_primal_solver <- function(KernelX, y, C = 1,
     u <- y*(KernelX %*% v) - 1
     expau <- exp(a*u)
     sgterm <- (2*C*u*expau + C*(u^2)*expau*a)*y
-    idx <- which(sgterm!=Inf & sgterm!=-Inf)
-    sgterm <- as.matrix(sgterm[idx])
-    xn <- length(idx)
-    if (xn != 0) {
-      dim(sgterm) <- c(xn, 1)
-      KernelX <- KernelX[idx, ]
-      dim(KernelX) <- c(xn, xp)
-      g <- v + t(KernelX) %*% sgterm/xn
-      if (sum(is.infinite(g)) > 0) {
-        g <- v
-      }
-    } else {
-      g <- v
-    }
+    g <- v + t(KernelX) %*% sgterm/xn
     return(g)
   }
   xn <- nrow(KernelX)
@@ -67,7 +54,7 @@ qtls_svm_primal_solver <- function(KernelX, y, C = 1,
 #' @return return \code{SVMClassifier} object.
 #' @export
 qtls_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
-                     a = -5,
+                     a = -1,
                      gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                      eps = 1e-5, max.steps = 80,
                      batch_size = nrow(X) / 10,

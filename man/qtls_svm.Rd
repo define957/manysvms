@@ -9,7 +9,7 @@ qtls_svm(
   y,
   C = 1,
   kernel = c("linear", "rbf", "poly"),
-  a = -5,
+  a = -1,
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
