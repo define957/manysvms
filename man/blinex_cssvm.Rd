@@ -14,7 +14,6 @@ blinex_cssvm(
   coef0 = 0,
   a = 1,
   b = 1,
-  c = 1,
   eps = 0.01,
   max.steps = 80,
   batch_size = nrow(X)/10,
@@ -43,7 +42,7 @@ blinex_cssvm(
 
 \item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
-\item{a, b, c}{parameters for blinex loss.}
+\item{a, b}{parameters for blinex loss.}
 
 \item{eps}{the precision of the optimization algorithm.}
 

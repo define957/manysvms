@@ -18,10 +18,17 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
     sgterm <- a*y*xi
     exp_sgterm <- exp(sgterm)
     idx <- which(exp_sgterm!=Inf)
-    exp_sgterm <- exp_sgterm[idx]
-    sgweight1 <- (1 - exp_sgterm*sign(xi[idx]))
-    sgweight2 <- (1 + b*(exp_sgterm - sgterm[idx] - 1))^2
-    sg <- v/n + (a*b*C/length(idx))*t((t(sgweight1/sgweight2)%*%KernelX[idx, ]))
+    xn <- length(idx)
+    if (xn != 0) {
+      exp_sgterm <- exp_sgterm[idx]
+      sgweight1 <- (1 - exp_sgterm*sign(xi[idx]))
+      sgweight2 <- (1 + b*(exp_sgterm - sgterm[idx] - 1))^2
+      KernelX <- KernelX[idx, ]
+      dim(KernelX) <- c(xn, xp)
+      sg <- v/n + (a*b*C/xn)*t((t(sgweight1/sgweight2)%*%KernelX))
+    } else {
+      sg <- v/n
+    }
     return(sg)
   }
   xn <- nrow(KernelX)
@@ -41,7 +48,7 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
 #' @author Li Feihong
 #' @param X,y dataset and label.
 #' @param C plenty term.
-#' @param a,b,c parameters for blinex loss.
+#' @param a,b parameters for blinex loss.
 #' @param kernel kernel function. The definitions of various kernel functions are as follows:
 #' \describe{
 #'     \item{linear:}{\eqn{u'v}{u'*v}}
@@ -64,7 +71,7 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
 #' @export
 blinex_cssvm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                         a = 1, b = 1, c = 1,
+                         a = 1, b = 1,
                          eps = 1e-2, max.steps = 80, batch_size = nrow(X) / 10,
                          solver = c("primal"),
                          fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
