@@ -13,22 +13,12 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
     sg <- matrix(0, nrow = xp, ncol = 1)
     xi <- 1 - y * (KernelX %*% v)
     na_idx <- which(is.na(xi)== TRUE)
-    print(v)
     xi <- ifelse(xi > 0, xi, 0)
     sgterm <- a*y*xi
     exp_sgterm <- exp(sgterm)
-    idx <- which(exp_sgterm!=Inf)
-    xn <- length(idx)
-    if (xn != 0) {
-      exp_sgterm <- exp_sgterm[idx]
-      sgweight1 <- (1 - exp_sgterm*sign(xi[idx]))
-      sgweight2 <- (1 + b*(exp_sgterm - sgterm[idx] - 1))^2
-      KernelX <- KernelX[idx, ]
-      dim(KernelX) <- c(xn, xp)
-      sg <- v/n + (a*b*C/xn)*t((t(sgweight1/sgweight2)%*%KernelX))
-    } else {
-      sg <- v/n
-    }
+    sgweight1 <- (1 - exp_sgterm*sign(xi))
+    sgweight2 <- (1 + b*(exp_sgterm - sgterm - 1))^2
+    sg <- v/n + (a*b*C/m)*t((t(sgweight1/sgweight2)%*%KernelX))
     return(sg)
   }
   xn <- nrow(KernelX)

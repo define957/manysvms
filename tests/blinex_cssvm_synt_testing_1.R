@@ -33,13 +33,13 @@ ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
 cat(model1$coef, "\n")
 
 C <- 2^seq(-8, 8, 2)
-param_list <- list("C" = C, "gamma " = C, "a" = c(1, 2, 3))
+param_list <- list("C" = C, "gamma " = 1, "a" = c(1, 2, 3))
 
 s <- Sys.time()
 grid_search_cv(blinex_cssvm, X, y, metrics = accuracy,
                param_list = param_list, seed = 1234, K = 5,
                max.steps = 500, threads.num = 2,
-               solver = "primal", randx = 1, batch_size = 1,
+               solver = "primal", randx = 0.1, batch_size = 100,
                kernel = "rbf")
 e <- Sys.time()
 print(e - s)
