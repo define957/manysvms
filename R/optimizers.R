@@ -81,9 +81,8 @@ nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
 #' @param fx sub-gradient of objective function.
 #' @param eps the precision of the optimization algorithm.
 #' @param epsilon initial stepsize.
+#' @param rho momentum parameter.
 #' @param delta avoid division by 0.
-#' @param eta initial learning rate.
-#' @param k decay rate of learning rate.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export

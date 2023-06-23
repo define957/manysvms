@@ -33,13 +33,11 @@ rmsprop(
 
 \item{epsilon}{initial stepsize.}
 
+\item{rho}{momentum parameter.}
+
 \item{delta}{avoid division by 0.}
 
 \item{...}{additional settings for the sub-gradient.}
-
-\item{eta}{initial learning rate.}
-
-\item{k}{decay rate of learning rate.}
 }
 \value{
 return optimal solution.

@@ -59,10 +59,6 @@ the function will evaluates intercept.}
 \item{randx}{parameter for reduce SVM, default \code{randx = 0.1}.}
 
 \item{...}{unused parameters.}
-
-\item{eps.cccp}{the precision of the optimization algorithm.}
-
-\item{cccp.steps}{the number of iterations of CCCP.}
 }
 \value{
 return \code{SVMClassifier} object.

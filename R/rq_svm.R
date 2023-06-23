@@ -8,6 +8,13 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   e <- matrix(1, nrow = n, ncol = 1)
   delta_k_old <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {
+    if (i == 1) {
+      if (tau > 0) {
+        u0 <- matrix((lambda*C - lambda*tau*C)/2, n, 1)
+      } else if (tau == 0) {
+        u0 <- matrix(0, nrow = n, ncol = 1)
+      }
+    }
     f <- 1 - H %*% u0
     delta_k <- update_deltak(f, u0, tau, lambda)
     lb <- -C*delta_k - C*eta*tau/lambda

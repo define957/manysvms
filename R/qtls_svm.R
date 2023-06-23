@@ -56,9 +56,7 @@ qtls_svm_primal_solver <- function(KernelX, y, C = 1,
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param eps the precision of the optimization algorithm.
-#' @param eps.cccp the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
-#' @param cccp.steps the number of iterations of CCCP.
 #' @param batch_size mini-batch size for primal solver.
 #' @param solver \code{"primal"} option is available.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
