@@ -131,7 +131,8 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                    "num.parameters" = n_param,
                    "K" = K,
                    "time" = e - s,
-                   "score_mat" = score_mat
+                   "score_mat" = score_mat,
+                   "param_grid" = param_grid
                    )
   class(cv_model) <- "cv_model"
   return(cv_model)
@@ -244,8 +245,9 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                    "num.parameters" = n_param,
                    "K" = K,
                    "time" = e - s,
-                   "score_mat" = score_mat
-  )
+                   "score_mat" = score_mat,
+                   "param_grid" = param_grid
+                   )
   class(cv_model) <- "cv_model"
   return(cv_model)
 }
