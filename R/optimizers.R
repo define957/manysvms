@@ -13,6 +13,10 @@
 #' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
 pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
+  sample_seed <- list(...)$sample_seed
+  if (is.null(sample_seed) == FALSE) {
+    set.seed(sample_seed)
+  }
   nx = nrow(X)
   px = ncol(X)
   for (t in 1:max.steps) {
@@ -46,6 +50,10 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
 #' @export
 nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
                      v = matrix(0, nrow(w)), eta = 1, gam = 0.5, k = 0.5, ...) {
+  sample_seed <- list(...)$sample_seed
+  if (is.null(sample_seed) == FALSE) {
+    set.seed(sample_seed)
+  }
   nx <- nrow(X)
   px <- ncol(X)
   for (t in 1:max.steps) {
@@ -76,7 +84,11 @@ nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
 #' @return return optimal solution.
 #' @export
 rmsprop <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
-                    epsilon = 0.001, rho = 0.9, delta = 1e-5,...) {
+                    epsilon = 0.001, rho = 0.9, delta = 1e-5, ...) {
+  sample_seed <- list(...)$sample_seed
+  if (is.null(sample_seed) == FALSE) {
+    set.seed(sample_seed)
+  }
   xn <- nrow(X)
   xp <- ncol(X)
   r <- matrix(0.1,nrow = ncol(X),ncol = 1)
