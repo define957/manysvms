@@ -6,7 +6,6 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   H <- calculate_svm_H(KernelX, y)
   u0 <- matrix(0, nrow = n, ncol = 1)
   e <- matrix(1, nrow = n, ncol = 1)
-  u0 <- matrix(0, nrow = n, ncol = 1)
   for (i in 1:cccp.steps) {
     f <- 1 - H %*% u0
     delta_k <- update_deltak(f, u0, tau, lambda)
@@ -35,10 +34,10 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     eta <- 1/(1 - exp(-1/lambda))
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
-    sg <- matrix(0, nrow = xp, ncol = 1)
+    sg <- matrix(0, xp, 1)
     f <- 1 - y*(KernelX %*% v)
-    u <- matrix(0, nrow = xn)
-    u[f < 0] <- tau
+    u <- matrix(0, xn)
+    u[f < 0] <- -tau
     u[f >= 0] <- 1
     sg <- v - eta*(C/xn) * t(KernelX) %*% (u*y)/lambda +
       C/xn*t(KernelX) %*% (y*deltak[At, ])
@@ -47,7 +46,7 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   D <- diag(as.vector(y))
-  wt <- matrix(0, nrow = xp, ncol = 1)
+  wt <- matrix(0, xp, 1)
   for (i in 1:cccp.steps) {
     f <- 1 - y*(KernelX %*% wt)
     deltak <- update_deltak(f, wt, tau, lambda)
