@@ -6,6 +6,11 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
   H <- calculate_svm_H(KernelX, y)
   u0 <- matrix(0, nrow = n, ncol = 1)
   e <- matrix(1, nrow = n, ncol = 1)
+  if (tau == 0) {
+    u0 <- matrix(0, nrow = n, ncol = 1)
+  } else {
+    u0 <- matrix((1 - tau)*lambda*C, nrow = n, ncol = 1)
+  }
   for (i in 1:cccp.steps) {
     f <- 1 - H %*% u0
     delta_k <- update_deltak(f, u0, tau, lambda)
