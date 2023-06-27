@@ -180,7 +180,7 @@ adam <- function(X, y, w, m, max.steps, fx,
 }
 
 
-exp_decay <- function(lr, steps, s = 0.03, ...) {
+exp_decay <- function(lr, steps, s = 0.001, ...) {
   lr <- lr*exp(-s*steps)
   return(lr)
 }
