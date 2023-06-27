@@ -21,8 +21,8 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
     sg <- v/n + (a*b*C/m)*t((t(sgweight1/sgweight2)%*%KernelX))
     return(sg)
   }
-  nestrov_decay_option_CSKB_linear_default <- function(lr, steps, k = 0.03, ...) {
-    lr <- lr*exp(-k*steps)
+  nestrov_decay_option_CSKB_linear_default <- function(lr, steps, s = 0.03, ...) {
+    lr <- lr*exp(-s*steps)
     return(lr)
   }
   xn <- nrow(KernelX)
@@ -71,6 +71,7 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
 #' @param optimizer default primal optimizer pegasos.
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
 #' @param ... unused parameters.
+#' @importFrom methods functionBody
 #' @return return \code{HingeSVMClassifier} object.
 #' @export
 blinex_cssvm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),

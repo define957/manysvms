@@ -45,9 +45,9 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
 #' @param fx sub-gradient of objective function.
 #' @param eps the precision of the optimization algorithm.
 #' @param v initial velocity.
-#' @param eta initial learning rate.
+#' @param lr initial learning rate.
 #' @param gam momentum parameter.
-#' @param k decay rate of learning rate.
+#' @param decay_option decay option for learning rate.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export

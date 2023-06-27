@@ -13,9 +13,9 @@ nesterov(
   fx,
   eps = 1e-05,
   v = matrix(0, nrow(w)),
-  eta = 1,
+  lr = 1,
   gam = 0.5,
-  k = 0.5,
+  decay_option = NULL,
   ...
 )
 }
@@ -34,11 +34,11 @@ nesterov(
 
 \item{v}{initial velocity.}
 
-\item{eta}{initial learning rate.}
+\item{lr}{initial learning rate.}
 
 \item{gam}{momentum parameter.}
 
-\item{k}{decay rate of learning rate.}
+\item{decay_option}{decay option for learning rate.}
 
 \item{...}{additional settings for the sub-gradient.}
 }
