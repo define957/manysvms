@@ -11,7 +11,6 @@ nesterov(
   m,
   max.steps,
   fx,
-  eps = 1e-05,
   v = matrix(0, nrow(w)),
   lr = 1,
   gam = 0.5,
@@ -30,8 +29,6 @@ nesterov(
 
 \item{fx}{sub-gradient of objective function.}
 
-\item{eps}{the precision of the optimization algorithm.}
-
 \item{v}{initial velocity.}
 
 \item{lr}{initial learning rate.}
@@ -41,6 +38,8 @@ nesterov(
 \item{decay_option}{decay option for learning rate.}
 
 \item{...}{additional settings for the sub-gradient.}
+
+\item{eps}{the precision of the optimization algorithm.}
 }
 \value{
 return optimal solution.
