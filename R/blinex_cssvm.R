@@ -1,8 +1,8 @@
 blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
                                        a, b, eps = 1e-5,
                                        max.steps = 80, batch_size = nrow(KernelX) / 10,
-                                       optimizer = pegasos, ...) {
-  sgBlinex <- function(KernelX, y, v, ...) {
+                                       optimizer = pegasos, kernel, ...) {
+  gBlinex <- function(KernelX, y, v, ...) {
     add_param <- list(...)
     a <- add_param$a
     b <- add_param$b
@@ -21,11 +21,25 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
     sg <- v/n + (a*b*C/m)*t((t(sgweight1/sgweight2)%*%KernelX))
     return(sg)
   }
+  nestrov_decay_option_CSKB_linear_default <- function(lr, steps, k = 0.03, ...) {
+    lr <- lr*exp(-k*steps)
+    return(lr)
+  }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, xp, 1)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgBlinex, C = C,
-                  a = a, b = b, n = xn, ...)
+  if (is.null(list(...)$decay_option) & kernel == "linear" & functionBody(nesterov) == functionBody(optimizer)) {
+    print("hi")
+    decay_option <- nestrov_decay_option_CSKB_linear_default
+    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, C = C,
+                    a = a, b = b, n = xn, decay_option = decay_option,
+                    ...)
+  } else {
+    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, C = C,
+                    a = a, b = b, n = xn,
+                    ...)
+  }
+
   BasePrimalBlinexCSSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalBlinexCSSVMClassifier) <- "BasePrimalBlinexCSSVMClassifier"
   return(BasePrimalBlinexCSSVMClassifier)
@@ -88,7 +102,7 @@ blinex_cssvm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   if (solver == "primal") {
     solver.res <- blinex_cssvm_primal_solver(KernelX, y, C, a, b,
                                              eps, max.steps, batch_size,
-                                             optimizer, ...)
+                                             optimizer, kernel = kernel, ...)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                         "C" = C, "kernel" = kernel,
