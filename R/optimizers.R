@@ -12,7 +12,7 @@
 #' @return return optimal solution.
 #' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
-pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
+pegasos <- function(X, y, w, m, max.steps, fx, C = 1, ...) {
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
     set.seed(sample_seed)
@@ -51,9 +51,9 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
-nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
+nesterov <- function(X, y, w, m, max.steps, fx,
                      v = matrix(0, nrow(w)), lr = 1, gam = 0.5,
-                     decay_option = NULL, ...) {
+                     decay_option = exp_decay, ...) {
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
     set.seed(sample_seed)
@@ -89,7 +89,7 @@ nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
-rmsprop <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
+rmsprop <- function(X, y, w, m, max.steps, fx,
                     epsilon = 0.001, rho = 0.9, delta = 1e-5, ...) {
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
@@ -104,12 +104,9 @@ rmsprop <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
     xm <- X[At, ]
     dim(xm) <- c(m, xp)
     ym <- as.matrix(y[At])
-    # update parameter
     dF <- fx(xm, ym, w, ...)
-    rk <- rho*r + (1 - rho)*g*g
-    w <- w - (epsilon/sqrt(delta + rk)) * dF
-    g <- dF
-    r <- rk
+    r <- rho*r + (1 - rho)*dF*dF
+    w <- w - (epsilon/sqrt(delta + r)) * dF
   }
   return(w)
 }
@@ -145,7 +142,49 @@ conjugate_gradient_method <- function(A, b, x, max.steps, eps = 1e-5, ...) {
 }
 
 
-#exponential_decay <- function(lr, decay_rate, steps, ...) {
-#  decay_lr <- lr*decay_rate^(steps)
-# return(decay_lr)
-#}
+#' Adaptive Moment Estimation Optimizer
+#'
+#' @author Zhang Jiaqi.
+#' @param X,y dataset and label.
+#' @param w initial point.
+#' @param m mini-batch size for pegasos solver.
+#' @param max.steps the number of iterations to solve the optimization problem.
+#' @param fx sub-gradient of objective function.
+#' @param eps the precision of the optimization algorithm.
+#' @param epsilon initial stepsize.
+#' @param rho momentum parameter.
+#' @param delta avoid division by 0.
+#' @param ... additional settings for the sub-gradient.
+#' @return return optimal solution.
+#' @export
+adam <- function(X, y, w, m, max.steps, fx,
+                 lr = 0.001, beta1 = 0.9, beta2 = 0.999, delta = 1e-5, ...) {
+  sample_seed <- list(...)$sample_seed
+  if (is.null(sample_seed) == FALSE) {
+    set.seed(sample_seed)
+  }
+  xn <- nrow(X)
+  xp <- ncol(X)
+  mt <- matrix(0, xp, 1)
+  vt <- mt
+  for (t in 1:max.steps) {
+    At <- sample(xn, m)
+    xm <- X[At, ]
+    dim(xm) <- c(m, xp)
+    ym <- as.matrix(y[At])
+    dF <- fx(xm, ym, w, ...)
+    mt <- beta1*mt + (1 - beta1)*dF
+    vt <- beta2*vt + (1 - beta2)*(dF*dF)
+    mt_hat <- mt/(1 - beta1^t)
+    vt_hat <- vt/(1 - beta2^t)
+    w <- w - lr*(mt_hat/sqrt(vt_hat + delta)) * dF
+  }
+  return(w)
+}
+
+
+exp_decay <- function(lr, steps, s = 0.03, ...) {
+  lr <- lr*exp(-s*steps)
+  return(lr)
+}
+
