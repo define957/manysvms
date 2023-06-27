@@ -20,8 +20,6 @@ pegasos(X, y, w, m, max.steps, fx, C = 1, ...)
 \item{C}{penalty term of SVMs.}
 
 \item{...}{additional settings for the sub-gradient.}
-
-\item{eps}{the precision of the optimization algorithm.}
 }
 \value{
 return optimal solution.

@@ -35,8 +35,6 @@ rmsprop(
 \item{delta}{avoid division by 0.}
 
 \item{...}{additional settings for the sub-gradient.}
-
-\item{eps}{the precision of the optimization algorithm.}
 }
 \value{
 return optimal solution.

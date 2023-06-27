@@ -29,15 +29,15 @@ adam(
 
 \item{fx}{sub-gradient of objective function.}
 
+\item{lr}{initial learning rate.}
+
+\item{beta1}{first order moment parameter.}
+
+\item{beta2}{second order moment parameter.}
+
 \item{delta}{avoid division by 0.}
 
 \item{...}{additional settings for the sub-gradient.}
-
-\item{eps}{the precision of the optimization algorithm.}
-
-\item{epsilon}{initial stepsize.}
-
-\item{rho}{momentum parameter.}
 }
 \value{
 return optimal solution.

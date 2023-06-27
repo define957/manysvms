@@ -14,7 +14,7 @@ nesterov(
   v = matrix(0, nrow(w)),
   lr = 1,
   gam = 0.5,
-  decay_option = NULL,
+  decay_option = exp_decay,
   ...
 )
 }
@@ -38,8 +38,6 @@ nesterov(
 \item{decay_option}{decay option for learning rate.}
 
 \item{...}{additional settings for the sub-gradient.}
-
-\item{eps}{the precision of the optimization algorithm.}
 }
 \value{
 return optimal solution.

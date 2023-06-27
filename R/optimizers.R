@@ -6,7 +6,6 @@
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
-#' @param eps the precision of the optimization algorithm.
 #' @param C penalty term of SVMs.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
@@ -43,7 +42,6 @@ pegasos <- function(X, y, w, m, max.steps, fx, C = 1, ...) {
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
-#' @param eps the precision of the optimization algorithm.
 #' @param v initial velocity.
 #' @param lr initial learning rate.
 #' @param gam momentum parameter.
@@ -82,7 +80,6 @@ nesterov <- function(X, y, w, m, max.steps, fx,
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
-#' @param eps the precision of the optimization algorithm.
 #' @param epsilon initial stepsize.
 #' @param rho momentum parameter.
 #' @param delta avoid division by 0.
@@ -150,9 +147,9 @@ conjugate_gradient_method <- function(A, b, x, max.steps, eps = 1e-5, ...) {
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
-#' @param eps the precision of the optimization algorithm.
-#' @param epsilon initial stepsize.
-#' @param rho momentum parameter.
+#' @param lr initial learning rate.
+#' @param beta1 first order moment parameter.
+#' @param beta2 second order moment parameter.
 #' @param delta avoid division by 0.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
