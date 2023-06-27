@@ -80,14 +80,14 @@ nesterov <- function(X, y, w, m, max.steps, fx,
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
-#' @param epsilon initial stepsize.
+#' @param lr initial stepsize.
 #' @param rho momentum parameter.
 #' @param delta avoid division by 0.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
 rmsprop <- function(X, y, w, m, max.steps, fx,
-                    epsilon = 0.001, rho = 0.9, delta = 1e-5, ...) {
+                    lr = 0.001, rho = 0.9, delta = 1e-5, ...) {
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
     set.seed(sample_seed)
@@ -103,7 +103,7 @@ rmsprop <- function(X, y, w, m, max.steps, fx,
     ym <- as.matrix(y[At])
     dF <- fx(xm, ym, w, ...)
     r <- rho*r + (1 - rho)*dF*dF
-    w <- w - (epsilon/sqrt(delta + r)) * dF
+    w <- w - lr*dF/(sqrt(r) + delta)
   }
   return(w)
 }
@@ -174,7 +174,7 @@ adam <- function(X, y, w, m, max.steps, fx,
     vt <- beta2*vt + (1 - beta2)*(dF*dF)
     mt_hat <- mt/(1 - beta1^t)
     vt_hat <- vt/(1 - beta2^t)
-    w <- w - lr*(mt_hat/sqrt(vt_hat + delta)) * dF
+    w <- w - lr*(mt_hat/(sqrt(vt_hat) + delta)) * dF
   }
   return(w)
 }
