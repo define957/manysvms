@@ -1,13 +1,12 @@
 blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
-                                       a, b, eps = 1e-5,
+                                       a, b,
                                        max.steps = 80, batch_size = nrow(KernelX) / 10,
                                        optimizer = pegasos, kernel, ...) {
-  gBlinex <- function(KernelX, y, v, ...) {
-    add_param <- list(...)
-    a <- add_param$a
-    b <- add_param$b
-    C <- add_param$C
-    n <- add_param$n
+  gBlinex <- function(KernelX, y, v, pars, ...) {
+    C <- pars$C
+    a <- pars$a
+    b <- pars$b
+    n <- pars$n
     m <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
@@ -24,8 +23,8 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, xp, 1)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, C = C,
-                  a = a, b = b, n = xn,
+  pars <- list("a" = a, "b" = b, "C" = C, "n" = xn)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, pars = pars,
                   ...)
   BasePrimalBlinexCSSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalBlinexCSSVMClassifier) <- "BasePrimalBlinexCSSVMClassifier"
@@ -49,7 +48,6 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
-#' @param eps the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param batch_size mini-batch size for primal solver.
 #' @param solver \code{"primal"} are available.
@@ -63,8 +61,7 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
 #' @export
 blinex_cssvm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                         a = 1, b = 1,
-                         eps = 1e-2, max.steps = 80, batch_size = nrow(X) / 10,
+                         a = 1, b = 1, max.steps = 80, batch_size = nrow(X) / 10,
                          solver = c("primal"),
                          fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
@@ -88,8 +85,7 @@ blinex_cssvm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   KernelX <- kso$KernelX
   X <- kso$X
   if (solver == "primal") {
-    solver.res <- blinex_cssvm_primal_solver(KernelX, y, C, a, b,
-                                             eps, max.steps, batch_size,
+    solver.res <- blinex_cssvm_primal_solver(KernelX, y, C, a, b, max.steps, batch_size,
                                              optimizer, kernel = kernel, ...)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
