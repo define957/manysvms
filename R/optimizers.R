@@ -17,10 +17,12 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
   if (is.null(sample_seed) == FALSE) {
     set.seed(sample_seed)
   }
-  nx = nrow(X)
-  px = ncol(X)
+  nx <- nrow(X)
+  px <- ncol(X)
+  At_all <- sample(nx, m*max.steps, replace = T)
+  idx <- 1
   for (t in 1:max.steps) {
-    At <- sample(nx, m)
+    At <- At_all[idx:(idx + m - 1)]
     xm <- X[At, ]
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
@@ -28,6 +30,7 @@ pegasos <- function(X, y, w, m, max.steps, fx, eps = 1e-5, C = 1, ...) {
     dF <- fx(xm, ym, w, At = At, C = C, ...)
     w <- w - (C/t)*dF
     w <- min(1, sqrt(C)/norm(w, type = "2"))*w
+    idx <- idx + m
   }
   return(w)
 }
@@ -61,8 +64,8 @@ nesterov <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
     xm <- X[At, ]
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
-    v <- gam*v - eta*fx(xm, ym, w, At = At, ...)
-    w <- w + gam*v
+    v <- gam*v - eta*fx(xm, ym, w + gam*v, At = At, ...)
+    w <- w + v
     eta <- eta*exp(-k)
   }
   return(w)
