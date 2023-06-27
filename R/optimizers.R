@@ -94,8 +94,8 @@ rmsprop <- function(X, y, w, m, max.steps, fx, eps = 1e-5,
   }
   xn <- nrow(X)
   xp <- ncol(X)
-  r <- matrix(0.1,nrow = ncol(X),ncol = 1)
-  g <-r
+  r <- matrix(0.1, xp, 1)
+  g <- r
   for (t in 1:max.steps) {
     At <- sample(xn, m)
     xm <- X[At, ]
