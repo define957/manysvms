@@ -103,7 +103,7 @@ rmsprop <- function(X, y, w, m, max.steps, fx,
     ym <- as.matrix(y[At])
     dF <- fx(xm, ym, w, ...)
     r <- rho*r + (1 - rho)*dF*dF
-    w <- w - lr*dF/(sqrt(r) + delta)
+    w <- w - lr*dF/(sqrt(r + delta))
   }
   return(w)
 }
