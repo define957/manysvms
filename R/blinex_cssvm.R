@@ -21,25 +21,12 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
     sg <- v/n + (a*b*C/m)*t((t(sgweight1/sgweight2)%*%KernelX))
     return(sg)
   }
-  nestrov_decay_option_CSKB_linear_default <- function(lr, steps, s = 0.03, ...) {
-    lr <- lr*exp(-s*steps)
-    return(lr)
-  }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, xp, 1)
-  if (is.null(list(...)$decay_option) & kernel == "linear" & functionBody(nesterov) == functionBody(optimizer)) {
-    print("hi")
-    decay_option <- nestrov_decay_option_CSKB_linear_default
-    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, C = C,
-                    a = a, b = b, n = xn, decay_option = decay_option,
-                    ...)
-  } else {
-    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, C = C,
-                    a = a, b = b, n = xn,
-                    ...)
-  }
-
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, C = C,
+                  a = a, b = b, n = xn,
+                  ...)
   BasePrimalBlinexCSSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalBlinexCSSVMClassifier) <- "BasePrimalBlinexCSSVMClassifier"
   return(BasePrimalBlinexCSSVMClassifier)
