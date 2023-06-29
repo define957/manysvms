@@ -35,7 +35,11 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                  eps = 1e-5, eps.cccp = 1e-2,
                                  max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                  optimizer = pegasos, ...) {
-  sgRq <- function(KernelX, y, v, tau, lambda, deltak, At, C, ...) { # sub-gradient of RQ loss function
+  sgRq <- function(KernelX, y, v, pars, At, ...) { # sub-gradient of RQ loss function
+    lambda <- pars$lambda
+    tau <- pars$tau
+    C <- pars$C
+    deltak <- pars$deltak
     eta <- 1/(1 - exp(-1/lambda))
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
@@ -50,13 +54,18 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
-  D <- diag(as.vector(y))
-  wt <- matrix(0, xp, 1)
+  w0 <- matrix(0, xp, 1)
+  pars <- list("C" = C, "lambda" = lambda, "tau" = tau)
   for (i in 1:cccp.steps) {
-    f <- 1 - y*(KernelX %*% wt)
-    deltak <- update_deltak(f, wt, tau, lambda)
-    wt <- optimizer(KernelX, y, wt, batch_size, max.steps, sgRq, eps,
-                    C = C, tau = tau, lambda = lambda, deltak = deltak, ...)
+    f <- 1 - y*(KernelX %*% w0)
+    deltak <- update_deltak(f, w0, tau, lambda)
+    pars$deltak <- deltak
+    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgRq, pars = pars, ...)
+    if (norm(wt - w0, type = "2") < eps.cccp) {
+      break
+    } else {
+      w0 <- wt
+    }
   }
   BasePrimalRqSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalRqSVMClassifier) <- "BasePrimalRqSVMClassifier"
@@ -131,8 +140,7 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   }
   if (solver == "primal") {
     solver.res <- rq_svm_primal_solver(KernelX, y, C, update_deltak,
-                                       tau, lambda,
-                                       eps, eps.cccp, max.steps, cccp.steps, batch_size,
+                                       tau, lambda, eps.cccp, max.steps, cccp.steps, batch_size,
                                        optimizer, ...)
   } else if (solver == "dual") {
     solver.res <- rq_svm_dual_solver(KernelX, y, C, update_deltak,

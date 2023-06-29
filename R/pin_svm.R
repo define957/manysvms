@@ -13,10 +13,12 @@ pin_svm_dual_solver <- function(KernelX, y, C = 1, tau = 0.5,
 }
 
 
-pin_svm_primal_solver <- function(KernelX, y, C = 1, tau = 0.5, eps = 1e-5,
+pin_svm_primal_solver <- function(KernelX, y, C = 1, tau = 0.5,
                                   max.steps = 80, batch_size = nrow(KernelX) / 10,
                                   optimizer = pegasos, ...) {
-  sgpinball <- function(KernelX, y, v, C, ...) { # sub-gradient of hinge loss function
+  sgpinball <- function(KernelX, y, v, pars, ...) { # sub-gradient of Pinball loss function
+    C <- pars$C
+    tau <- pars$tau
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
@@ -29,7 +31,8 @@ pin_svm_primal_solver <- function(KernelX, y, C = 1, tau = 0.5, eps = 1e-5,
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgpinball, C = C, ...)
+  pars <- list("C" = C, "tau" = tau)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgpinball, pars = pars, ...)
   BasePrimalPinSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalPinSVMClassifier) <- "BasePrimalPinSVMClassifier"
   return(BasePrimalPinSVMClassifier)
@@ -90,7 +93,7 @@ pin_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   KernelX <- kso$KernelX
   X <- kso$X
   if (solver == "primal") {
-    solver.res <- pin_svm_primal_solver(KernelX, y, C, tau, eps,
+    solver.res <- pin_svm_primal_solver(KernelX, y, C, tau,
                                         max.steps, batch_size,
                                         optimizer, ...)
   } else if (solver == "dual") {

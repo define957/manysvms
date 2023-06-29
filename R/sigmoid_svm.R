@@ -25,11 +25,14 @@ sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
 
 
 sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
-                                      epsilon = 0, lambda = 1,
-                                      eps = 1e-5, eps.cccp = 1e-2,
+                                      epsilon = 0, lambda = 1, eps.cccp = 1e-2,
                                       max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                       optimizer = pegasos, ...) {
-  sgSigmoid <- function(KernelX, y, v, epsilon, lambda, deltak, At, C, ...) { # sub-gradient of Sigmoid loss function
+  sgSigmoid <- function(KernelX, y, v, pars, At, ...) { # sub-gradient of Sigmoid loss function
+    C <- pars$C
+    epsilon <- pars$epsilon
+    lambda <- pars$lambda
+    deltak <- pars$deltak
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
@@ -42,13 +45,18 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
-  wt <- matrix(0, nrow = xp, ncol = 1)
+  w0 <- matrix(0, nrow = xp, ncol = 1)
+  pars <- list("C" = C, "lambda" = lambda, "epsilon" = epsilon)
   for (i in 1:cccp.steps) {
-    f <- 1 - y*(KernelX %*% wt)
-    deltak <- update_deltak(f, wt, epsilon, lambda)
-    wt <- optimizer(KernelX, y, wt, batch_size, max.steps,
-                    sgSigmoid, eps, C = C,
-                    epsilon = epsilon, lambda = lambda, deltak = deltak, ...)
+    f <- 1 - y*(KernelX %*% w0)
+    deltak <- update_deltak(f, w0, epsilon, lambda)
+    pars$deltak <- deltak
+    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgSigmoid, pars = pars, ...)
+    if (norm(wt - w0, type = "2") < eps.cccp) {
+      break
+    } else {
+      w0 <- wt
+    }
   }
   BasePrimalSigmoidSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalSigmoidSVMClassifier) <- "BasePrimalSigmoidSVMClassifier"
@@ -123,7 +131,7 @@ sigmoid_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   if (solver == "primal") {
     solver.res <- sigmoid_svm_primal_solver(KernelX, y, C, update_deltak,
                                             epsilon, lambda,
-                                            eps, eps.cccp, max.steps, cccp.steps, batch_size,
+                                            eps.cccp, max.steps, cccp.steps, batch_size,
                                             optimizer, ...)
   } else if (solver == "dual") {
     solver.res <- sigmoid_svm_dual_solver(KernelX, y, C, update_deltak,

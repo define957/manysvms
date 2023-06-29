@@ -24,8 +24,7 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
   xp <- ncol(KernelX)
   w0 <- matrix(0, xp, 1)
   pars <- list("a" = a, "b" = b, "C" = C, "n" = xn)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, pars = pars,
-                  ...)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gBlinex, pars = pars, ...)
   BasePrimalBlinexCSSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalBlinexCSSVMClassifier) <- "BasePrimalBlinexCSSVMClassifier"
   return(BasePrimalBlinexCSSVMClassifier)
