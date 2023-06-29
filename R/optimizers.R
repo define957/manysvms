@@ -101,7 +101,7 @@ rmsprop <- function(X, y, w, m, max.steps, fx,
     xm <- X[At, ]
     dim(xm) <- c(m, xp)
     ym <- as.matrix(y[At])
-    dF <- fx(xm, ym, w, ...)
+    dF <- fx(xm, ym, w, At = At, ...)
     r <- rho*r + (1 - rho)*dF*dF
     w <- w - lr*dF/(sqrt(r + delta))
   }
@@ -169,7 +169,7 @@ adam <- function(X, y, w, m, max.steps, fx,
     xm <- X[At, ]
     dim(xm) <- c(m, xp)
     ym <- as.matrix(y[At])
-    dF <- fx(xm, ym, w, ...)
+    dF <- fx(xm, ym, w, At = At, ...)
     mt <- beta1*mt + (1 - beta1)*dF
     vt <- beta2*vt + (1 - beta2)*(dF*dF)
     mt_hat <- mt/(1 - beta1^t)
