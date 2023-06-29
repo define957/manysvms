@@ -4,7 +4,19 @@
 \alias{rmsprop}
 \title{Rmsprop Optimizer}
 \usage{
-rmsprop(X, y, w, m, max.steps, fx, lr = 0.001, rho = 0.9, delta = 1e-05, ...)
+rmsprop(
+  X,
+  y,
+  w,
+  m,
+  max.steps,
+  fx,
+  pars,
+  lr = 0.001,
+  rho = 0.9,
+  delta = 1e-05,
+  ...
+)
 }
 \arguments{
 \item{X, y}{dataset and label.}
@@ -16,6 +28,8 @@ rmsprop(X, y, w, m, max.steps, fx, lr = 0.001, rho = 0.9, delta = 1e-05, ...)
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{fx}{sub-gradient of objective function.}
+
+\item{pars}{parameters list for the sub-gradient.}
 
 \item{lr}{initial stepsize.}
 

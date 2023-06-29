@@ -28,7 +28,7 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                       epsilon = 0, lambda = 1, eps.cccp = 1e-2,
                                       max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                       optimizer = pegasos, ...) {
-  sgSigmoid <- function(KernelX, y, v, pars, At, ...) { # sub-gradient of Sigmoid loss function
+  sgSigmoid <- function(KernelX, y, w, pars, At, ...) { # sub-gradient of Sigmoid loss function
     C <- pars$C
     epsilon <- pars$epsilon
     lambda <- pars$lambda
@@ -36,10 +36,10 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
-    u <- 1 - y*(KernelX %*% v) - epsilon
+    u <- 1 - y*(KernelX %*% w) - epsilon
     u[u < 0] <- 0
     u[u >= 0] <- 1
-    sg <- v - lambda*(C/xn) * t(KernelX) %*% (u*y) +
+    sg <- w - lambda*(C/xn) * t(KernelX) %*% (u*y) +
       C/xn*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
   }
@@ -51,7 +51,7 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     f <- 1 - y*(KernelX %*% w0)
     deltak <- update_deltak(f, w0, epsilon, lambda)
     pars$deltak <- deltak
-    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgSigmoid, pars = pars, ...)
+    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgSigmoid, pars, ...)
     if (norm(wt - w0, type = "2") < eps.cccp) {
       break
     } else {

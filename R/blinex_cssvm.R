@@ -2,7 +2,7 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
                                        a, b,
                                        max.steps = 80, batch_size = nrow(KernelX) / 10,
                                        optimizer = pegasos, kernel, ...) {
-  gBlinex <- function(KernelX, y, v, pars, ...) {
+  gBlinex <- function(KernelX, y, w, pars, ...) {
     C <- pars$C
     a <- pars$a
     b <- pars$b
@@ -10,14 +10,13 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
     m <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, nrow = xp, ncol = 1)
-    xi <- 1 - y * (KernelX %*% v)
-    na_idx <- which(is.na(xi)== TRUE)
+    xi <- 1 - y * (KernelX %*% w)
     xi <- ifelse(xi > 0, xi, 0)
     sgterm <- a*y*xi
     exp_sgterm <- exp(sgterm)
     sgweight1 <- (1 - exp_sgterm*sign(xi))
     sgweight2 <- (1 + b*(exp_sgterm - sgterm - 1))^2
-    sg <- v/n + (a*b*C/m)*t((t(sgweight1/sgweight2)%*%KernelX))
+    sg <- w/n + (a*b*C/m)*t((t(sgweight1/sgweight2)%*%KernelX))
     return(sg)
   }
   xn <- nrow(KernelX)

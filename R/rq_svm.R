@@ -35,7 +35,7 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                  eps = 1e-5, eps.cccp = 1e-2,
                                  max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                  optimizer = pegasos, ...) {
-  sgRq <- function(KernelX, y, v, pars, At, ...) { # sub-gradient of RQ loss function
+  sgRq <- function(KernelX, y, w, pars, At, ...) { # sub-gradient of RQ loss function
     lambda <- pars$lambda
     tau <- pars$tau
     C <- pars$C
@@ -44,11 +44,11 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     sg <- matrix(0, xp, 1)
-    f <- 1 - y*(KernelX %*% v)
+    f <- 1 - y*(KernelX %*% w)
     u <- matrix(0, xn)
     u[f < 0] <- -tau
     u[f >= 0] <- 1
-    sg <- v - eta*(C/xn) * t(KernelX) %*% (u*y)/lambda +
+    sg <- w - eta*(C/xn) * t(KernelX) %*% (u*y)/lambda +
       C/xn*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
   }
@@ -60,7 +60,7 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     f <- 1 - y*(KernelX %*% w0)
     deltak <- update_deltak(f, w0, tau, lambda)
     pars$deltak <- deltak
-    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgRq, pars = pars, ...)
+    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgRq, pars, ...)
     if (norm(wt - w0, type = "2") < eps.cccp) {
       break
     } else {

@@ -6,12 +6,13 @@
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
-#' @param C penalty term of SVMs.
+#' @param pars parameters list for the sub-gradient.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
-pegasos <- function(X, y, w, m, max.steps, fx, C = 1, ...) {
+pegasos <- function(X, y, w, m, max.steps, fx, pars, ...) {
+  C <- pars$C
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
     set.seed(sample_seed)
@@ -26,7 +27,7 @@ pegasos <- function(X, y, w, m, max.steps, fx, C = 1, ...) {
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
     # update parameter
-    dF <- fx(xm, ym, w, At = At, C = C, ...)
+    dF <- fx(xm, ym, w, pars, At = At)
     w <- w - (C/t)*dF
     w <- min(1, sqrt(C)/norm(w, type = "2"))*w
     idx <- idx + m
@@ -42,6 +43,7 @@ pegasos <- function(X, y, w, m, max.steps, fx, C = 1, ...) {
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
+#' @param pars parameters list for the sub-gradient.
 #' @param v initial velocity.
 #' @param lr initial learning rate.
 #' @param gam momentum parameter.
@@ -49,7 +51,7 @@ pegasos <- function(X, y, w, m, max.steps, fx, C = 1, ...) {
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
-nesterov <- function(X, y, w, m, max.steps, fx,
+nesterov <- function(X, y, w, m, max.steps, fx, pars,
                      v = matrix(0, nrow(w)), lr = 1, gam = 0.5,
                      decay_option = exp_decay, ...) {
   sample_seed <- list(...)$sample_seed
@@ -63,7 +65,7 @@ nesterov <- function(X, y, w, m, max.steps, fx,
     xm <- X[At, ]
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
-    v <- gam*v - lr*fx(xm, ym, w + gam*v, At = At, ...)
+    v <- gam*v - lr*fx(xm, ym, w + gam*v, pars, At = At)
     w <- w + v
     if (is.null(decay_option) == FALSE) {
       lr <- decay_option(lr, steps = t, ...)
@@ -80,13 +82,14 @@ nesterov <- function(X, y, w, m, max.steps, fx,
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
+#' @param pars parameters list for the sub-gradient.
 #' @param lr initial stepsize.
 #' @param rho momentum parameter.
 #' @param delta avoid division by 0.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
-rmsprop <- function(X, y, w, m, max.steps, fx,
+rmsprop <- function(X, y, w, m, max.steps, fx, pars,
                     lr = 0.001, rho = 0.9, delta = 1e-5, ...) {
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
@@ -101,7 +104,7 @@ rmsprop <- function(X, y, w, m, max.steps, fx,
     xm <- X[At, ]
     dim(xm) <- c(m, xp)
     ym <- as.matrix(y[At])
-    dF <- fx(xm, ym, w, At = At, ...)
+    dF <- fx(xm, ym, w, pars, At = At)
     r <- rho*r + (1 - rho)*dF*dF
     w <- w - lr*dF/(sqrt(r + delta))
   }
@@ -147,6 +150,7 @@ conjugate_gradient_method <- function(A, b, x, max.steps, eps = 1e-5, ...) {
 #' @param m mini-batch size for pegasos solver.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
+#' @param pars parameters list for the sub-gradient.
 #' @param lr initial learning rate.
 #' @param beta1 first order moment parameter.
 #' @param beta2 second order moment parameter.
@@ -154,7 +158,7 @@ conjugate_gradient_method <- function(A, b, x, max.steps, eps = 1e-5, ...) {
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @export
-adam <- function(X, y, w, m, max.steps, fx,
+adam <- function(X, y, w, m, max.steps, fx, pars,
                  lr = 0.001, beta1 = 0.9, beta2 = 0.999, delta = 1e-5, ...) {
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
@@ -169,7 +173,7 @@ adam <- function(X, y, w, m, max.steps, fx,
     xm <- X[At, ]
     dim(xm) <- c(m, xp)
     ym <- as.matrix(y[At])
-    dF <- fx(xm, ym, w, At = At, ...)
+    dF <- fx(xm, ym, w, pars, At = At)
     mt <- beta1*mt + (1 - beta1)*dF
     vt <- beta2*vt + (1 - beta2)*(dF*dF)
     mt_hat <- mt/(1 - beta1^t)

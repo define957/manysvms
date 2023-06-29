@@ -11,6 +11,7 @@ nesterov(
   m,
   max.steps,
   fx,
+  pars,
   v = matrix(0, nrow(w)),
   lr = 1,
   gam = 0.5,
@@ -28,6 +29,8 @@ nesterov(
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{fx}{sub-gradient of objective function.}
+
+\item{pars}{parameters list for the sub-gradient.}
 
 \item{v}{initial velocity.}
 

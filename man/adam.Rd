@@ -11,6 +11,7 @@ adam(
   m,
   max.steps,
   fx,
+  pars,
   lr = 0.001,
   beta1 = 0.9,
   beta2 = 0.999,
@@ -28,6 +29,8 @@ adam(
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{fx}{sub-gradient of objective function.}
+
+\item{pars}{parameters list for the sub-gradient.}
 
 \item{lr}{initial learning rate.}
 

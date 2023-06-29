@@ -2,22 +2,21 @@ qtls_svm_primal_solver <- function(KernelX, y, C = 1,
                                    a = -1, eps = 1e-5,
                                    max.steps = 80, batch_size = nrow(KernelX) / 10,
                                    optimizer = rmsprop, ...) {
-  gqtls <- function(KernelX, y, v, C, a, ...) { # gradient of qtls loss function
+  gqtls <- function(KernelX, y, w, pars, ...) { # gradient of qtls loss function
     xn <- nrow(KernelX)
     xp <- ncol(KernelX)
     g <- matrix(0, nrow = xp, ncol = 1)
-    u <- y*(KernelX %*% v) - 1
+    u <- y*(KernelX %*% w) - 1
     expau <- exp(a*u)
     sgterm <- (2*C*u*expau + C*(u^2)*expau*a)*y
-    g <- v + t(KernelX) %*% sgterm/xn
+    g <- w + t(KernelX) %*% sgterm/xn
     return(g)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
-  w0 <- matrix(0, nrow = xp, ncol = 1)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps,
-                  gqtls, C = C,
-                  a = a, ...)
+  w0 <- matrix(0, xp, 1)
+  pars <- list("C" = C, "a" = a)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gqtls, pars, ...)
   BasePrimalQTLSSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalQTLSSVMClassifier) <- "BasePrimalQTLSSVMClassifier"
   return(BasePrimalQTLSSVMClassifier)
