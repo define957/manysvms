@@ -31,8 +31,7 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
 
 
 rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
-                                 tau = 0, lambda = 1,
-                                 eps = 1e-5, eps.cccp = 1e-2,
+                                 tau = 0, lambda = 1, eps.cccp = 1e-2,
                                  max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
                                  optimizer = pegasos, ...) {
   sgRq <- function(KernelX, y, w, pars, At, ...) { # sub-gradient of RQ loss function
