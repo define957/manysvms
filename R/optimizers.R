@@ -7,11 +7,13 @@
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param fx sub-gradient of objective function.
 #' @param pars parameters list for the sub-gradient.
+#' @param projection projection option.
 #' @param ... additional settings for the sub-gradient.
 #' @return return optimal solution.
 #' @references ${1:Pegasos: Primal Estimated sub-GrAdient SOlver for SVM}
 #' @export
-pegasos <- function(X, y, w, m, max.steps, fx, pars, ...) {
+pegasos <- function(X, y, w, m, max.steps, fx, pars,
+                    projection = TRUE, ...) {
   C <- pars$C
   sample_seed <- list(...)$sample_seed
   if (is.null(sample_seed) == FALSE) {
@@ -19,18 +21,18 @@ pegasos <- function(X, y, w, m, max.steps, fx, pars, ...) {
   }
   nx <- nrow(X)
   px <- ncol(X)
-  At_all <- sample(nx, m*max.steps, replace = T)
-  idx <- 1
   for (t in 1:max.steps) {
-    At <- At_all[idx:(idx + m - 1)]
+    At <- sample(nx, m)
+    xm <- X[At, ]
     xm <- X[At, ]
     dim(xm) <- c(m, px)
     ym <- as.matrix(y[At])
     # update parameter
     dF <- fx(xm, ym, w, pars, At = At)
     w <- w - (C/t)*dF
-    w <- min(1, sqrt(C)/norm(w, type = "2"))*w
-    idx <- idx + m
+    if (projection == TRUE) {
+      w <- min(1, sqrt(C)/norm(w, type = "2"))*w
+    }
   }
   return(w)
 }

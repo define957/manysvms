@@ -4,7 +4,7 @@
 \alias{pegasos}
 \title{Primal Estimated sub-Gradient SOlver for SVM (Pegasos)}
 \usage{
-pegasos(X, y, w, m, max.steps, fx, pars, ...)
+pegasos(X, y, w, m, max.steps, fx, pars, projection = TRUE, ...)
 }
 \arguments{
 \item{X, y}{dataset and label.}
@@ -18,6 +18,8 @@ pegasos(X, y, w, m, max.steps, fx, pars, ...)
 \item{fx}{sub-gradient of objective function.}
 
 \item{pars}{parameters list for the sub-gradient.}
+
+\item{projection}{projection option.}
 
 \item{...}{additional settings for the sub-gradient.}
 }
