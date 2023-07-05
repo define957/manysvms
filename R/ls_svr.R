@@ -5,6 +5,26 @@ ls_svr_dual_solver <- function(KernelX, y, C = 1) {
   return(BaseDualLSSVMRegressor)
 }
 
+ls_svr_primal_solver <- function(KernelX, y, C, max.steps, batch_size,
+                                 optimizer, ...) {
+  gLeastSquares <- function(KernelX, y, w, pars,...) {
+    # gradient of Least Squares loss function
+    C <- pars$C
+    xn <- nrow(KernelX)
+    xp <- ncol(KernelX)
+    g <- matrix(0, xp, 1)
+    g <- w - (C/xn) * t(KernelX) %*% (y - KernelX%*%w)
+    return(g)
+  }
+  xp <- ncol(KernelX)
+  w0 <- matrix(0, xp, 1)
+  pars <- list("C" = C)
+  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gLeastSquares, pars, ...)
+  BasePrimalLeastSquaresSVMRegressor <- list(coef = as.matrix(wt[1:xp]))
+  class(BasePrimalLeastSquaresSVMRegressor) <- "BasePrimalLeastSquaresSVMRegressor"
+  return(BasePrimalLeastSquaresSVMRegressor)
+}
+
 #' Least Squares Support Vector Regression (Ridge/Kernel Ridge)
 #'
 #' \code{ls_svr} is an R implementation of Least Squares SVR.
@@ -35,7 +55,7 @@ ls_svr_dual_solver <- function(KernelX, y, C = 1) {
 ls_svr <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                    gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                    eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                   solver = c("dual"),
+                   solver = c("dual", "primal"),
                    fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -48,7 +68,11 @@ ls_svr <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                               gamma, degree, coef0)
   KernelX <- kso$KernelX
   X <- kso$X
-  if (solver == "dual") {
+  if (solver == "primal"){
+    solver.res <- ls_svr_primal_solver(KernelX, y, C,
+                                       max.steps, batch_size,
+                                       optimizer, ...)
+  } else if (solver == "dual") {
     solver.res <- ls_svr_dual_solver(KernelX, y, C)
   }
   SVMRegressor <- list("X" = X, "y" = y,

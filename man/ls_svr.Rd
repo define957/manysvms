@@ -15,7 +15,7 @@ ls_svr(
   eps = 1e-05,
   max.steps = 80,
   batch_size = nrow(X)/10,
-  solver = c("dual"),
+  solver = c("dual", "primal"),
   fit_intercept = TRUE,
   optimizer = pegasos,
   randx = 0.1,
