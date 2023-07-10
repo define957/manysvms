@@ -26,7 +26,7 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
   u_mat <- t(matrix(u, n, n))
   Hui <- H*u_mat
   Hu <- H%*%u
-  for (i in 1:max.steps) {
+  for (t in 1:max.steps) {
     numerator <- q - Hu
     L_idx_val <- numerator / diagH
     L_val <- numerator*L_idx_val
@@ -48,6 +48,6 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
     }
   }
   obj_val <- 0.5 * t(u) %*% H %*% u - t(q) %*% u
-  clip_dcd_res <- list('x' = u,'iterations' = i, 'objectiv.value' = obj_val)
+  clip_dcd_res <- list('x' = u,'iterations' = t, 'objectiv.value' = obj_val)
   return(clip_dcd_res)
 }
