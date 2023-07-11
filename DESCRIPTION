@@ -17,7 +17,7 @@ Imports:
       foreach,
       doParallel,
       doSNOW,
-      methods
+      Matrix
 Suggests:
       MASS,
       ggplot2
