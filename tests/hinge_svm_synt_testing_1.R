@@ -3,7 +3,7 @@ library(ggplot2)
 library(manysvms)
 
 set.seed(100)
-n <- 150
+n <- 3000
 X1 <- mvrnorm(n, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
 X2 <- mvrnorm(n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
 X <- rbind(X1, X2)
