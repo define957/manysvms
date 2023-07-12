@@ -38,7 +38,7 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
     if (length(idx) == 0) {
       break
     }
-    k <- which(L_val == L_val_max)
+    k <- which(L_val == L_val_max)[1]
     lambda_max <- L_idx_val[k]
     lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
     u[k] <- u[k] + lambda_opt
