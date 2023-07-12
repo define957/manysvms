@@ -42,10 +42,12 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
     lambda_max <- L_idx_val[k]
     lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
     u[k] <- u[k] + lambda_opt
-    for (i in 1:n) {
-      Hu[i] <- Hu[i] - Hui[i, k] + H[i, k]*u[k]
-      Hui[i, k] <- H[i, k]*u[k]
-    }
+    # for (i in 1:n) {
+    #   Hu[i] <- Hu[i] - Hui[i, k] + H[i, k]*u[k]
+    #   Hui[i, k] <- H[i, k]*u[k]
+    # }
+    Hu <- Hu - Hui[, k] + H[, k]*u[k]
+    Hui[, k] <- H[, k]*u[k]
   }
   obj_val <- 0.5 * t(u) %*% H %*% u - t(q) %*% u
   clip_dcd_res <- list('x' = u,'iterations' = t, 'objectiv.value' = obj_val)
