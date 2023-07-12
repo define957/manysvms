@@ -23,19 +23,19 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
   ub <- as.matrix(ub)
   diagH <- diag(H)
   n <- nrow(H)
-  u_mat <- t(matrix(u, n, n))
-  Hui <- H*u_mat
+  # u_mat <- t(matrix(u, n, n))
+  Hui <- H*as.numeric(u)
   Hu <- H%*%u
   for (t in 1:max.steps) {
     numerator <- q - Hu
     L_idx_val <- numerator / diagH
     L_val <- numerator*L_idx_val
     idx <- which((u > lb & L_idx_val < 0) | (u < ub & L_idx_val > 0))
-    L_val_max <- max(L_val[idx])
-    if (L_val_max < eps) {
+    if (length(idx) == 0) {
       break
     }
-    if (length(idx) == 0) {
+    L_val_max <- max(L_val[idx])
+    if (L_val_max < eps) {
       break
     }
     k <- which(L_val == L_val_max)[1]
