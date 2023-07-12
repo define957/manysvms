@@ -33,16 +33,17 @@ devtools::install_github("define957/manysvms")
 ```
 Then you can have `manysvms` package on your PC。
 ## Important notice
-This project is currently being redesigned !!! 🔧
-The old version of the function will be deprecated in the new version !!!
+The refactoring of the project is complete !!!
 
 ## SVMs for classification
 
-+ Hinge Support Vector Classification
-+ Pin Support Vector Classification
-+ Least Squares Support Vector Classification
-+ Rescaled Quantile Support Vector Classification
-+ Sigmoid Support Vector Classification
++ Hinge Loss Support Vector Classification
++ Pinball Loss Support Vector Classification
++ Least Squares Loss Support Vector Classification
++ Rescaled Quantile Loss Support Vector Classification
++ Sigmoid Loss Support Vector Classification
++ Blinex Cost Sensitive Support Vector Classification
++ QTLS Support Vector Classification
 
 ## SVMs for regression
 
