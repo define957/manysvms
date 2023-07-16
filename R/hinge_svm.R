@@ -108,6 +108,47 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
 }
 
 
+#' Plot Method for Support Vector Machine
+#'
+#' @author Zhang Jiaqi
+#' @param x a fitted object of class inheriting from \code{SVMClassifier}.
+#' @param ... unused parameter.
+#' @importFrom stats coef
+#' @importFrom graphics abline grid points
+#' @export
+plot.SVMClassifier <- function(x, ...) {
+  class_set <- sort(unique(x$y))
+  coefs <- coef(x)
+  idx <- which(x$y == 1)
+  xlim_c <- c(min(x$X[,1]), max(x$X[, 1]))
+  ylim_c <- c(min(x$X[,2]), max(x$X[, 2]))
+  if (ncol(x$X) == 3) {
+    plot(x$X[idx, 1], x$X[idx, 2], col = "red", xlim = xlim_c, ylim = ylim_c,
+         xlab = "", ylab = "")
+    grid(10, 10, lwd = 2,col = "grey")
+    points(x$X[-idx, 1], x$X[-idx, 2], col = "blue")
+    if (x$kernel == "linear") {
+      abline(a = -coefs[3]/coefs[2], b = -coefs[1]/coefs[2],
+             lty = 2)
+    }
+  }
+}
+
+#' Coef Method for Support Vector Machine
+#'
+#' @author Zhang Jiaqi
+#' @param object a fitted object of class inheriting from \code{SVMClassifier}.
+#' @param ... unused parameter.
+#' @importFrom stats coef
+#' @export
+coef.SVMClassifier <- function(object, ...) {
+  if (object$solver == "dual") {
+    return(t(object$X) %*% object$coef)
+  } else if (object$solver == "primal") {
+    return(object$coef)
+  }
+}
+
 #' Predict Method for Support Vector Machine
 #'
 #' @author Zhang Jiaqi
