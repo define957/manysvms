@@ -223,7 +223,7 @@ pega <- function(X, y, w, m, max.steps, fx, pars,
     ym <- as.matrix(y[At])
     # update parameter
     dF <- fx(xm, ym, w, pars, At = At)
-    w <- w - (1/C*t)*dF
+    w <- w - (1/(C*t))*dF
     if (projection == TRUE) {
       w <- min(1, sqrt(C)/norm(w, type = "2"))*w
     }
