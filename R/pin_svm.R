@@ -18,20 +18,21 @@ pin_svm_primal_solver <- function(KernelX, y, C = 1, tau = 0.5,
                                   optimizer = pegasos, ...) {
   sgpinball <- function(KernelX, y, w, pars, ...) { # sub-gradient of Pinball loss function
     C <- pars$C
+    xn <- pars$xn
     tau <- pars$tau
-    xn <- nrow(KernelX)
-    xp <- ncol(KernelX)
-    sg <- matrix(0, nrow = xp, ncol = 1)
+    xmn <- nrow(KernelX)
+    xmp <- ncol(KernelX)
+    sg <- matrix(0, xmp, 1)
     u <- 1 - y * (KernelX %*% w)
     u[u <= 0] <- -tau
     u[u > 0] <- 1
-    sg <- w - (C/xn) * t(KernelX) %*% (u*y)
+    sg <- w - (C*xn/xmn) * t(KernelX) %*% (u*y)
     return(sg)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  pars <- list("C" = C, "tau" = tau)
+  pars <- list("C" = C, "tau" = tau, "xn" = xn)
   wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgpinball, pars, ...)
   BasePrimalPinSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalPinSVMClassifier) <- "BasePrimalPinSVMClassifier"

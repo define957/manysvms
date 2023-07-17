@@ -7,7 +7,7 @@ X1 <- mvrnorm(n, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
 X2 <- mvrnorm(n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
 X <- rbind(X1, X2)
 y <- rep(c(-1, 1), rep(n, 2))
-model <- hinge_svm(X, y, solver = "primal")
+model <- hinge_svm(X, y, solver = "primal", max.steps = 800)
 print(coef(model))
 plot(model)
 

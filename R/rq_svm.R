@@ -40,21 +40,21 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     C <- pars$C
     deltak <- pars$deltak
     eta <- 1/(1 - exp(-1/lambda))
-    xn <- nrow(KernelX)
-    xp <- ncol(KernelX)
-    sg <- matrix(0, xp, 1)
+    xmn <- nrow(KernelX)
+    xmp <- ncol(KernelX)
+    sg <- matrix(0, xmp, 1)
     f <- 1 - y*(KernelX %*% w)
-    u <- matrix(0, xn)
+    u <- matrix(0, xmn)
     u[f < 0] <- -tau
     u[f >= 0] <- 1
-    sg <- w - eta*(C/xn) * t(KernelX) %*% (u*y)/lambda +
-      C/xn*t(KernelX) %*% (y*deltak[At, ])
+    sg <- w - eta*(C*xn/xmn) * t(KernelX) %*% (u*y)/lambda +
+          (C*xn/xmn)*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, xp, 1)
-  pars <- list("C" = C, "lambda" = lambda, "tau" = tau)
+  pars <- list("C" = C, "lambda" = lambda, "tau" = tau, "xn" = xn)
   for (i in 1:cccp.steps) {
     f <- 1 - y*(KernelX %*% w0)
     deltak <- update_deltak(f, w0, tau, lambda)

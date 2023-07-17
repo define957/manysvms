@@ -10,15 +10,17 @@ ls_svr_primal_solver <- function(KernelX, y, C, max.steps, batch_size,
   gLeastSquares <- function(KernelX, y, w, pars,...) {
     # gradient of Least Squares loss function
     C <- pars$C
-    xn <- nrow(KernelX)
-    xp <- ncol(KernelX)
-    g <- matrix(0, xp, 1)
-    g <- w - (C/xn) * t(KernelX) %*% (y - KernelX%*%w)
+    xn <- pars$xn
+    xmn <- nrow(KernelX)
+    xmp <- ncol(KernelX)
+    g <- matrix(xmp, xp, 1)
+    g <- w/xn - (C/xmn) * t(KernelX) %*% (y - KernelX%*%w)
     return(g)
   }
+  xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, xp, 1)
-  pars <- list("C" = C)
+  pars <- list("C" = C, "xn" = xn)
   wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gLeastSquares, pars, ...)
   BasePrimalLeastSquaresSVMRegressor <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalLeastSquaresSVMRegressor) <- "BasePrimalLeastSquaresSVMRegressor"

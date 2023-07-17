@@ -19,19 +19,20 @@ hinge_svm_primal_solver <- function(KernelX, y, C = 1,
                                     optimizer = pegasos, ...) {
   sgHinge <- function(KernelX, y, w, pars, ...) { # sub-gradient of hinge loss function
     C <- pars$C
-    xn <- nrow(KernelX)
-    xp <- ncol(KernelX)
-    sg <- matrix(0, nrow = xp, ncol = 1)
+    xn <- pars$xn
+    xmn <- nrow(KernelX)
+    xmp <- ncol(KernelX)
+    sg <- matrix(0, nrow = xmp, ncol = 1)
     u <- 1 - y * (KernelX %*% w)
     u[u <= 0] <- 0
     u[u > 0] <- 1
-    sg <- w - (C/xn) * t(KernelX) %*% (u*y)
+    sg <- w - (C*xn/xmn) * t(KernelX) %*% (u*y)
     return(sg)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   w0 <- matrix(0, nrow = xp, ncol = 1)
-  pars <- list("C" = C)
+  pars <- list("C" = C, "xn" = xn)
   wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgHinge, pars, ...)
   BasePrimalHingeSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalHingeSVMClassifier) <- "BasePrimalHingeSVMClassifier"
