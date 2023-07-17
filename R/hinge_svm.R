@@ -130,6 +130,10 @@ plot.SVMClassifier <- function(x, ...) {
     if (x$kernel == "linear") {
       abline(a = -coefs[3]/coefs[2], b = -coefs[1]/coefs[2],
              lty = 2)
+      abline(a = -(coefs[3]+1)/coefs[2], b = -coefs[1]/coefs[2],
+             lty = 2)
+      abline(a = -(coefs[3]-1)/coefs[2], b = -coefs[1]/coefs[2],
+             lty = 2)
     }
   }
 }
