@@ -26,27 +26,29 @@ sigmoid_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
 
 sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
                                       epsilon = 0, lambda = 1, eps.cccp = 1e-2,
-                                      max.steps = 80, cccp.steps = 10, batch_size = nrow(KernelX) / 10,
+                                      max.steps = 80, cccp.steps = 10,
+                                      batch_size = nrow(KernelX) / 10,
                                       optimizer = pegasos, ...) {
   sgSigmoid <- function(KernelX, y, w, pars, At, ...) { # sub-gradient of Sigmoid loss function
     C <- pars$C
+    xn <- pars$xn
     epsilon <- pars$epsilon
     lambda <- pars$lambda
     deltak <- pars$deltak
-    xn <- nrow(KernelX)
-    xp <- ncol(KernelX)
-    sg <- matrix(0, nrow = xp, ncol = 1)
+    xmn <- nrow(KernelX)
+    xmp <- ncol(KernelX)
+    sg <- matrix(0, xmp, 1)
     u <- 1 - y*(KernelX %*% w) - epsilon
     u[u < 0] <- 0
     u[u >= 0] <- 1
-    sg <- w - lambda*(C/xn) * t(KernelX) %*% (u*y) +
-      C/xn*t(KernelX) %*% (y*deltak[At, ])
+    sg <- w - lambda*(C*xn/xmn) * t(KernelX) %*% (u*y) +
+          (C*xn/xmn)*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
   }
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
-  w0 <- matrix(0, nrow = xp, ncol = 1)
-  pars <- list("C" = C, "lambda" = lambda, "epsilon" = epsilon)
+  w0 <- matrix(0, xp, 1)
+  pars <- list("C" = C, "lambda" = lambda, "epsilon" = epsilon, "xn" = xn)
   for (i in 1:cccp.steps) {
     f <- 1 - y*(KernelX %*% w0)
     deltak <- update_deltak(f, w0, epsilon, lambda)

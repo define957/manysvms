@@ -23,8 +23,7 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
   ub <- as.matrix(ub)
   diagH <- diag(H)
   n <- nrow(H)
-  # u_mat <- t(matrix(u, n, n))
-  Hui <- H*as.numeric(u)
+  Hui <- H*matrix(u, n, n, byrow = T)
   Hu <- H%*%u
   for (t in 1:max.steps) {
     numerator <- q - Hu

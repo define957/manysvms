@@ -190,3 +190,4 @@ exp_decay <- function(lr, steps, s = 0.001, ...) {
   lr <- lr*exp(-s*steps)
   return(lr)
 }
+
