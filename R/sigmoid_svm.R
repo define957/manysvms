@@ -38,9 +38,10 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     xmn <- nrow(KernelX)
     xmp <- ncol(KernelX)
     sg <- matrix(0, xmp, 1)
-    u <- 1 - y*(KernelX %*% w) - epsilon
-    u[u < 0] <- 0
-    u[u >= 0] <- 1
+    f <- 1 - y*(KernelX %*% w) - epsilon
+    u <- matrix(0, xmn)
+    u[f < 0] <- 0
+    u[f >= 0] <- 1
     sg <- w - lambda*(C*xn/xmn) * t(KernelX) %*% (u*y) +
           (C*xn/xmn)*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
@@ -50,7 +51,7 @@ sigmoid_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
   w0 <- matrix(0, xp, 1)
   pars <- list("C" = C, "lambda" = lambda, "epsilon" = epsilon, "xn" = xn)
   for (i in 1:cccp.steps) {
-    f <- 1 - y*(KernelX %*% w0)
+    f <- 1 - y*(KernelX %*% w0) - epsilon
     deltak <- update_deltak(f, w0, epsilon, lambda)
     pars$deltak <- deltak
     wt <- optimizer(KernelX, y, w0, batch_size, max.steps, sgSigmoid, pars, ...)
