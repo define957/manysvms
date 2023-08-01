@@ -116,8 +116,9 @@ predict.TSVMClassifier <- function(object, X, values = FALSE, ...) {
   if (object$fit_intercept == TRUE) {
     KernelX <- cbind(KernelX, 1)
   }
-  fx1 <- abs(KernelX %*% object$coef1)
-  fx2 <- abs(KernelX %*% object$coef2)
+  xp <- ncol(KernelX)
+  fx1 <- abs(KernelX %*% object$coef1)/norm(object$coef1[1:(xp - 1)], type = "2")
+  fx2 <- abs(KernelX %*% object$coef2)/norm(object$coef1[1:(xp - 1)], type = "2")
   if (values == FALSE) {
     decf <- apply(cbind(fx1, fx2), 1, which.min)
     idx_pos <- which(decf == 1)
