@@ -23,7 +23,7 @@ lines(x, pred)
 x <- sort(rnorm(n))
 y <- 3*x + 1 + rnorm(n, 0, 0.1)
 
-model <- ls_svr(x, y, C = 0.01, kernel = "linear", max.steps = 180000, solver = "primal", batch_size = 100,
+model <- ls_svr(x, y, C = 1, kernel = "linear", max.steps = 8000, solver = "primal", batch_size = 100,
                 optimizer = pegasos, projection = FALSE)
 pred <- predict(model, x)
 plot(x, y, col = "red")
