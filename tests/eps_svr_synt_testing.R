@@ -15,3 +15,8 @@ model <- eps_svr(x, y, C = 1, epsilon = 0.1, kernel = "linear", max.steps = 8000
 pred <- predict(model, x)
 plot(x, y, col = "red")
 lines(x, pred)
+
+model <- bls_svr(x, y, C = 1, b = 1, kernel = "linear", max.steps = 8000)
+pred <- predict(model, x)
+plot(x, y, col = "red")
+lines(x, pred)
