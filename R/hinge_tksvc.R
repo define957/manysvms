@@ -32,7 +32,6 @@ hinge_tksvc_dual_solver <- function(KernelX, y, C, epsilon, class_set, class_num
       x <- clip_dcd_optimizer(dualH, dualq, duallb, dualub,
                               eps, max.steps, u0)$x
       coef1 <- - invHTH %*% t(N) %*% x
-      print(coef1)
 
       # Hyperplane 2
       P <- rbind(H, M)
