@@ -38,7 +38,7 @@ hinge_tksvc_dual_solver <- function(KernelX, y, C, epsilon, class_set, class_num
       invGTG <- chol2inv(chol(t(G) %*% G + diag(1e-7, xp)))
       dualH <- P %*% invGTG %*% t(P)
       dualq <- rbind(matrix(1, Hn), matrix(1-epsilon, Mn))
-      dualub <- rbind(matrix(C[3], Gn), matrix(C[4], Mn))
+      dualub <- rbind(matrix(C[3], Hn), matrix(C[4], Mn))
       duallb <- matrix(0, Hn+Mn)
       u0 <- matrix(0, Hn+Mn)
       x <- clip_dcd_optimizer(dualH, dualq, duallb, dualub,
