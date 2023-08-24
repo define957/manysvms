@@ -59,7 +59,7 @@ kernel_select_option <- function(X, kernel, solver, randx,
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
   } else if (kernel != "linear" & solver == "primal") {
-    if (randx > 0) {
+    if (randx > 0 && randx < 1) {
       randX <- X[sample(n, floor(randx*n)),]
     } else {
       randX <- X
