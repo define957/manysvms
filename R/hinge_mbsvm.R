@@ -1,13 +1,17 @@
 hinge_mbsvm_dual_solver <- function(KernelX, y, C, class_set, class_num,
                                     eps, max.steps) {
   coefk <- matrix(0, ncol(KernelX), class_num)
+  xn <- nrow(KernelX)
+  xp <- ncol(KernelX)
   for (i in 1:class_num) {
     class_idx <- which(y == class_set[i])
     Hk <- KernelX[-class_idx, ]
     Gk <- KernelX[class_idx, ]
+    nGk <- nrow(Gk)
+    dim(Hk) <- c(xn - nGk, xp)
+    dim(Gk) <- c(nGk, xp)
     HTH_inv_Gt <- solve(t(Hk)%*%Hk + diag(1e-7, ncol(Hk)), t(Gk))
     G_HTH_inv_Gt <- Gk %*% HTH_inv_Gt
-    nGk <- nrow(Gk)
     lb <- matrix(0, nGk)
     ub <- matrix(C[i], nGk)
     ek <- matrix(1, nGk)
