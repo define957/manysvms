@@ -7,7 +7,7 @@ hinge_mbsvm_dual_solver <- function(KernelX, y, C, class_set, class_num,
     class_idx <- which(y == class_set[i])
     Hk <- KernelX[-class_idx, ]
     Gk <- KernelX[class_idx, ]
-    nGk <- nrow(Gk)
+    nGk <- length(class_idx)
     dim(Hk) <- c(xn - nGk, xp)
     dim(Gk) <- c(nGk, xp)
     HTH_inv_Gt <- solve(t(Hk)%*%Hk + diag(1e-7, ncol(Hk)), t(Gk))
@@ -105,14 +105,30 @@ predict.MBSVMClassifier <- function(object, X, values = FALSE, ...) {
                                degree = object$degree,
                                coef0 = object$coef0,
                                symmetric = FALSE)
+    K <- kernel_function(object$X, object$X,
+                         kernel.type = object$kernel,
+                         gamma = object$gamma,
+                         degree = object$degree,
+                         coef0 = object$coef0,
+                         symmetric = TRUE)
   }
   if (object$fit_intercept == TRUE) {
     KernelX <- cbind(KernelX, 1)
   }
   fx <- KernelX %*% object$coef
   xp <- ncol(KernelX)
-  coef_norm <- apply(object$coef[1:(xp-1), ], 2, norm, type = "2")
-  decf_values <- abs(fx) / coef_norm
+  if (object$kernel == "linear") {
+    coef_norm <- apply(object$coef[1:(xp-1), ], 2, norm, type = "2")
+  } else {
+    num_class <- ncol(object$coef)
+    coef_norm <- matrix(0, 1, num_class)
+    vK <- t(object$coef[1:(xp-1), ]) %*% K
+    for (i in 1:num_class) {
+      coef_norm[i] <-  vK[i, ] %*% object$coef[1:(xp-1), i]
+    }
+    coef_norm <- as.numeric(coef_norm)
+  }
+  decf_values <- abs(fx) / (coef_norm + 1e-7)
   if (values == FALSE) {
     class_idx <- apply(decf_values, 1, which.max)
     decf <- object$class_set[class_idx]
