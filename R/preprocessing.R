@@ -14,18 +14,19 @@ train_test_split <- function(X, y, test_size = 0.3,
   X <- as.matrix(X)
   y <- as.matrix(y)
   m <- nrow(X)
+  idx <- 1:round(m*(1 - test_size))
   if (shuffle == TRUE) {
     if (is.null(seed) == FALSE) {
       set.seed(seed)
     }
-    new_idx <- sample(1:round(m*test_size))
+    new_idx <- sample(idx)
   }else{
-    new_idx <- 1:m
+    new_idx <- idx
   }
-  train_X <- X[-new_idx, ]
-  train_y <- y[-new_idx]
-  test_X <- X[new_idx, ]
-  test_y <- y[new_idx]
+  train_X <- X[new_idx, ]
+  train_y <- y[new_idx]
+  test_X <- X[-new_idx, ]
+  test_y <- y[-new_idx]
   train_test_data <- list("train_X" = train_X, "train_y" = train_y,
                           "test_X" = test_X, "test_y" = test_y)
   return(train_test_data)
