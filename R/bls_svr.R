@@ -70,7 +70,7 @@ bls_svr <- function(X, y, C = 1, b = 0.2, kernel = c("linear", "rbf", "poly"),
   X <- kso$X
   if (solver == "primal") {
     solver.res <- bls_svr_primal_solver(KernelX, y, C, b, max.steps, batch_size,
-                                        optimizer)
+                                        optimizer, ...)
   }
   SVMRegressor <- list("X" = X, "y" = y,
                        "C" = C, "kernel" = kernel,
