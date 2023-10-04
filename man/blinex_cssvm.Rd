@@ -20,6 +20,7 @@ blinex_cssvm(
   fit_intercept = TRUE,
   optimizer = pegasos,
   randx = 0.1,
+  auto_cs = FALSE,
   ...
 )
 }
@@ -55,6 +56,8 @@ the function will evaluates intercept.}
 \item{optimizer}{default primal optimizer pegasos.}
 
 \item{randx}{parameter for reduce SVM, default \code{randx = 0.1}.}
+
+\item{auto_cs}{auto assign minority class +1.}
 
 \item{...}{unused parameters.}
 }

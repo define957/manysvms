@@ -53,6 +53,7 @@ blinex_cssvm_primal_solver <- function(KernelX, y, C = 1,
 #'                      the function will evaluates intercept.
 #' @param optimizer default primal optimizer pegasos.
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
+#' @param auto_cs auto assign minority class +1.
 #' @param ... unused parameters.
 #' @return return \code{HingeSVMClassifier} object.
 #' @export
@@ -60,13 +61,26 @@ blinex_cssvm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                          gamma = 1 / ncol(X), degree = 3, coef0 = 0,
                          a = 1, b = 1, max.steps = 80, batch_size = nrow(X) / 10,
                          solver = c("primal"),
-                         fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
+                         fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, auto_cs = FALSE, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- sort(unique(y))
+  ny <- length(y)
   idx <- which(y == class_set[1])
-  y[idx] <- 1
-  y[-idx] <- -1
+  if (auto_cs == FALSE) {
+    y[idx] <- 1
+    y[-idx] <- -1
+  } else {
+    n1 <- length(idx)
+    n2 <- ny - n1 
+    if (n1 <= n2) {
+      y[idx] <- 1
+      y[-idx] <- -1
+    } else {
+      y[-idx] <- -1
+      y[idx] <- 1
+    }
+  }
   y <- as.matrix(as.numeric(y))
   if (length(class_set) > 2) {
     stop("The number of class should less 2!")
