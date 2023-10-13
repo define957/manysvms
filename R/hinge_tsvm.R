@@ -83,7 +83,7 @@ hinge_tsvm <- function(X, y, C1 = 1, C2 = 2,
     solver.res <- hinge_tsvm_dual_solver(KernelX, idx, C1, C2, eps, max.steps)
   }
   TSVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
-                         "C" = C, "kernel" = kernel,
+                         "C1" = C1, "C2" = C2, "kernel" = kernel,
                          "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                          "solver" = solver, "coef1" = solver.res$coef1,
                          "coef2" = solver.res$coef2,

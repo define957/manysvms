@@ -11,17 +11,17 @@ r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE) {
   x1 <- as.matrix(x1)
   x2 <- as.matrix(x2)
   n1 <- nrow(x1)
-  norms1 <- as.matrix(apply(x1^2, 1, sum))
+  norms1 <- as.matrix(apply(x1^2, 1, sum))#rowSums(x1^2, 1)#as.matrix(apply(x1^2, 1, sum))
   e2 <- matrix(1, 1, n1)
   if (symmetric == FALSE) {
     n2 <- nrow(x2)
-    norms2 <- as.matrix(apply(x2^2, 1, sum))
+    norms2 <- as.matrix(apply(x2^2, 1, sum))#rowSums(x2^2, 1)#as.matrix(apply(x2^2, 1, sum))
     e1 <- matrix(1, 1, n2)
   } else {
     norms2 <- norms1
     e1 <- e2
   }
-  K <- exp(gamma*(-norms1%*%e1 - t(e2)%*% t(norms2) + 2*(x1%*%t(x2))))
+  K <- exp(gamma*(-norms1 %*% e1 - t(e2) %*% t(norms2) + 2*(x1 %*% t(x2))))
   return(K)
 }
 

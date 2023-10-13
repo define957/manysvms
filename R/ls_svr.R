@@ -14,7 +14,7 @@ ls_svr_primal_solver <- function(KernelX, y, C, max.steps, batch_size,
     xmn <- nrow(KernelX)
     xmp <- ncol(KernelX)
     g <- matrix(xmp, xp, 1)
-    g <- w - (C*xn/xmn) * t(KernelX) %*% (y - KernelX%*%w)
+    g <- w - (C*xn/xmn) * t(KernelX) %*% (y - KernelX %*% w)
     return(g)
   }
   xn <- nrow(KernelX)
@@ -70,7 +70,7 @@ ls_svr <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                               gamma, degree, coef0)
   KernelX <- kso$KernelX
   X <- kso$X
-  if (solver == "primal"){
+  if (solver == "primal") {
     solver.res <- ls_svr_primal_solver(KernelX, y, C,
                                        max.steps, batch_size,
                                        optimizer, ...)
