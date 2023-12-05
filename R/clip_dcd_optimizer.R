@@ -37,14 +37,16 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
     if (L_val_max < eps) {
       break
     }
-    k <- which(L_val == L_val_max)[1]
-    lambda_max <- L_idx_val[k]
-    lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
+    k_list <- which(L_val == L_val_max)
+    for (i in 1:length(k_list)) {
+      k <- k_list[i]
+      lambda_max <- L_idx_val[k]
+      lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
+      if (lambda_opt != 0) {
+        break
+      }
+    }
     u[k] <- u[k] + lambda_opt
-    # for (i in 1:n) {
-    #   Hu[i] <- Hu[i] - Hui[i, k] + H[i, k]*u[k]
-    #   Hui[i, k] <- H[i, k]*u[k]
-    # }
     Huik <- H[, k]*u[k]
     Hu <- Hu - Hui[, k] + Huik
     Hui[, k] <- Huik
