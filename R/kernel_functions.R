@@ -11,11 +11,11 @@ r_rbf_kernel <- function(x1, x2, gamma= 1/ncol(x2), symmetric = FALSE) {
   x1 <- as.matrix(x1)
   x2 <- as.matrix(x2)
   n1 <- nrow(x1)
-  norms1 <- as.matrix(apply(x1^2, 1, sum))#rowSums(x1^2, 1)#as.matrix(apply(x1^2, 1, sum))
+  norms1 <- rowSums(x1^2, 1)#as.matrix(apply(x1^2, 1, sum))
   e2 <- matrix(1, 1, n1)
   if (symmetric == FALSE) {
     n2 <- nrow(x2)
-    norms2 <- as.matrix(apply(x2^2, 1, sum))#rowSums(x2^2, 1)#as.matrix(apply(x2^2, 1, sum))
+    norms2 <- rowSums(x2^2, 1)#as.matrix(apply(x2^2, 1, sum))
     e1 <- matrix(1, 1, n2)
   } else {
     norms2 <- norms1
@@ -54,13 +54,15 @@ kernel_function <- function(x1, x2,
 
 
 kernel_select_option <- function(X, kernel, solver, randx,
-                                 gamma, degree, coef0, rcpp) {
+                                 gamma, degree, coef0, ...) {
   n <- nrow(X)
+  sample_idx <- 1:n
   if (kernel == "linear" & solver == "primal") {
     KernelX <- X
   } else if (kernel != "linear" & solver == "primal") {
     if (randx > 0 && randx < 1) {
-      randX <- X[sample(n, floor(randx*n)),]
+      sample_idx <- sample(n, floor(randx*n))
+      randX <- X[sample_idx,]
     } else {
       randX <- X
     }
@@ -74,6 +76,6 @@ kernel_select_option <- function(X, kernel, solver, randx,
                                gamma = gamma, degree = degree, coef0 = coef0,
                                symmetric = T)
   }
-  K <- list("X" = X, "KernelX" = KernelX)
+  K <- list("X" = X, "KernelX" = KernelX, "sample_idx" = sample_idx)
   return(K)
 }
