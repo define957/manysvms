@@ -16,7 +16,6 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
   # solve quadratic programming like:
   #       min t(x) %*% H %*% x - t(q) %*% x
   #       s.t lb < x < ub
-
   H <- as.matrix(H)
   q <- as.matrix(q)
   lb <- as.matrix(lb)
@@ -38,12 +37,17 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
       break
     }
     k_list <- which(L_val == L_val_max)
+    lambda_max_list <- L_idx_val[k_list]
+    lambda_opt <- 0
+    k <- 1
     for (i in 1:length(k_list)) {
-      k <- k_list[i]
-      lambda_max <- L_idx_val[k]
-      lambda_opt <- max(lb[k] - u[k], min(lambda_max, ub[k] - u[k]))
-      if (lambda_opt != 0) {
-        break
+      ktemp <- k_list[i]
+      lambda_opt_temp <- max(lb[ktemp] - u[ktemp],
+                             min(lambda_max_list[i], ub[ktemp] - u[ktemp]))
+      if (abs(lambda_opt) < abs(lambda_opt_temp)) {
+        print(ktemp)
+        k <- ktemp
+        lambda_opt <- lambda_opt_temp
       }
     }
     u[k] <- u[k] + lambda_opt
