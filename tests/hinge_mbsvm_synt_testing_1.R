@@ -11,11 +11,13 @@ X <- rbind(X1, X2, X3)
 
 y <- rep(c(1, 2, 3), rep(n, 3))
 
-system.time(model <- hinge_mbsvm(X, y, 1, kernel = "linear", randx = 1, max.steps = 800000))
+
+system.time(model <- hinge_mbsvm(X, y, 1, kernel = "linear", randx = 1, max.steps = 8000,
+                                 gamma = 1/(10)))
 pred <- predict(model, X)
 accuracy(y, pred)
 plot(model)
-
+#
 # X <- glass[, 1:9]
 # X <- apply(X, 2, scale)
 # y <- glass[, 10]
@@ -24,6 +26,3 @@ plot(model)
 # param_list <- list("C" = C, "gamma" = 2^seq(-10, 4))
 # grid_search_cv(hinge_mbsvm, X, y, 5, accuracy, param_list, kernel = "rbf", randx = 1, seed = 1213,
 #                max.steps = 15000, eps = 1e-14)
-#
-# grid_search_cv(OVR_Classifier, X, y, 5, accuracy, param_list, kernel = "rbf", randx = 1, seed = 1213,
-#                max.steps = 800, bin_model = hinge_svm, values = TRUE)
