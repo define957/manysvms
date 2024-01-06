@@ -1,0 +1,15 @@
+library(MASS)
+library(manysvms)
+
+set.seed(123)
+n <- 150
+X1 <- mvrnorm(n, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
+X2 <- mvrnorm(n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
+X <- rbind(X1, X2)
+y <- rep(c(-1, 1), rep(n, 2))
+model <- sh_svm(X, y, max.steps = 8000, solver = "dual")
+print(coef(model))
+plot(model)
+model <- sh_svm(X, y, max.steps = 8000, solver = "primal")
+print(coef(model))
+plot(model)
