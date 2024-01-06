@@ -45,7 +45,6 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
       lambda_opt_temp <- max(lb[ktemp] - u[ktemp],
                              min(lambda_max_list[i], ub[ktemp] - u[ktemp]))
       if (abs(lambda_opt) < abs(lambda_opt_temp)) {
-        print(ktemp)
         k <- ktemp
         lambda_opt <- lambda_opt_temp
       }
