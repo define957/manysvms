@@ -78,8 +78,6 @@ als_svm_primal_solver <- function(KernelX, y, C = 1, p = 0.5,
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
 #' @param ... unused parameters.
 #' @return return \code{HingeSVMClassifier} object.
-#' @import Rcpp
-#' @useDynLib SupportVectorLab, .registration=TRUE
 #' @export
 als_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                     gamma = 1 / ncol(X), degree = 3, coef0 = 0,
