@@ -13,7 +13,7 @@ als_svm(
   degree = 3,
   coef0 = 0,
   p = 0.5,
-  eps = 1e-14,
+  eps = 1e-05,
   max.steps = 4000,
   batch_size = nrow(X)/10,
   solver = c("dual", "primal"),
