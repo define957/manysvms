@@ -61,7 +61,7 @@ the function will evaluates intercept.}
 \item{...}{unused parameters.}
 }
 \value{
-return \code{HingeSVMClassifier} object.
+return \code{SVMClassifier} object.
 }
 \description{
 \code{als_svm} is an R implementation of ALS-SVM
