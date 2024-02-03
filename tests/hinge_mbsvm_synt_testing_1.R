@@ -12,7 +12,7 @@ X <- rbind(X1, X2, X3)
 y <- rep(c(1, 2, 3), rep(n, 3))
 
 
-system.time(model <- hinge_mbsvm(X, y, 256, kernel = "linear", randx = 1, max.steps = 8000))
+system.time(model <- hinge_mbsvm(X, y, 1, kernel = "linear", randx = 1, max.steps = 8000))
 pred <- predict(model, X)
 accuracy(y, pred)
 plot(model)
@@ -23,6 +23,12 @@ accuracy(y, pred)
 plot(model)
 
 system.time(model <- ls_mbsvm(X, y, 1, kernel = "linear"))
+pred <- predict(model, X)
+accuracy(y, pred)
+plot(model)
+
+system.time(model <- ramp_mbsvm(X, y, 1, kernel = "linear", randx = 1, max.steps = 8000,
+                                cccp.steps = 10, s = 0.01))
 pred <- predict(model, X)
 accuracy(y, pred)
 plot(model)
