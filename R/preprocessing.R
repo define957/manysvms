@@ -62,3 +62,20 @@ noisy_label_generator <- function(y, p, seed = NULL){
   }
   return(y)
 }
+
+#' Transform Class to Character Class label
+#'
+#' @author Zhang Jiaqi
+#' @param y label.
+#' @export
+generate_character_label <- function(y) {
+  y_str <- as.character(y)
+  class_set   <- sort(unique(y))
+  num_class   <- length(class_set)
+  class_label <- paste("Class", 1:num_class, sep = "-")
+  for (i in 1:num_class) {
+    label_idx <- which(y == class_set[i])
+    y_str[label_idx] <- class_label[i]
+  }
+  return(y_str)
+}
