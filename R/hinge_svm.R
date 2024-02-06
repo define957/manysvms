@@ -118,7 +118,6 @@ hinge_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
 #' @importFrom graphics abline grid points
 #' @export
 plot.SVMClassifier <- function(x, ...) {
-  class_set <- sort(unique(x$y))
   coefs <- coef(x)
   idx <- which(x$y == 1)
   xlim_c <- c(min(x$X[,1]), max(x$X[, 1]))
@@ -131,9 +130,9 @@ plot.SVMClassifier <- function(x, ...) {
     if (x$kernel == "linear") {
       abline(a = -coefs[3]/coefs[2], b = -coefs[1]/coefs[2],
              lty = 2)
-      abline(a = -(coefs[3]+1)/coefs[2], b = -coefs[1]/coefs[2],
+      abline(a = -(coefs[3] + 1)/coefs[2], b = -coefs[1]/coefs[2],
              lty = 2)
-      abline(a = -(coefs[3]-1)/coefs[2], b = -coefs[1]/coefs[2],
+      abline(a = -(coefs[3] - 1)/coefs[2], b = -coefs[1]/coefs[2],
              lty = 2)
     }
   }
@@ -192,8 +191,6 @@ predict.SVMClassifier <- function(object, X, values = FALSE, ...) {
 }
 
 calculate_svm_H <- function(KernelX, y) {
-  # D <- Matrix::Matrix(diag(as.numeric(y)))
-  # H <- D %*% KernelX %*% D
-  H <- (y%*%t(y))*KernelX
+  H <- (y %*% t(y))*KernelX
   return(H)
 }
