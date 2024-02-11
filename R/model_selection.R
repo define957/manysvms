@@ -6,10 +6,12 @@
 #' @param K number of folds.
 #' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
+#' @param pipeline preprocessing pipline.
 #' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @export
 cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict,
+                             pipeline = NULL,
                              ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -25,12 +27,19 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
     idx <- which(index == i)
     X_test <- X[idx, ]
     y_test <- y[idx]
-    if(K == 1) {
+    if (K == 1) {
       X_train <- X_test
       y_train <- y_test
-    }else{
+    }else {
       X_train <- X[-idx, ]
       y_train <- y[-idx]
+    }
+    if (is.null(pipeline) == F) {
+      for (pipi in 1:length(pipeline)) {
+        pip_temp <- pipeline[[pipi]](X_train)
+        X_train <- trans(pip_temp, X_train)
+        X_test <- trans(pip_temp, X_test)
+      }
     }
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
@@ -52,6 +61,7 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @param metrics this parameter receive a metric function.
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
+#' @param pipeline preprocessing pipline.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
@@ -65,6 +75,7 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @export
 grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                            predict_func = predict,
+                           pipeline = NULL,
                            shuffle = TRUE, seed = NULL,
                            threads.num = parallel::detectCores() - 1, ...) {
   s <- Sys.time()
@@ -101,6 +112,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                             "X" = X, "y" = y, "K" = K,
                             "metrics" = metrics,
                             "predict_func" =  predict_func,
+                            "pipeline" = pipeline,
                             ...),
                        temp)
     cv_res <- do.call("cross_validation", params_cv)
@@ -165,6 +177,7 @@ print.cv_model <- function(x, ...) {
 #' @param metrics this parameter receive a metric function.
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
+#' @param pipeline preprocessing pipline.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
@@ -178,6 +191,7 @@ print.cv_model <- function(x, ...) {
 #' @export
 grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_list,
                                  predict_func = predict,
+                                 pipeline = NULL,
                                  shuffle = TRUE, seed = NULL,
                                  threads.num = parallel::detectCores() - 1,
                                  ...) {
@@ -216,6 +230,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                             "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
                             "metrics" = metrics,
                             "predict_func" =  predict_func,
+                            "pipeline" = pipeline,
                             ...),
                        temp)
     cv_res <- do.call("cross_validation_noisy", params_cv)
@@ -265,10 +280,13 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
 #' @param K number of folds.
 #' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
+#' @param pipeline preprocessing pipline.
 #' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @export
-cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics, predict_func = predict,
+cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
+                                   predict_func = predict,
+                                   pipeline = NULL,
                                    ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -285,12 +303,19 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics, predict
     idx <- which(index == i)
     X_test <- X[idx, ]
     y_test <- y[idx]
-    if(K == 1) {
+    if (K == 1) {
       X_train <- X_test
       y_train <- y_test
     }else{
       X_train <- X[-idx, ]
       y_train <- y_noisy[-idx]
+    }
+    if (is.null(pipeline) == F) {
+      for (pipi in 1:length(pipeline)) {
+        pip_temp <- pipeline[[pipi]](X_train)
+        X_train <- trans(pip_temp, X_train)
+        X_test <- trans(pip_temp, X_test)
+      }
     }
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)

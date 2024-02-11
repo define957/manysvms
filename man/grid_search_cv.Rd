@@ -12,6 +12,7 @@ grid_search_cv(
   metrics,
   param_list,
   predict_func = predict,
+  pipeline = NULL,
   shuffle = TRUE,
   seed = NULL,
   threads.num = parallel::detectCores() - 1,
@@ -30,6 +31,8 @@ grid_search_cv(
 \item{param_list}{parameter list.}
 
 \item{predict_func}{this parameter receive a function for predict.}
+
+\item{pipeline}{preprocessing pipline.}
 
 \item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle
 the dataset.}

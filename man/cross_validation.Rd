@@ -4,7 +4,16 @@
 \alias{cross_validation}
 \title{K-Fold Cross Validation}
 \usage{
-cross_validation(model, X, y, K = 5, metrics, predict_func = predict, ...)
+cross_validation(
+  model,
+  X,
+  y,
+  K = 5,
+  metrics,
+  predict_func = predict,
+  pipeline = NULL,
+  ...
+)
 }
 \arguments{
 \item{model}{your model.}
@@ -16,6 +25,8 @@ cross_validation(model, X, y, K = 5, metrics, predict_func = predict, ...)
 \item{metrics}{this parameter receive a metric function.}
 
 \item{predict_func}{this parameter receive a function for predict.}
+
+\item{pipeline}{preprocessing pipline.}
 
 \item{...}{additional parameters for your model.}
 }

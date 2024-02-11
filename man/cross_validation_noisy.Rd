@@ -12,6 +12,7 @@ cross_validation_noisy(
   K = 5,
   metrics,
   predict_func = predict,
+  pipeline = NULL,
   ...
 )
 }
@@ -27,6 +28,8 @@ cross_validation_noisy(
 \item{metrics}{this parameter receive a metric function.}
 
 \item{predict_func}{this parameter receive a function for predict.}
+
+\item{pipeline}{preprocessing pipline.}
 
 \item{...}{additional parameters for your model.}
 }
