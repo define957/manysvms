@@ -4,10 +4,9 @@ als_svr_dual_solver <- function(KernelX, y, C = 1, p = 0.5,
   H <- KernelX
   H <- cbind(H, -H)
   H <- rbind(H, -H)
-  I <- diag(1, n)
-  I1 <- diag(1/(p^2), n)
-  I12 <- diag(1/(p*(1-p)), n)
-  I4 <- diag(1/((1-p)^2), n)
+  I1 <- diag(1/(p), n, n)
+  I12 <- matrix(0, n, n)
+  I4 <- diag(1/(1 - p), n, n)
   In <- rbind(cbind(I1, I12), cbind(I12, I4))
   H <- H + In/C
   q <- rbind(y, -y)
@@ -15,7 +14,7 @@ als_svr_dual_solver <- function(KernelX, y, C = 1, p = 0.5,
   ub <- matrix(Inf, 2*n)
   u0 <- lb
   u <- clip_dcd_optimizer(H, q, lb, ub, eps, max.steps, u0)$x
-  coef <- u[1:n] - u[(n+1):(2*n)]
+  coef <- u[1:n] - u[(n + 1):(2*n)]
   BaseDualALSSVRRegressor <- list(coef = as.matrix(coef))
   class(BaseDualALSSVRRegressor) <- "BaseDualALSSVRRegressor"
   return(BaseDualALSSVRRegressor)
@@ -35,8 +34,8 @@ als_svr_primal_solver <- function(KernelX, y, C = 1, p = 0.5,
     u <- matrix(1, xmn)
     e <- y -  KernelX %*% w
     idx <- which(e >= 0)
-    u[idx] <- p^2
-    u[-idx] <- (1 - p)^2
+    u[idx] <- p
+    u[-idx] <- (1 - p)
     g <- w - (C*xn/xmn) * t(KernelX) %*% (u*e)
     print(g)
     return(g)

@@ -4,10 +4,9 @@ als_svm_dual_solver <- function(KernelX, y, C = 1, p = 0.5,
   H <- calculate_svm_H(KernelX, y)
   H <- cbind(H, -H)
   H <- rbind(H, -H)
-  I <- diag(1, n)
-  I1 <- diag(1/(p^2), n)
-  I12 <- diag(1/(p*(1-p)), n)
-  I4 <- diag(1/((1-p)^2), n)
+  I1 <- diag(1/(p), n, n)
+  I12 <- matrix(0, n, n)
+  I4 <- diag(1/(1 - p), n, n)
   In <- rbind(cbind(I1, I12), cbind(I12, I4))
   H <- H + In/C
   q <- matrix(-1, nrow = 2*n)
@@ -16,7 +15,7 @@ als_svm_dual_solver <- function(KernelX, y, C = 1, p = 0.5,
   ub <- matrix(Inf, nrow = 2*n)
   u0 <- lb
   u <- clip_dcd_optimizer(H, q, lb, ub, eps, max.steps, u0)$x
-  coef <- y*(u[1:n] - u[(n+1):(2*n)])
+  coef <- y*(u[1:n] - u[(n + 1):(2*n)])
   BaseDualALSSVMClassifier <- list(coef = as.matrix(coef))
   class(BaseDualALSSVMClassifier) <- "BaseDualALSSVMClassifier"
   return(BaseDualALSSVMClassifier)
@@ -24,8 +23,8 @@ als_svm_dual_solver <- function(KernelX, y, C = 1, p = 0.5,
 
 
 als_svm_primal_solver <- function(KernelX, y, C = 1, p = 0.5,
-                                 max.steps = 80, batch_size = nrow(KernelX) / 10,
-                                 optimizer = pegasos, ...) {
+                                  max.steps = 80, batch_size = nrow(KernelX) / 10,
+                                  optimizer = pegasos, ...) {
   gLeastSquares <- function(KernelX, y, w, pars,...) { # gradient of Least Squares loss function
     C <- pars$C
     xn <- pars$xn
@@ -34,8 +33,8 @@ als_svm_primal_solver <- function(KernelX, y, C = 1, p = 0.5,
     sg <- matrix(0, xmp, 1)
     u <- 1 - y * (KernelX %*% w)
     idx <- which(u >= 0)
-    u[idx] <- p^2
-    u[-idx] <- (1 - p)^2
+    u[idx] <- p
+    u[-idx] <- (1 - p)
     sg <- w - (C*xn/xmn) * t(KernelX) %*% (u*y)
     return(sg)
   }
@@ -108,8 +107,8 @@ als_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
   X <- kso$X
   if (solver == "primal") {
     solver.res <- als_svm_primal_solver(KernelX, y, C, p,
-                                          max.steps, batch_size,
-                                          optimizer, ...)
+                                        max.steps, batch_size,
+                                        optimizer, ...)
   } else if (solver == "dual") {
     solver.res <- als_svm_dual_solver(KernelX, y, C,
                                       p, eps, max.steps)
