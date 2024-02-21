@@ -39,24 +39,20 @@ eps_svr_dual_solver <- function(KernelX, y, C = 1, epsilon = 0.2,
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param eps the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
-#' @param batch_size mini-batch size for primal solver.
-#' @param solver \code{"dual"} and \code{"primal"} are available.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
-#' @param optimizer default primal optimizer pegasos.
-#' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
 #' @param ... unused parameters.
 #' @return return \code{SVMRegressor} object.
 #' @export
 eps_svr <- function(X, y, C = 1, epsilon = 0.2, kernel = c("linear", "rbf", "poly"),
                     gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                    eps = 1e-5, max.steps = 80, batch_size = nrow(X) / 10,
-                    solver = c("dual"),
-                    fit_intercept = TRUE, optimizer = pegasos, randx = 0.1, ...) {
+                    eps = 1e-5, max.steps = 4000,
+                    fit_intercept = TRUE, ...) {
+  randx <- 1
   X <- as.matrix(X)
   y <- as.matrix(y)
   kernel <- match.arg(kernel)
-  solver <- match.arg(solver)
+  solver <- "dual"
   if (fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
@@ -65,8 +61,7 @@ eps_svr <- function(X, y, C = 1, epsilon = 0.2, kernel = c("linear", "rbf", "pol
   KernelX <- kso$KernelX
   X <- kso$X
   if (solver == "dual") {
-    solver.res <- eps_svr_dual_solver(KernelX, y, C, epsilon, eps,
-                                      max.steps)
+    solver.res <- eps_svr_dual_solver(KernelX, y, C, epsilon, eps, max.steps)
   }
   SVMRegressor <- list("X" = X, "y" = y,
                        "C" = C, "kernel" = kernel,
@@ -75,6 +70,21 @@ eps_svr <- function(X, y, C = 1, epsilon = 0.2, kernel = c("linear", "rbf", "pol
                        "fit_intercept" = fit_intercept)
   class(SVMRegressor) <- "SVMRegressor"
   return(SVMRegressor)
+}
+
+#' Coef Method for Support Vector Regression
+#'
+#' @author Zhang Jiaqi
+#' @param object a fitted object of class inheriting from \code{SVMRegressor}.
+#' @param ... unused parameter.
+#' @importFrom stats coef
+#' @export
+coef.SVMRegressor <- function(object, ...) {
+  if (object$solver == "dual") {
+    return(t(object$X) %*% object$coef)
+  } else if (object$solver == "primal") {
+    return(object$coef)
+  }
 }
 
 #' Predict Method for Support Vector Regression

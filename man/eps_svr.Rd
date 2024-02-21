@@ -14,12 +14,8 @@ eps_svr(
   degree = 3,
   coef0 = 0,
   eps = 1e-05,
-  max.steps = 80,
-  batch_size = nrow(X)/10,
-  solver = c("dual"),
+  max.steps = 4000,
   fit_intercept = TRUE,
-  optimizer = pegasos,
-  randx = 0.1,
   ...
 )
 }
@@ -47,16 +43,8 @@ eps_svr(
 
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
-\item{batch_size}{mini-batch size for primal solver.}
-
-\item{solver}{\code{"dual"} and \code{"primal"} are available.}
-
 \item{fit_intercept}{if set \code{fit_intercept = TRUE},
 the function will evaluates intercept.}
-
-\item{optimizer}{default primal optimizer pegasos.}
-
-\item{randx}{parameter for reduce SVM, default \code{randx = 0.1}.}
 
 \item{...}{unused parameters.}
 }
