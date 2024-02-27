@@ -91,6 +91,7 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
 #' @param pipeline preprocessing pipline.
+#' @param metrics_params set parameter for each metrics (need a list).
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
@@ -105,6 +106,7 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                            predict_func = predict,
                            pipeline = NULL,
+                           metrics_params = NULL,
                            shuffle = TRUE, seed = NULL,
                            threads.num = parallel::detectCores() - 1, ...) {
   s <- Sys.time()
@@ -142,6 +144,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                             "metrics" = metrics,
                             "predict_func" =  predict_func,
                             "pipeline" = pipeline,
+                            "metrics_params" = metrics_params,
                             ...),
                        temp)
     cv_res <- do.call("cross_validation", params_cv)
@@ -207,6 +210,7 @@ print.cv_model <- function(x, ...) {
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
 #' @param pipeline preprocessing pipline.
+#' @param metrics_params set parameter for each metrics (need a list).
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
@@ -221,6 +225,7 @@ print.cv_model <- function(x, ...) {
 grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_list,
                                  predict_func = predict,
                                  pipeline = NULL,
+                                 metrics_params = NULL,
                                  shuffle = TRUE, seed = NULL,
                                  threads.num = parallel::detectCores() - 1,
                                  ...) {
@@ -260,6 +265,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                             "metrics" = metrics,
                             "predict_func" =  predict_func,
                             "pipeline" = pipeline,
+                            "metrics_params" = metrics_params,
                             ...),
                        temp)
     cv_res <- do.call("cross_validation_noisy", params_cv)

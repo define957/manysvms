@@ -18,4 +18,7 @@ y <- generate_character_label(y)
 model_params <- list("C" = 1, "max.steps" = 8000, "eps" = 0)
 cross_validation(hinge_svm, X, y, K = 5,
                  metrics = list(accuracy, binaryf1score),
-                 metrics_params = list(NULL, positive = "Class-1"))
+                 metrics_params = list(NULL, list(positive = "Class-2")))
+param_list <- list("C" = 1:4)
+
+grid_search_cv(hinge_svm, X, y, 5, binaryf1score, param_list, metrics_params = list("positive" = "Class-2"))

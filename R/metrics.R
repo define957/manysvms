@@ -71,8 +71,6 @@ root_mean_squared_error <- function(y, y_hat, dof = 0) {
 #' @param positive positive class, default "Class-1".
 #' @export
 binaryf1score <- function(y, y_hat, positive = "Class-1") {
-  positive <- match.arg(positive)
-  y <- as.character(y)
   y_hat <- as.character(y_hat)
   n1 <- length(y)
   n2 <- length(y_hat)
