@@ -70,7 +70,7 @@ root_mean_squared_error <- function(y, y_hat, dof = 0) {
 #' @param y,y_hat real values and fitted values.
 #' @param positive positive class, default "Class-1".
 #' @export
-binaryf1score <- function(y, y_hat, positive = c("Class-1", "Class-2")) {
+binaryf1score <- function(y, y_hat, positive = "Class-1") {
   positive <- match.arg(positive)
   y <- as.character(y)
   y_hat <- as.character(y_hat)

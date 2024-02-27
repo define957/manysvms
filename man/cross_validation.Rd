@@ -12,6 +12,7 @@ cross_validation(
   metrics,
   predict_func = predict,
   pipeline = NULL,
+  metrics_params = NULL,
   ...
 )
 }
@@ -27,6 +28,8 @@ cross_validation(
 \item{predict_func}{this parameter receive a function for predict.}
 
 \item{pipeline}{preprocessing pipline.}
+
+\item{metrics_params}{set parameter for each metrics (need a list).}
 
 \item{...}{additional parameters for your model.}
 }

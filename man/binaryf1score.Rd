@@ -5,7 +5,7 @@
 \title{Binary F1 Score
 return F1 Score for two vector}
 \usage{
-binaryf1score(y, y_hat, positive = c("Class-1", "Class-2"))
+binaryf1score(y, y_hat, positive = "Class-1")
 }
 \arguments{
 \item{y, y_hat}{real values and fitted values.}

@@ -1,3 +1,29 @@
+metrics_check_cv <- function(metrics) {
+  if (is.list(metrics) == F) {
+    metrics <- list(metrics)
+    names(metrics) <- paste("metric", length(metrics), sep = "")
+  }
+  return(metrics)
+}
+
+metrics_params_check_cv <- function(num_metrics, metrics_params) {
+  if (is.null(metrics_params)) {
+    metrics_params <- rep(list(NULL), num_metrics)
+  } else {
+    len_params <- length(metrics_params)
+    metrics_params <- append(metrics_params,
+                             rep(NULL, num_metrics - len_params))
+  }
+  return(metrics_params)
+}
+
+metric_evaluate <- function(metric_func, y, y_hat, metric_params) {
+  metric_params <- append(list("y" = y, "y_hat" = y_hat), metric_params)
+  evaluate_res <- do.call("metric_func", metric_params)
+  return(evaluate_res)
+}
+
+
 #' K-Fold Cross Validation
 #'
 #' @author Zhang Jiaqi.
@@ -7,20 +33,20 @@
 #' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
 #' @param pipeline preprocessing pipline.
+#' @param metrics_params set parameter for each metrics (need a list).
 #' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @export
 cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict,
                              pipeline = NULL,
+                             metrics_params = NULL,
                              ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
-  if (is.list(metrics) == F) {
-    metrics <- list(metrics)
-    names(metrics) <- paste("metric", length(metrics), sep = "")
-  }
+  metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
+  metrics_params_check_cv(num_metric, metrics_params)
   metric_mat <- matrix(0, num_metric, K)
   index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
@@ -44,7 +70,10 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
     for (j in 1:num_metric) {
-      metric_mat[j, i] <- metrics[[j]](y_test, y_test_hat)
+      metric_j <- metrics[[j]]
+      metric_mat[j, i] <- metric_evaluate(metric_j,
+                                          y_test, y_test_hat,
+                                          metrics_params[[j]])
     }
   }
   rownames(metric_mat) <- names(metrics)
@@ -281,20 +310,21 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
 #' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
 #' @param pipeline preprocessing pipline.
+#' @param metrics_params set parameter for each metrics (need a list).
 #' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @export
 cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
                                    predict_func = predict,
                                    pipeline = NULL,
+                                   metrics_params = NULL,
                                    ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   y_noisy <- as.matrix(y_noisy)
-  if (is.list(metrics) == F) {
-    metrics <- list(metrics)
-    names(metrics) <- paste("metric", length(metrics), sep = "")
-  }
+  metrics <- metrics_check_cv(metrics)
+  num_metric <- length(metrics)
+  metrics_params_check_cv(num_metric, metrics_params)
   n <- nrow(X)
   num_metric <- length(metrics)
   metric_mat <- matrix(0, num_metric, K)
@@ -320,7 +350,10 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
     model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
     y_test_hat <- predict_func(model_res, X_test, ...)
     for (j in 1:num_metric) {
-      metric_mat[j, i] <- metrics[[j]](y_test, y_test_hat)
+      metric_j <- metrics[[j]]
+      metric_mat[j, i] <- metric_evaluate(metric_j,
+                                          y_test, y_test_hat,
+                                          metrics_params[[j]])
     }
   }
   return(metric_mat)
