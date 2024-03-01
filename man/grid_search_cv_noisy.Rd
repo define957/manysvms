@@ -14,6 +14,8 @@ grid_search_cv_noisy(
   param_list,
   predict_func = predict,
   pipeline = NULL,
+  metrics_params = NULL,
+  predict_params = NULL,
   shuffle = TRUE,
   seed = NULL,
   threads.num = parallel::detectCores() - 1,
@@ -36,6 +38,10 @@ grid_search_cv_noisy(
 \item{predict_func}{this parameter receive a function for predict.}
 
 \item{pipeline}{preprocessing pipline.}
+
+\item{metrics_params}{set parameter for each metrics (need a list).}
+
+\item{predict_params}{set parameters for each predict method (need a list).}
 
 \item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle
 the dataset.}

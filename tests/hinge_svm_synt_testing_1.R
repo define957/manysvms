@@ -21,4 +21,11 @@ cross_validation(hinge_svm, X, y, K = 5,
                  metrics_params = list(NULL, list(positive = "Class-2")))
 param_list <- list("C" = 1:4)
 
-grid_search_cv(hinge_svm, X, y, 5, binaryf1score, param_list, metrics_params = list("positive" = "Class-2"))
+grid_search_cv(hinge_svm, X, y, 5, binaryf1score, param_list,
+               metrics_params = list("positive" = "Class-2"),
+               threads.num = 2)
+
+cross_validation_noisy(hinge_svm, X, y, y, K = 5,
+                 metrics = list(accuracy, binaryf1score),
+                 metrics_params = list(NULL, list(positive = "Class-2")))
+param_list <- list("C" = 1:4)
