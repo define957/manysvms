@@ -26,9 +26,9 @@ rq_svm_dual_solver <- function(KernelX, y, C = 1, update_deltak,
     }
   }
   coef <- y*u
-  BaseDualRqSVMClassifier <- list(coef = as.matrix(coef))
-  class(BaseDualRqSVMClassifier) <- "BaseDualRqSVMClassifier"
-  return(BaseDualRqSVMClassifier)
+  BaseDualRQSVMClassifier <- list(coef = as.matrix(coef))
+  class(BaseDualRQSVMClassifier) <- "BaseDualRQSVMClassifier"
+  return(BaseDualRQSVMClassifier)
 }
 
 
@@ -40,6 +40,7 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     lambda <- pars$lambda
     tau <- pars$tau
     C <- pars$C
+    xn <- pars$xn
     deltak <- pars$deltak
     eta <- 1/(1 - exp(-1/lambda))
     xmn <- nrow(KernelX)
@@ -50,7 +51,7 @@ rq_svm_primal_solver <- function(KernelX, y, C = 1, update_deltak,
     u[f < 0] <- -tau
     u[f >= 0] <- 1
     sg <- w - eta*(C*xn/xmn) * t(KernelX) %*% (u*y)/lambda +
-          (C*xn/xmn)*t(KernelX) %*% (y*deltak[At, ])
+      (C*xn/xmn)*t(KernelX) %*% (y*deltak[At, ])
     return(sg)
   }
   xn <- nrow(KernelX)
@@ -145,8 +146,8 @@ rq_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                                        optimizer, ...)
   } else if (solver == "dual") {
     solver.res <- rq_svm_dual_solver(KernelX, y, C, update_deltak,
-                                          tau, lambda, eps, eps.cccp,
-                                          max.steps, cccp.steps)
+                                     tau, lambda, eps, eps.cccp,
+                                     max.steps, cccp.steps)
   }
   SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                         "C" = C, "kernel" = kernel,
