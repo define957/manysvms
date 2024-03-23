@@ -1,45 +1,37 @@
 library(MASS)
-library(ggplot2)
 library(manysvms)
 
 set.seed(100)
 n <- 150
-X1 <- mvrnorm(3*n, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
-X2 <- mvrnorm(2*n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
+X1 <- mvrnorm(n, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
+X2 <- mvrnorm(n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
 X <- rbind(X1, X2)
+y <- rep(c(-1, 1), rep(n, 2))
+model <- qtls_svm(X, y, solver = "primal", max.steps = 15000)
+print(coef(model))
+plot(model)
 
-y <- rep(c(1, 2), c(3*n, 2*n))
-s <- Sys.time()
-model1 <- qtls_svm(X, y , 0.2, "linear", max.steps = 2000, a = 1, optimizer = pegasos,
-                       batch_size = 50)
-e <- Sys.time()
-print(e - s)
-res <- predict(model1, X)
-accuracy(res, y)
+y <- generate_character_label(y)
+model_params <- list("C" = 1, "max.steps" = 8000, "eps" = 0)
+cross_validation(qtls_svm, X, y, K = 5,
+                 metrics = list(accuracy, binaryf1score),
+                 metrics_params = list(NULL, list(positive = "Class-1")),
+                 model_settings = list("max.steps" = 4000, "eps" = 0))
+param_list <- list("C" = 1:4)
 
-dataXy <- data.frame(X, y)
-dataXy$y <- as.factor(dataXy$y)
+grid_search_cv(qtls_svm, X, y, 5, binaryf1score, param_list,
+               metrics_params = list("positive" = "Class-2"),
+               model_settings = list("max.steps" = 4000, "eps" = 1e-5),
+               threads.num = 2)
 
-ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
-  geom_point() +
-  geom_abline(slope = -model1$coef[1] / model1$coef[2],
-              intercept = -model1$coef[3] / model1$coef[2]) +
-  geom_abline(slope = -model1$coef[1] / model1$coef[2],
-              intercept = -(-1 + model1$coef[3])/model1$coef[2]) +
-  geom_abline(slope = -model1$coef[1] / model1$coef[2],
-              intercept = -(1 + model1$coef[3])/model1$coef[2]) +
-  theme_bw()
+cross_validation_noisy(hinge_svm, X, y, y, K = 5,
+                       metrics = list(binaryf1score, binaryf1score),
+                       metrics_params = list(list(positive = "Class-1"),
+                                             list(positive = "Class-2")),
+                       model_settings = list("max.steps" = 4000, "eps" = 1e-5))
 
-cat(model1$coef, "\n")
+grid_search_cv_noisy(hinge_svm, X, y, y, 5, binaryf1score, param_list,
+                     metrics_params = list("positive" = "Class-2"),
+                     model_settings = list("max.steps" = 4000, "eps" = 1e-5),
+                     threads.num = 2)
 
-C <- 2^seq(-8, 8, 2)
-param_list <- list("C" = C, "gamma " = 1, "a" = -(1:50))
-
-s <- Sys.time()
-grid_search_cv(qtls_svm, X, y, metrics = accuracy,
-               param_list = param_list, seed = 1234, K = 5,
-               max.steps = 500, threads.num = 2,
-               solver = "primal", randx = 0.1,
-               kernel = "rbf")
-e <- Sys.time()
-print(e - s)

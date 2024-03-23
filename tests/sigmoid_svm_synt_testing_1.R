@@ -1,5 +1,4 @@
 library(MASS)
-library(ggplot2)
 library(manysvms)
 
 set.seed(100)
@@ -7,58 +6,34 @@ n <- 150
 X1 <- mvrnorm(n, mu = c(-3, -3), Sigma = diag(1, nrow = 2))
 X2 <- mvrnorm(n, mu = c(3, 3), Sigma = diag(1, nrow = 2))
 X <- rbind(X1, X2)
+y <- rep(c(-1, 1), rep(n, 2))
+model <- sigmoid_svm(X, y, solver = "primal", max.steps = 15000)
+print(coef(model))
+plot(model)
 
-y <- rep(c(1, 2), c(n, n))
-s <- Sys.time()
-model1 <- sigmoid_svm(X, y, C = 20, epsilon = 0, max.steps = 500)
-e <- Sys.time()
-print(e - s)
-w <- t(cbind(X, 1)) %*% model1$coef
-dataXy <- data.frame(X, y)
-dataXy$y <- as.factor(dataXy$y)
+model <- sigmoid_svm(X, y, solver = "dual", max.steps = 4000)
+print(coef(model))
+plot(model)
+y <- generate_character_label(y)
+model_params <- list("C" = 1, "max.steps" = 8000, "eps" = 0)
+cross_validation(sigmoid_svm, X, y, K = 5,
+                 metrics = list(accuracy, binaryf1score),
+                 metrics_params = list(NULL, list(positive = "Class-1")),
+                 model_settings = list("max.steps" = 4000, "eps" = 0))
+param_list <- list("C" = 1:4)
 
-ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
-  geom_point() +
-  geom_abline(slope = -w[1] / w[2],
-              intercept = -w[3] / w[2]) +
-  geom_abline(slope = -w[1] / w[2],
-              intercept = -(-1 + w[3])/w[2]) +
-  geom_abline(slope = -w[1] / w[2],
-              intercept = -(1 + w[3])/w[2]) +
-  theme_bw()
+grid_search_cv(sigmoid_svm, X, y, 5, binaryf1score, param_list,
+               metrics_params = list("positive" = "Class-2"),
+               model_settings = list("max.steps" = 4000, "eps" = 1e-5),
+               threads.num = 2)
 
-cat(w, "\n")
+cross_validation_noisy(hinge_svm, X, y, y, K = 5,
+                       metrics = list(binaryf1score, binaryf1score),
+                       metrics_params = list(list(positive = "Class-1"),
+                                             list(positive = "Class-2")),
+                       model_settings = list("max.steps" = 4000, "eps" = 1e-5))
 
-s <- Sys.time()
-model1 <- sigmoid_svm(X, y, C = 1, epsilon = 0.5, batch_size = 150,
-                  solver = "primal", max.steps = 500)
-e <- Sys.time()
-print(e - s)
-dataXy <- data.frame(X, y)
-dataXy$y <- as.factor(dataXy$y)
-
-ggplot(dataXy, aes(x = X1, y = X2, color = y)) +
-  geom_point() +
-  geom_abline(slope = -model1$coef[1] / model1$coef[2],
-              intercept = -model1$coef[3]/model1$coef[2]) +
-  geom_abline(slope = -model1$coef[1] / model1$coef[2],
-              intercept = -(-1 + model1$coef[3])/model1$coef[2]) +
-  geom_abline(slope = -model1$coef[1] / model1$coef[2],
-              intercept = -(1 + model1$coef[3])/model1$coef[2]) +
-  theme_bw()
-
-cat(model1$coef, "\n")
-
-C <- 1
-param_list <- list("C" = C, "gamma " = 1/2,
-                   "lambda" = c(1, 2, 3),
-                   "epsilon" = 0)
-
-s <- Sys.time()
-gscv <-  grid_search_cv(hinge_svm, X, y, metrics = accuracy,
-                        param_list = param_list, seed = 1234, K = 5,
-                        max.steps = 500, threads.num = 2,
-                        solver = "dual", randx = 0.1, batch_size = 100,
-                        kernel = "rbf")
-e <- Sys.time()
-print(e - s)
+grid_search_cv_noisy(hinge_svm, X, y, y, 5, binaryf1score, param_list,
+                     metrics_params = list("positive" = "Class-2"),
+                     model_settings = list("max.steps" = 4000, "eps" = 1e-5),
+                     threads.num = 2)

@@ -44,13 +44,13 @@ predict_model <- function(model_res, X_test, y_test,
 #' @param pipeline preprocessing pipline.
 #' @param metrics_params set parameters for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
-#' @param ... additional parameters for your model.
+#' @param model_settings set parameters for model (need a list).
 #' @return return a metric matrix
 #' @export
 cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict,
                              pipeline = NULL,
                              metrics_params = NULL, predict_params = NULL,
-                             ...) {
+                             model_settings = NULL) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
@@ -77,9 +77,10 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
         X_test <- trans(pip_temp, X_test)
       }
     }
-    model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
+    model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
+                                         model_settings))
     predict_res <- predict_model(model_res, X_test, y_test,
-                                predict_params, predict_func)
+                                 predict_params, predict_func)
     for (j in 1:num_metric) {
       metric_j <- metrics[[j]]
       metric_mat[j, i] <- metric_evaluate(metric_j,
@@ -104,11 +105,11 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @param pipeline preprocessing pipline.
 #' @param metrics_params set parameters for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
+#' @param model_settings set parameters for model (need a list).
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
 #' @param threads.num the number of threads used for parallel execution.
-#' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @import foreach
 #' @import doParallel
@@ -119,8 +120,9 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                            predict_func = predict,
                            pipeline = NULL,
                            metrics_params = NULL, predict_params = NULL,
+                           model_settings = NULL,
                            shuffle = TRUE, seed = NULL,
-                           threads.num = parallel::detectCores() - 1, ...) {
+                           threads.num = parallel::detectCores() - 1) {
   s <- Sys.time()
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -151,15 +153,14 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                              .options.snow = opts) %dopar% {
     temp <- data.frame(param_grid[i, ])
     colnames(temp) <- param_names
-    params_cv <- append(list("model" = model,
-                            "X" = X, "y" = y, "K" = K,
-                            "metrics" = metrics,
-                            "predict_func" =  predict_func,
-                            "pipeline" = pipeline,
-                            "metrics_params" = metrics_params,
-                            "predict_params" = predict_params,
-                            ...),
-                       temp)
+    params_cv <- list("model" = model,
+                      "X" = X, "y" = y, "K" = K,
+                      "metrics" = metrics,
+                      "predict_func" =  predict_func,
+                      "pipeline" = pipeline,
+                      "metrics_params" = metrics_params,
+                      "model_settings" = append(model_settings, as.list(temp))
+                       )
     cv_res <- do.call("cross_validation", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
@@ -168,7 +169,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   cat("\n")
   num_metrics <- length(metrics)
   name_matrics <- names(metrics)
-  colnames(cv_res)[(num_metrics+1):(2*num_metrics)] <- paste(name_matrics, "- sd")
+  colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")
   e <- Sys.time()
   idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
   idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
@@ -178,8 +179,8 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   for (i in 1:num_metrics) {
     score_mat[1, i] <- cv_res[idx_max[i], i]
     score_mat[2, i] <- cv_res[idx_min[i], i]
-    score_mat[1, num_metrics+i] <- cv_res[idx_max[i], num_metrics+i]
-    score_mat[2, num_metrics+i] <- cv_res[idx_min[i], num_metrics+i]
+    score_mat[1, num_metrics + i] <- cv_res[idx_max[i], num_metrics + i]
+    score_mat[2, num_metrics + i] <- cv_res[idx_min[i], num_metrics + i]
   }
   cv_res <- cbind(cv_res, param_grid)
   cv_model <- list("results" = cv_res,
@@ -225,11 +226,11 @@ print.cv_model <- function(x, ...) {
 #' @param pipeline preprocessing pipline.
 #' @param metrics_params set parameter for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
+#' @param model_settings set parameters for model (need a list).
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
 #' @param threads.num the number of threads used for parallel execution.
-#' @param ... additional parameters for your model.
 #' @return return a metric matrix
 #' @import foreach
 #' @import doParallel
@@ -240,9 +241,9 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                                  predict_func = predict,
                                  pipeline = NULL,
                                  metrics_params = NULL, predict_params = NULL,
+                                 model_settings = NULL,
                                  shuffle = TRUE, seed = NULL,
-                                 threads.num = parallel::detectCores() - 1,
-                                 ...) {
+                                 threads.num = parallel::detectCores() - 1) {
   s <- Sys.time()
   X <- as.matrix(X)
   y <- as.matrix(y)
@@ -274,15 +275,14 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                              .options.snow = opts) %dopar% {
     temp <- data.frame(param_grid[i, ])
     colnames(temp) <- param_names
-    params_cv <- append(list("model" = model,
-                            "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
-                            "metrics" = metrics,
-                            "predict_func" =  predict_func,
-                            "pipeline" = pipeline,
-                            "metrics_params" = metrics_params,
-                            "predict_params" = predict_params,
-                            ...),
-                       temp)
+    params_cv <- list("model" = model,
+                      "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
+                      "metrics" = metrics,
+                      "predict_func" =  predict_func,
+                      "pipeline" = pipeline,
+                      "metrics_params" = metrics_params,
+                      "model_settings" = append(model_settings, as.list(temp))
+                      )
     cv_res <- do.call("cross_validation_noisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
@@ -290,7 +290,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   cat("\n")
   num_metrics <- length(metrics)
   name_matrics <- names(metrics)
-  colnames(cv_res)[(num_metrics+1):(2*num_metrics)] <- paste(name_matrics, "- sd")
+  colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")
   e <- Sys.time()
   idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
   idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
@@ -300,8 +300,8 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   for (i in 1:num_metrics) {
     score_mat[1, i] <- cv_res[idx_max[i], i]
     score_mat[2, i] <- cv_res[idx_min[i], i]
-    score_mat[1, num_metrics+i] <- cv_res[idx_max[i], num_metrics+i]
-    score_mat[2, num_metrics+i] <- cv_res[idx_min[i], num_metrics+i]
+    score_mat[1, num_metrics + i] <- cv_res[idx_max[i], num_metrics + i]
+    score_mat[2, num_metrics + i] <- cv_res[idx_min[i], num_metrics + i]
   }
   cv_res <- cbind(cv_res, param_grid)
   cv_model <- list("results" = cv_res,
@@ -333,14 +333,14 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
 #' @param pipeline preprocessing pipline.
 #' @param metrics_params set parameters for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
-#' @param ... additional parameters for your model.
+#' @param model_settings set parameters for model (need a list).
 #' @return return a metric matrix
 #' @export
 cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
                                    predict_func = predict,
                                    pipeline = NULL,
                                    metrics_params = NULL, predict_params = NULL,
-                                   ...) {
+                                   model_settings = NULL) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   y_noisy <- as.matrix(y_noisy)
@@ -369,7 +369,8 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
         X_test <- trans(pip_temp, X_test)
       }
     }
-    model_res <- do.call("model", list("X" = X_train, "y" = y_train, ...))
+    model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
+                                         model_settings))
     predict_res <- predict_model(model_res, X_test, y_test,
                                  predict_params, predict_func)
     for (j in 1:num_metric) {

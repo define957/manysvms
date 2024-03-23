@@ -15,7 +15,7 @@ cross_validation_noisy(
   pipeline = NULL,
   metrics_params = NULL,
   predict_params = NULL,
-  ...
+  model_settings = NULL
 )
 }
 \arguments{
@@ -37,7 +37,7 @@ cross_validation_noisy(
 
 \item{predict_params}{set parameters for each predict method (need a list).}
 
-\item{...}{additional parameters for your model.}
+\item{model_settings}{set parameters for model (need a list).}
 }
 \value{
 return a metric matrix

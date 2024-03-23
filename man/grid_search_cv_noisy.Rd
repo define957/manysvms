@@ -16,10 +16,10 @@ grid_search_cv_noisy(
   pipeline = NULL,
   metrics_params = NULL,
   predict_params = NULL,
+  model_settings = NULL,
   shuffle = TRUE,
   seed = NULL,
-  threads.num = parallel::detectCores() - 1,
-  ...
+  threads.num = parallel::detectCores() - 1
 )
 }
 \arguments{
@@ -43,14 +43,14 @@ grid_search_cv_noisy(
 
 \item{predict_params}{set parameters for each predict method (need a list).}
 
+\item{model_settings}{set parameters for model (need a list).}
+
 \item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle
 the dataset.}
 
 \item{seed}{random seed for \code{shuffle} option.}
 
 \item{threads.num}{the number of threads used for parallel execution.}
-
-\item{...}{additional parameters for your model.}
 }
 \value{
 return a metric matrix
