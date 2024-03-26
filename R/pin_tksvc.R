@@ -1,4 +1,5 @@
-pin_tksvc_dual_solver <- function(KernelX, y, C, epsilon, tau,
+pin_tksvc_dual_solver <- function(KernelX, y, C1, C2, C3, C4, epsilon,
+                                  tau1, tau2, tau3, tau4,
                                   class_set, class_num,
                                   eps, max.steps) {
   xp <- ncol(KernelX)
@@ -18,6 +19,7 @@ pin_tksvc_dual_solver <- function(KernelX, y, C, epsilon, tau,
       G <- KernelX[idxNeg, ]
       M <- KernelX[idxRest, ]
       N <- rbind(G, M)
+      P <- rbind(H, M)
 
       Hn <- nrow(H)
       Gn <- nrow(G)
@@ -26,17 +28,17 @@ pin_tksvc_dual_solver <- function(KernelX, y, C, epsilon, tau,
       invHTH <- chol2inv(chol(t(H) %*% H + diag(1e-7, xp)))
       dualH <- N %*% invHTH %*% t(N)
       dualq <- rbind(matrix(1, Gn), matrix(1 - epsilon, Mn))
-      duallb <- rbind(matrix(-tau[1]*C[1], Gn), matrix(-tau[2]*C[2], Mn))
-      dualub <- rbind(matrix(C[1], Gn), matrix(C[2], Mn))
-      if (tau[1] == 0) {
+      duallb <- rbind(matrix(-tau1*C1, Gn), matrix(-tau2*C2, Mn))
+      dualub <- rbind(matrix(C1, Gn), matrix(C2, Mn))
+      if (tau1 == 0) {
         u0_1 <- matrix(0, Gn)
       } else {
-        u0_1 <- matrix((1 - tau[1]*C[1]) / 2, Gn)
+        u0_1 <- matrix((1 - tau1)*C1 / 2, Gn)
       }
-      if (tau[2] == 0) {
+      if (tau2 == 0) {
         u0_2 <- matrix(0, Mn)
       } else {
-        u0_2 <- matrix((1 - tau[2]*C[2]) / 2, Mn)
+        u0_2 <- matrix((1 - tau2*C2) / 2, Mn)
       }
       u0 <- rbind(u0_1, u0_2)
       x <- clip_dcd_optimizer(dualH, dualq, duallb, dualub, eps, max.steps, u0)$x
@@ -47,17 +49,17 @@ pin_tksvc_dual_solver <- function(KernelX, y, C, epsilon, tau,
       invGTG <- chol2inv(chol(t(G) %*% G + diag(1e-7, xp)))
       dualH <- P %*% invGTG %*% t(P)
       dualq <- rbind(matrix(1, Hn), matrix(1 - epsilon, Mn))
-      duallb <- rbind(matrix(-tau[3]*C[3], Hn), matrix(-tau[4]*C[4], Mn))
-      dualub <- rbind(matrix(C[3], Hn), matrix(C[4], Mn))
-      if (tau[3] == 0) {
-        u0_1 <- matrix(0, Gn)
+      dualub <- rbind(matrix(C3, Hn), matrix(C4, Mn))
+      duallb <- rbind(matrix(-tau3*C3, Hn), matrix(-tau4*C4, Mn))
+      if (tau3 == 0) {
+        u0_1 <- matrix(0, Hn)
       } else {
-        u0_1 <- matrix((1 - tau[3]*C[3]) / 2, Gn)
+        u0_1 <- matrix((1 - tau3)*C3 / 2, Hn)
       }
-      if (tau[4] == 0) {
+      if (tau4 == 0) {
         u0_2 <- matrix(0, Mn)
       } else {
-        u0_2 <- matrix((1 - tau[4]*C[4]) / 2, Mn)
+        u0_2 <- matrix((1 - tau4)*C4 / 2, Mn)
       }
       u0 <- rbind(u0_1, u0_2)
       x <- clip_dcd_optimizer(dualH, dualq, duallb, dualub, eps, max.steps, u0)$x
@@ -79,7 +81,7 @@ pin_tksvc_dual_solver <- function(KernelX, y, C, epsilon, tau,
 #'
 #' @author Zhang Jiaqi.
 #' @param X,y dataset and label.
-#' @param C plenty term.
+#' @param C1,C2,C3,C4 plenty term.
 #' @param kernel kernel function. The definitions of various kernel functions are as follows:
 #' \describe{
 #'     \item{linear:}{\eqn{u'v}{u'*v}}
@@ -90,7 +92,7 @@ pin_tksvc_dual_solver <- function(KernelX, y, C, epsilon, tau,
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
 #' @param epsilon rest class parameter.
-#' @param tau parameter for pinball loss function.
+#' @param tau1,tau2,tau3,tau4 parameter for pinball loss function.
 #' @param eps the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param solver \code{"dual"} is available.
@@ -99,32 +101,17 @@ pin_tksvc_dual_solver <- function(KernelX, y, C, epsilon, tau,
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
 #' @return return \code{HingeSVMClassifier} object.
 #' @export
-pin_tksvc <- function(X, y, C = 1,
+pin_tksvc <- function(X, y, C1 = 1, C2 = 1, C3 = C1, C4 = C2,
                       kernel = c("linear", "rbf", "poly"),
                       gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                      epsilon = 0.1, tau = 0.1,
+                      epsilon = 0.1, tau1 = 1, tau2 = 1, tau3 = tau1, tau4 = tau2,
                       eps = 1e-5, max.steps = 5000,
                       solver = c("dual"), fit_intercept = TRUE,
                       randx = 1) {
-  C <- as.vector(C)
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- sort(unique(y))
   class_num <- length(class_set)
-  if (length(C) == 1) {
-    C <- matrix(C, 4)
-  } else if (length(C) == 2) {
-    C <- c(C, C)
-  } else if (length(C) != 4) {
-    stop("length(C) should equal to 1, 2 or 4!")
-  }
-  if (length(tau) == 1) {
-    tau <- matrix(tau, 4)
-  } else if (length(tau) == 2) {
-    tau <- c(tau, tau)
-  } else if (length(tau) != 4) {
-    stop("length(tau) should equal to 1, 2 or 4!")
-  }
   kernel <- match.arg(kernel)
   solver <- match.arg(solver)
   kso <- kernel_select_option(X, kernel, "primal", randx,
@@ -135,12 +122,14 @@ pin_tksvc <- function(X, y, C = 1,
     KernelX <- cbind(KernelX, 1)
   }
   if (solver == "dual") {
-    solver.res <- pin_tksvc_dual_solver(KernelX, y, C, epsilon, tau,
+    solver.res <- pin_tksvc_dual_solver(KernelX, y, C1, C2, C3, C4, epsilon,
+                                        tau1, tau2, tau3, tau4,
                                         class_set, class_num, eps, max.steps)
   }
   TKSVCClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
                           "class_num" = class_num,
-                          "C" = C, "kernel" = kernel,
+                          "C1" = C1, "C2" = C2, "C3" = C3, "C4" = C4,
+                          "kernel" = kernel,
                           "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                           "epsilon" = epsilon,
                           "solver" = solver, "coef_pos" = solver.res$coef_pos,

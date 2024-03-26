@@ -7,13 +7,19 @@
 pin_tksvc(
   X,
   y,
-  C = 1,
+  C1 = 1,
+  C2 = 1,
+  C3 = C1,
+  C4 = C2,
   kernel = c("linear", "rbf", "poly"),
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
   epsilon = 0.1,
-  tau = 0.1,
+  tau1 = 1,
+  tau2 = 1,
+  tau3 = tau1,
+  tau4 = tau2,
   eps = 1e-05,
   max.steps = 5000,
   solver = c("dual"),
@@ -24,7 +30,7 @@ pin_tksvc(
 \arguments{
 \item{X, y}{dataset and label.}
 
-\item{C}{plenty term.}
+\item{C1, C2, C3, C4}{plenty term.}
 
 \item{kernel}{kernel function. The definitions of various kernel functions are as follows:
 \describe{
@@ -41,7 +47,7 @@ pin_tksvc(
 
 \item{epsilon}{rest class parameter.}
 
-\item{tau}{parameter for pinball loss function.}
+\item{tau1, tau2, tau3, tau4}{parameter for pinball loss function.}
 
 \item{eps}{the precision of the optimization algorithm.}
 

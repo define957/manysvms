@@ -31,10 +31,10 @@ model <- hinge_tksvc(X, y, C1 = 2^(8), C2 = 2^(8), epsilon = 0, max.steps = 8000
 accuracy(y, predict(model, X))
 
 
-model_params <- list("C1" = 1, "C2" = 4, "max.steps" = 8000, "eps" = 0)
+model_params <- list("C1" = 1, "C2" = 4, "max.steps" = 4000, "eps" = 0)
 cross_validation(hinge_tksvc, X, y, K = 5,
                  metrics = list(accuracy),
-                 model_settings = list("max.steps" = 4000, "eps" = 0))
+                 model_settings = model_params)
 
 param_list <- list("C1" = 1:4, "C2" = 1:4, "epsilon" = c(0, 0.1, 0.2))
 
@@ -47,5 +47,28 @@ cross_validation_noisy(hinge_tksvc, X, y, y, K = 5,
                        model_settings = list("max.steps" = 4000, "eps" = 1e-5))
 
 grid_search_cv_noisy(hinge_tksvc, X, y, y, 5, accuracy, param_list,
+                     model_settings = list("max.steps" = 4000, "eps" = 1e-5),
+                     threads.num = 2)
+
+# Pin-TKSVC
+
+model_settings <- list("C1" = 1, "C2" = 4, "tau1" = 0.1, "tau2" = 0.1,
+                     "max.steps" = 4000, "eps" = 0)
+cross_validation(pin_tksvc, X, y, K = 5,
+                 metrics = list(accuracy),
+                 model_settings = model_settings)
+
+param_list <- list("C1" = 1:4, "epsilon" = c(0, 0.1, 0.2),
+                   "tau1" = c(0.1, 0.2, 0.3))
+
+grid_search_cv(pin_tksvc, X, y, 5, accuracy, param_list,
+               model_settings = list("max.steps" = 4000, "eps" = 1e-5),
+               threads.num = 2)
+
+cross_validation_noisy(pin_tksvc, X, y, y, K = 5,
+                       metrics = accuracy,
+                       model_settings = list("max.steps" = 4000, "eps" = 1e-5))
+
+grid_search_cv_noisy(pin_tksvc, X, y, y, 5, accuracy, param_list,
                      model_settings = list("max.steps" = 4000, "eps" = 1e-5),
                      threads.num = 2)
