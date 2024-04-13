@@ -20,11 +20,11 @@ hinge_tksvc_dual_solver <- function(KernelX, y, C1, C2, C3, C4, epsilon,
       Hn <- length(idxPos)
       Gn <- length(idxNeg)
       Mn <- length(idxRest)
-      
+
       dim(H) <- c(Hn, xp)
       dim(G) <- c(Gn, xp)
       dim(M) <- c(Mn, xp)
-      
+
       N <- rbind(G, M)
       P <- rbind(H, M)
 
@@ -82,7 +82,7 @@ hinge_tksvc_dual_solver <- function(KernelX, y, C1, C2, C3, C4, epsilon,
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
 #' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
-#' @return return \code{HingeSVMClassifier} object.
+#' @return return \code{TKSVCClassifier} object.
 #' @export
 hinge_tksvc <- function(X, y, C1 = 1, C2 = C1, C3 = C1, C4 = C2,
                         kernel = c("linear", "rbf", "poly"),

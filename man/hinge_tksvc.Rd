@@ -55,7 +55,7 @@ the function will evaluates intercept.}
 \item{randx}{parameter for reduce SVM, default \code{randx = 0.1}.}
 }
 \value{
-return \code{HingeSVMClassifier} object.
+return \code{TKSVCClassifier} object.
 }
 \description{
 \code{hinge_tksvc} is an R implementation of Hinge-TKSVC
