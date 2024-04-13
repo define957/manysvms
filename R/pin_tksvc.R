@@ -18,12 +18,17 @@ pin_tksvc_dual_solver <- function(KernelX, y, C1, C2, C3, C4, epsilon,
       H <- KernelX[idxPos, ]
       G <- KernelX[idxNeg, ]
       M <- KernelX[idxRest, ]
+
+      Hn <- length(idxPos)
+      Gn <- length(idxNeg)
+      Mn <- length(idxRest)
+      
+      dim(H) <- c(Hn, xp)
+      dim(G) <- c(Gn, xp)
+      dim(M) <- c(Mn, xp)
+      
       N <- rbind(G, M)
       P <- rbind(H, M)
-
-      Hn <- nrow(H)
-      Gn <- nrow(G)
-      Mn <- nrow(M)
 
       invHTH <- chol2inv(chol(t(H) %*% H + diag(1e-7, xp)))
       dualH <- N %*% invHTH %*% t(N)
