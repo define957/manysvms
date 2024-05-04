@@ -17,6 +17,7 @@ grid_search_cv_noisy(
   metrics_params = NULL,
   predict_params = NULL,
   model_settings = NULL,
+  transy = FALSE,
   shuffle = TRUE,
   seed = NULL,
   threads.num = parallel::detectCores() - 1
@@ -44,6 +45,8 @@ grid_search_cv_noisy(
 \item{predict_params}{set parameters for each predict method (need a list).}
 
 \item{model_settings}{set parameters for model (need a list).}
+
+\item{transy}{apply transforms defined in `pipeline` on y, default FALSE.}
 
 \item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle
 the dataset.}

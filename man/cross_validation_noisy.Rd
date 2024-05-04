@@ -15,7 +15,8 @@ cross_validation_noisy(
   pipeline = NULL,
   metrics_params = NULL,
   predict_params = NULL,
-  model_settings = NULL
+  model_settings = NULL,
+  transy = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ cross_validation_noisy(
 \item{predict_params}{set parameters for each predict method (need a list).}
 
 \item{model_settings}{set parameters for model (need a list).}
+
+\item{transy}{apply transforms defined in `pipeline` on y, default FALSE.}
 }
 \value{
 return a metric matrix

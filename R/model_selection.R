@@ -45,12 +45,13 @@ predict_model <- function(model_res, X_test, y_test,
 #' @param metrics_params set parameters for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
 #' @param model_settings set parameters for model (need a list).
+#' @param transy apply transforms defined in `pipeline` on y, default FALSE.
 #' @return return a metric matrix
 #' @export
 cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict,
                              pipeline = NULL,
                              metrics_params = NULL, predict_params = NULL,
-                             model_settings = NULL) {
+                             model_settings = NULL, transy = F) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
@@ -75,6 +76,11 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
         pip_temp <- pipeline[[pipi]](X_train)
         X_train <- trans(pip_temp, X_train)
         X_test <- trans(pip_temp, X_test)
+        if (transy == T) {
+          pip_temp <- pipeline[[pipi]](y_train)
+          y_train <- trans(pip_temp, y_train)
+          y_test <- trans(pip_temp, y_test)
+        }
       }
     }
     model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
@@ -106,6 +112,7 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @param metrics_params set parameters for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
 #' @param model_settings set parameters for model (need a list).
+#' @param transy apply transforms defined in `pipeline` on y, default FALSE.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
@@ -120,7 +127,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                            predict_func = predict,
                            pipeline = NULL,
                            metrics_params = NULL, predict_params = NULL,
-                           model_settings = NULL,
+                           model_settings = NULL, transy = FALSE,
                            shuffle = TRUE, seed = NULL,
                            threads.num = parallel::detectCores() - 1) {
   s <- Sys.time()
@@ -159,7 +166,8 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                       "predict_func" =  predict_func,
                       "pipeline" = pipeline,
                       "metrics_params" = metrics_params,
-                      "model_settings" = append(model_settings, as.list(temp))
+                      "model_settings" = append(model_settings, as.list(temp)),
+                      "transy" = transy
                        )
     cv_res <- do.call("cross_validation", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
@@ -227,6 +235,7 @@ print.cv_model <- function(x, ...) {
 #' @param metrics_params set parameter for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
 #' @param model_settings set parameters for model (need a list).
+#' @param transy apply transforms defined in `pipeline` on y, default FALSE.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
@@ -241,7 +250,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                                  predict_func = predict,
                                  pipeline = NULL,
                                  metrics_params = NULL, predict_params = NULL,
-                                 model_settings = NULL,
+                                 model_settings = NULL, transy = FALSE,
                                  shuffle = TRUE, seed = NULL,
                                  threads.num = parallel::detectCores() - 1) {
   s <- Sys.time()
@@ -281,7 +290,8 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                       "predict_func" =  predict_func,
                       "pipeline" = pipeline,
                       "metrics_params" = metrics_params,
-                      "model_settings" = append(model_settings, as.list(temp))
+                      "model_settings" = append(model_settings, as.list(temp)),
+                      "transy" = transy
                       )
     cv_res <- do.call("cross_validation_noisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
@@ -334,13 +344,14 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
 #' @param metrics_params set parameters for each metrics (need a list).
 #' @param predict_params set parameters for each predict method (need a list).
 #' @param model_settings set parameters for model (need a list).
+#' @param transy apply transforms defined in `pipeline` on y, default FALSE.
 #' @return return a metric matrix
 #' @export
 cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
                                    predict_func = predict,
                                    pipeline = NULL,
                                    metrics_params = NULL, predict_params = NULL,
-                                   model_settings = NULL) {
+                                   model_settings = NULL, transy = FALSE) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   y_noisy <- as.matrix(y_noisy)
@@ -367,6 +378,11 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
         pip_temp <- pipeline[[pipi]](X_train)
         X_train <- trans(pip_temp, X_train)
         X_test <- trans(pip_temp, X_test)
+        if (transy == T) {
+          pip_temp <- pipeline[[pipi]](y_train)
+          y_train <- trans(pip_temp, y_train)
+          y_test <- trans(pip_temp, y_test)
+        }
       }
     }
     model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
