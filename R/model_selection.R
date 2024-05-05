@@ -372,6 +372,7 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
     }else{
       X_train <- X[-idx, ]
       y_train <- y_noisy[-idx]
+      y_train_clean <- y[-idx]
     }
     if (is.null(pipeline) == F) {
       for (pipi in 1:length(pipeline)) {
@@ -379,7 +380,7 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
         X_train <- trans(pip_temp, X_train)
         X_test <- trans(pip_temp, X_test)
         if (transy == T) {
-          pip_temp <- pipeline[[pipi]](y_train)
+          pip_temp <- pipeline[[pipi]](y_train_clean)
           y_train <- trans(pip_temp, y_train)
           y_test <- trans(pip_temp, y_test)
         }
