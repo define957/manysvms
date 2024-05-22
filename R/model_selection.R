@@ -465,7 +465,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
                                temp <- data.frame(param_grid[i, ])
                                colnames(temp) <- param_names
                                params_cv <- list("model" = model,
-                                                 "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
+                                                 "X" = X, "y" = y, "X_noisy" = X_noisy, "y_noisy" = y_noisy, "K" = K,
                                                  "metrics" = metrics,
                                                  "predict_func" =  predict_func,
                                                  "pipeline" = pipeline,
