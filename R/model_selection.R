@@ -473,7 +473,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
                                                  "model_settings" = append(model_settings, as.list(temp)),
                                                  "transy" = transy
                                )
-                               cv_res <- do.call("cross_validation_noisy", params_cv)
+                               cv_res <- do.call("cross_validation_Xynoisy", params_cv)
                                cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
                              }
   parallel::stopCluster(cl)
@@ -535,6 +535,7 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metri
                                      model_settings = NULL, transy = FALSE) {
   X <- as.matrix(X)
   y <- as.matrix(y)
+  X_noisy <- as.matrix(X_noisy)
   y_noisy <- as.matrix(y_noisy)
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
@@ -552,7 +553,7 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metri
       y_train <- y_test
     }else{
       X_train_clean <- X[-idx, ]
-      X_train <- X_noisy[-idx]
+      X_train <- X_noisy[-idx, ]
       y_train <- y_noisy[-idx]
       y_train_clean <- y[-idx]
     }
