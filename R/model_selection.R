@@ -447,7 +447,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   if (shuffle == TRUE) {
     idx <- sample(n)
     X <- X[idx, ]
-    X_noisy <- X[idx, ]
+    X_noisy <- X_noisy[idx, ]
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
@@ -463,20 +463,20 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   cv_res <- foreach::foreach(i = 1:n_param, .combine = rbind,
                              .packages = c('manysvms', 'Rcpp'),
                              .options.snow = opts) %dopar% {
-                               temp <- data.frame(param_grid[i, ])
-                               colnames(temp) <- param_names
-                               params_cv <- list("model" = model,
-                                                 "X" = X, "y" = y, "X_noisy" = X_noisy, "y_noisy" = y_noisy, "K" = K,
-                                                 "metrics" = metrics,
-                                                 "predict_func" =  predict_func,
-                                                 "pipeline" = pipeline,
-                                                 "metrics_params" = metrics_params,
-                                                 "model_settings" = append(model_settings, as.list(temp)),
-                                                 "transy" = transy
-                               )
-                               cv_res <- do.call("cross_validation_Xynoisy", params_cv)
-                               cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
-                             }
+    temp <- data.frame(param_grid[i, ])
+    colnames(temp) <- param_names
+    params_cv <- list("model" = model,
+                     "X" = X, "y" = y, "X_noisy" = X_noisy, "y_noisy" = y_noisy, "K" = K,
+                     "metrics" = metrics,
+                     "predict_func" =  predict_func,
+                     "pipeline" = pipeline,
+                     "metrics_params" = metrics_params,
+                     "model_settings" = append(model_settings, as.list(temp)),
+                     "transy" = transy
+    )
+    cv_res <- do.call("cross_validation_Xynoisy", params_cv)
+    cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
+  }
   parallel::stopCluster(cl)
   cat("\n")
   num_metrics <- length(metrics)
