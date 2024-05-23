@@ -447,6 +447,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   if (shuffle == TRUE) {
     idx <- sample(n)
     X <- X[idx, ]
+    X_noisy <- X[idx, ]
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
