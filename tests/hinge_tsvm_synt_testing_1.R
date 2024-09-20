@@ -15,3 +15,10 @@ model <- hinge_tsvm(X, y, C1 = 512, C2 = 512, max.steps = 8000)
 e <- Sys.time()
 print(e - s)
 plot(model)
+
+
+s <- Sys.time()
+model <- ls_tsvm(X, y, C1 = 512, C2 = 512, max.steps = 8000)
+e <- Sys.time()
+print(e - s)
+plot(model)
