@@ -9,8 +9,8 @@ ls_tsvm_dual_solver <- function(KernelX, idx, C1, C2) {
   GramE <- t(EMat) %*% EMat
   e1 <- matrix(1, Fn)
   e2 <- matrix(1, Mn)
-  u <- -chol2inv(chol(GramF + GramE/C1 + diag(1e-7, xp))) %*% t(FMat) %*% e1
-  v <-  chol2inv(chol(GramE + GramF/C2 + diag(1e-7, xp))) %*% t(EMat) %*% e2
+  u <- -cholsolve(GramF + GramE/C1 + diag(1e-7, xp), t(FMat) %*% e1)
+  v <-  cholsolve(GramE + GramF/C2 + diag(1e-7, xp), t(EMat) %*% e2)
   BaseDualHingeTSVMClassifier <- list("coef1" = as.matrix(u),
                                       "coef2" = as.matrix(v))
   return(BaseDualHingeTSVMClassifier)
