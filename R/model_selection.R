@@ -46,12 +46,17 @@ predict_model <- function(model_res, X_test, y_test,
 #' @param predict_params set parameters for each predict method (need a list).
 #' @param model_settings set parameters for model (need a list).
 #' @param transy apply transforms defined in `pipeline` on y, default FALSE.
+#' @param model_seed random_seed for model.
 #' @return return a metric matrix
 #' @export
 cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict,
                              pipeline = NULL,
                              metrics_params = NULL, predict_params = NULL,
-                             model_settings = NULL, transy = F) {
+                             model_settings = NULL, transy = F,
+                             model_seed = NULL) {
+  if (is.null(model_seed) == FALSE) {
+    set.seed(model_seed)
+  }
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
@@ -116,6 +121,7 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
+#' @param model_seed random_seed for model.
 #' @param threads.num the number of threads used for parallel execution.
 #' @return return a metric matrix
 #' @import foreach
@@ -128,7 +134,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                            pipeline = NULL,
                            metrics_params = NULL, predict_params = NULL,
                            model_settings = NULL, transy = FALSE,
-                           shuffle = TRUE, seed = NULL,
+                           shuffle = TRUE, seed = NULL, model_seed = NULL,
                            threads.num = parallel::detectCores() - 1) {
   s <- Sys.time()
   X <- as.matrix(X)
@@ -167,7 +173,8 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
                       "pipeline" = pipeline,
                       "metrics_params" = metrics_params,
                       "model_settings" = append(model_settings, as.list(temp)),
-                      "transy" = transy
+                      "transy" = transy,
+                      "model_seed" = model_seed
                        )
     cv_res <- do.call("cross_validation", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
@@ -239,6 +246,7 @@ print.cv_model <- function(x, ...) {
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
+#' @param model_seed random_seed for model.
 #' @param threads.num the number of threads used for parallel execution.
 #' @return return a metric matrix
 #' @import foreach
@@ -251,7 +259,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                                  pipeline = NULL,
                                  metrics_params = NULL, predict_params = NULL,
                                  model_settings = NULL, transy = FALSE,
-                                 shuffle = TRUE, seed = NULL,
+                                 shuffle = TRUE, seed = NULL, model_seed = NULL,
                                  threads.num = parallel::detectCores() - 1) {
   s <- Sys.time()
   X <- as.matrix(X)
@@ -291,7 +299,8 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
                       "pipeline" = pipeline,
                       "metrics_params" = metrics_params,
                       "model_settings" = append(model_settings, as.list(temp)),
-                      "transy" = transy
+                      "transy" = transy,
+                      "model_seed" = model_seed
                       )
     cv_res <- do.call("cross_validation_noisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
@@ -345,13 +354,19 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
 #' @param predict_params set parameters for each predict method (need a list).
 #' @param model_settings set parameters for model (need a list).
 #' @param transy apply transforms defined in `pipeline` on y, default FALSE.
+#' @param model_seed random_seed for model.
 #' @return return a metric matrix
 #' @export
 cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
                                    predict_func = predict,
                                    pipeline = NULL,
                                    metrics_params = NULL, predict_params = NULL,
-                                   model_settings = NULL, transy = FALSE) {
+                                   model_settings = NULL, transy = FALSE,
+                                   model_seed = NULL
+                                   ) {
+  if (is.null(model_seed) == FALSE) {
+    set.seed(model_seed)
+  }
   X <- as.matrix(X)
   y <- as.matrix(y)
   y_noisy <- as.matrix(y_noisy)
@@ -419,6 +434,7 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
 #'                the dataset.
 #' @param seed random seed for \code{shuffle} option.
+#' @param model_seed random_seed for model.
 #' @param threads.num the number of threads used for parallel execution.
 #' @return return a metric matrix
 #' @import foreach
@@ -431,7 +447,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
                                    pipeline = NULL,
                                    metrics_params = NULL, predict_params = NULL,
                                    model_settings = NULL, transy = FALSE,
-                                   shuffle = TRUE, seed = NULL,
+                                   shuffle = TRUE, seed = NULL, model_seed = NULL,
                                    threads.num = parallel::detectCores() - 1) {
   s <- Sys.time()
   X <- as.matrix(X)
@@ -472,7 +488,8 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
                      "pipeline" = pipeline,
                      "metrics_params" = metrics_params,
                      "model_settings" = append(model_settings, as.list(temp)),
-                     "transy" = transy
+                     "transy" = transy,
+                     "model_seed" = model_seed
     )
     cv_res <- do.call("cross_validation_Xynoisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
@@ -527,13 +544,15 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
 #' @param predict_params set parameters for each predict method (need a list).
 #' @param model_settings set parameters for model (need a list).
 #' @param transy apply transforms defined in `pipeline` on y, default FALSE.
+#' @param model_seed random_seed for model.
 #' @return return a metric matrix
 #' @export
 cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics,
                                      predict_func = predict,
                                      pipeline = NULL,
                                      metrics_params = NULL, predict_params = NULL,
-                                     model_settings = NULL, transy = FALSE) {
+                                     model_settings = NULL, transy = FALSE,
+                                     model_seed = NULL) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   X_noisy <- as.matrix(X_noisy)
