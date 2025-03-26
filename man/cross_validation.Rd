@@ -15,7 +15,8 @@ cross_validation(
   metrics_params = NULL,
   predict_params = NULL,
   model_settings = NULL,
-  transy = F
+  transy = F,
+  model_seed = NULL
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ cross_validation(
 \item{model_settings}{set parameters for model (need a list).}
 
 \item{transy}{apply transforms defined in `pipeline` on y, default FALSE.}
+
+\item{model_seed}{random_seed for model.}
 }
 \value{
 return a metric matrix
