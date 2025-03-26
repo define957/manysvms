@@ -21,6 +21,7 @@ grid_search_cv_Xynoisy(
   transy = FALSE,
   shuffle = TRUE,
   seed = NULL,
+  model_seed = NULL,
   threads.num = parallel::detectCores() - 1
 )
 }
@@ -55,6 +56,8 @@ grid_search_cv_Xynoisy(
 the dataset.}
 
 \item{seed}{random seed for \code{shuffle} option.}
+
+\item{model_seed}{random_seed for model.}
 
 \item{threads.num}{the number of threads used for parallel execution.}
 }

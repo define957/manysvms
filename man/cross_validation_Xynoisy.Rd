@@ -17,7 +17,8 @@ cross_validation_Xynoisy(
   metrics_params = NULL,
   predict_params = NULL,
   model_settings = NULL,
-  transy = FALSE
+  transy = FALSE,
+  model_seed = NULL
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ cross_validation_Xynoisy(
 \item{model_settings}{set parameters for model (need a list).}
 
 \item{transy}{apply transforms defined in `pipeline` on y, default FALSE.}
+
+\item{model_seed}{random_seed for model.}
 }
 \value{
 return a metric matrix
