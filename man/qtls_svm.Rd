@@ -13,13 +13,11 @@ qtls_svm(
   gamma = 1/ncol(X),
   degree = 3,
   coef0 = 0,
-  eps = 1e-05,
-  max.steps = 80,
+  max.steps = 4000,
   batch_size = nrow(X)/10,
-  solver = c("primal"),
   fit_intercept = TRUE,
   optimizer = rmsprop,
-  randx = 0.1,
+  reduce_set = NULL,
   ...
 )
 }
@@ -43,20 +41,16 @@ qtls_svm(
 
 \item{coef0}{parameter for polynomial kernel,  default: \code{coef0 = 0}.}
 
-\item{eps}{the precision of the optimization algorithm.}
-
 \item{max.steps}{the number of iterations to solve the optimization problem.}
 
 \item{batch_size}{mini-batch size for primal solver.}
-
-\item{solver}{\code{"primal"} option is available.}
 
 \item{fit_intercept}{if set \code{fit_intercept = TRUE},
 the function will evaluates intercept.}
 
 \item{optimizer}{default primal optimizer pegasos.}
 
-\item{randx}{parameter for reduce SVM, default \code{randx = 0.1}.}
+\item{reduce_set}{reduce set for reduce SVM, default \code{reduce_set = NULL}.}
 
 \item{...}{unused parameters.}
 }

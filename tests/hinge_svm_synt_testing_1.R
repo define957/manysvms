@@ -31,7 +31,44 @@ cross_validation_noisy(hinge_svm, X, y, y, K = 5,
                        metrics = list(binaryf1score, binaryf1score),
                        metrics_params = list(list(positive = "Class-1"),
                                              list(positive = "Class-2")),
-                       model_settings = list("max.steps" = 4000, "eps" = 1e-5))
+                       model_settings = list("max.steps" = 4000,
+                                             "solver" = "dual",
+                                             "kernel" = "linear"))
+
+cross_validation_noisy(hinge_svm, X, y, y, K = 5,
+                       metrics = list(binaryf1score, binaryf1score),
+                       metrics_params = list(list(positive = "Class-1"),
+                                             list(positive = "Class-2")),
+                       model_settings = list("max.steps" = 4000,
+                                             "solver" = "primal",
+                                             "kernel" = "linear"))
+
+cross_validation_noisy(hinge_svm, X, y, y, K = 5,
+                       metrics = list(binaryf1score, binaryf1score),
+                       metrics_params = list(list(positive = "Class-1"),
+                                             list(positive = "Class-2")),
+                       model_settings = list("max.steps" = 4000,
+                                             "solver" = "dual",
+                                             "kernel" = "rbf"))
+
+cross_validation_noisy(hinge_svm, X, y, y, K = 5,
+                       metrics = list(binaryf1score, binaryf1score),
+                       metrics_params = list(list(positive = "Class-1"),
+                                             list(positive = "Class-2")),
+                       model_settings = list("max.steps" = 4000,
+                                             "solver" = "primal",
+                                             "kernel" = "rbf"))
+
+reduce_set <- cbind(X[sample(1:nrow(X), 30), ], 1)
+
+cross_validation_noisy(hinge_svm, X, y, y, K = 5,
+                       metrics = list(binaryf1score, binaryf1score),
+                       metrics_params = list(list(positive = "Class-1"),
+                                             list(positive = "Class-2")),
+                       model_settings = list("max.steps" = 4000,
+                                             "solver" = "primal",
+                                             "kernel" = "rbf",
+                                             "reduce_set" = reduce_set))
 
 grid_search_cv_noisy(hinge_svm, X, y, y, 5, binaryf1score, param_list,
                      metrics_params = list("positive" = "Class-2"),

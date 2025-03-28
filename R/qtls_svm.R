@@ -1,22 +1,36 @@
-qtls_svm_primal_solver <- function(KernelX, y, C = 1,
-                                   a = -1, eps = 1e-5,
-                                   max.steps = 80, batch_size = nrow(KernelX) / 10,
-                                   optimizer = rmsprop, ...) {
-  gqtls <- function(KernelX, y, w, pars, ...) { # gradient of qtls loss function
-    xn <- nrow(KernelX)
-    xp <- ncol(KernelX)
-    g <- matrix(0, nrow = xp, ncol = 1)
-    u <- y*(KernelX %*% w) - 1
+qtls_svm_primal_solver <- function(KernelX, X, y, C, a,
+                                   max.steps, batch_size,
+                                   optimizer, kernel, reduce_flag,
+                                   reduce_set,
+                                   ...) {
+  gqtls <- function(batch_KernelX, y, w, pars, ...) { # gradient of qtls loss function
+    C <- pars$C
+    a <- pars$a
+    xn <- pars$xn
+    KernelX <- pars$KernelX
+    xmn <- nrow(batch_KernelX)
+    xmp <- ncol(batch_KernelX)
+    g <- matrix(0, nrow = xmp, ncol = 1)
+    u <- y*(batch_KernelX %*% w) - 1
     expau <- exp(a*u)
     sgterm <- (2*C*u*expau + C*(u^2)*expau*a)*y
-    g <- w + t(KernelX) %*% sgterm/xn
+    if (pars$kernel == "linear" || pars$reduce_flag) {
+      g <- w*xmn/xn + t(batch_KernelX) %*% sgterm
+    } else if (pars$kernel != "linear") {
+      g <- KernelX %*% w * xmn/xn + t(batch_KernelX) %*% sgterm
+    }
     return(g)
   }
-  xn <- nrow(KernelX)
-  xp <- ncol(KernelX)
-  w0 <- matrix(0, xp, 1)
-  pars <- list("C" = C, "a" = a)
-  wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gqtls, pars, ...)
+  xn <- nrow(X)
+  if (kernel == "linear") { xp <- ncol(X) } else { xp <- ncol(KernelX)}
+  w0 <- matrix(0, nrow = xp, ncol = 1)
+  pars <- list("C" = C, "a" = a, "xn" = xn, "kernel" = kernel,
+               "KernelX" = KernelX, "reduce_flag" = reduce_flag)
+  if (kernel == "linear") {
+    wt <- optimizer(X, y, w0, batch_size, max.steps, gqtls, pars, ...)
+  } else {
+    wt <- optimizer(KernelX, y, w0, batch_size, max.steps, gqtls, pars, ...)
+  }
   BasePrimalQTLSSVMClassifier <- list(coef = as.matrix(wt[1:xp]))
   class(BasePrimalQTLSSVMClassifier) <- "BasePrimalQTLSSVMClassifier"
   return(BasePrimalQTLSSVMClassifier)
@@ -41,24 +55,22 @@ qtls_svm_primal_solver <- function(KernelX, y, C = 1,
 #' @param gamma parameter for \code{'rbf'} and \code{'poly'} kernel. Default \code{gamma = 1/ncol(X)}.
 #' @param degree parameter for polynomial kernel, default: \code{degree = 3}.
 #' @param coef0 parameter for polynomial kernel,  default: \code{coef0 = 0}.
-#' @param eps the precision of the optimization algorithm.
 #' @param max.steps the number of iterations to solve the optimization problem.
 #' @param batch_size mini-batch size for primal solver.
-#' @param solver \code{"primal"} option is available.
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
 #' @param optimizer default primal optimizer pegasos.
-#' @param randx parameter for reduce SVM, default \code{randx = 0.1}.
+#' @param reduce_set reduce set for reduce SVM, default \code{reduce_set = NULL}.
 #' @param ... unused parameters.
 #' @return return \code{SVMClassifier} object.
 #' @export
 qtls_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
                      a = -1,
                      gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                     eps = 1e-5, max.steps = 80,
+                     max.steps = 4000,
                      batch_size = nrow(X) / 10,
-                     solver = c("primal"),
-                     fit_intercept = TRUE, optimizer = rmsprop, randx = 0.1, ...) {
+                     fit_intercept = TRUE, optimizer = rmsprop,
+                     reduce_set = NULL, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   class_set <- sort(unique(y))
@@ -70,20 +82,29 @@ qtls_svm <- function(X, y, C = 1, kernel = c("linear", "rbf", "poly"),
     stop("The number of class should less 2!")
   }
   kernel <- match.arg(kernel)
-  solver <- match.arg(solver)
+  solver <- "primal"
   if (fit_intercept == TRUE) {
     X <- cbind(X, 1)
   }
-  kso <- kernel_select_option(X, kernel, solver, randx,
-                              gamma, degree, coef0)
-  KernelX <- kso$KernelX
-  X <- kso$X
-  if (solver == "primal") {
-    solver.res <- qtls_svm_primal_solver(KernelX, y, C,
-                                         a, eps, max.steps, batch_size,
-                                         optimizer, ...)
+  reduce_flag <- is.null(reduce_set) == FALSE
+  if (solver == "dual" && reduce_flag == TRUE) {
+    reduce_flag <- FALSE
+    reduce_set <- NULL
+    cat("The dual solver does not support the reduce set; it has been set to NULL.\n")
   }
-  SVMClassifier <- list("X" = X, "y" = y, "class_set" = class_set,
+  kso <- kernel_select_option_(X, kernel, reduce_set, gamma, degree, coef0)
+  KernelX <- kso$KernelX
+  if (solver == "primal") {
+    solver.res <- qtls_svm_primal_solver(KernelX, X, y, C, a,
+                                         max.steps, batch_size,
+                                         optimizer, kernel, reduce_flag,
+                                         reduce_set,
+                                         ...)
+  }
+  SVMClassifier <- list("X" = X, "y" = y,
+                        "reduce_flag" = reduce_flag,
+                        "reduce_set" = reduce_set,
+                        "class_set" = class_set,
                         "C" = C, "kernel" = kernel,
                         "gamma" = gamma, "degree" = degree, "coef0" = coef0,
                         "solver" = solver, "coef" = solver.res$coef,
