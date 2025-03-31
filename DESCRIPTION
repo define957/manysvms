@@ -16,7 +16,8 @@ RoxygenNote: 7.3.2
 Imports: 
       foreach,
       doParallel,
-      doSNOW
+      doSNOW,
+      iterators
 Suggests:
       MASS,
       ggplot2
