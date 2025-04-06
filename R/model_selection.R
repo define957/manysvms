@@ -553,6 +553,9 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metri
                                      metrics_params = NULL, predict_params = NULL,
                                      model_settings = NULL, transy = FALSE,
                                      model_seed = NULL) {
+  if (is.null(model_seed) == FALSE) {
+    set.seed(model_seed)
+  }
   X <- as.matrix(X)
   y <- as.matrix(y)
   X_noisy <- as.matrix(X_noisy)
