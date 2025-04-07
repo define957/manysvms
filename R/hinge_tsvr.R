@@ -1,20 +1,20 @@
 hinge_tsvr_dual_solver <- function(KernelX, y, C1, C2, epsilon1, epsilon2,
                                    eps, max.steps) {
-  nx <- nrow(KernelX)
-  np <- ncol(KernelX)
+  xn <- nrow(KernelX)
+  xp <- ncol(KernelX)
   H <- KernelX
-  HTH_inv_H <- solve(t(H) %*% H + diag(1e-7, np), t(H))
-  dualH<- H %*% HTH_inv_H
+  HTH_inv_H <- cholsolve(t(H) %*% H + diag(1e-7, xp), t(H))
+  dualH <- H %*% HTH_inv_H
 
   f <- as.matrix(y - epsilon1)
   h <- as.matrix(y + epsilon2)
 
-  q1 <- f - dualH %*% f
-  q2 <- dualH %*% h - h
+  q1 <- dualH %*% f - f
+  q2 <- h - dualH %*% h
 
-  lb <- matrix(0, nx, 1)
-  ub1 <- matrix(C1, nx, 1)
-  ub2 <- matrix(C2, nx, 1)
+  lb <- matrix(0, xn, 1)
+  ub1 <- matrix(C1, xn, 1)
+  ub2 <- matrix(C2, xn, 1)
   x0 <- lb
   alphas <- clip_dcd_optimizer(dualH, q1, lb, ub1, eps, max.steps, x0)$x
   gammas <- clip_dcd_optimizer(dualH, q2, lb, ub2, eps, max.steps, x0)$x
@@ -22,7 +22,9 @@ hinge_tsvr_dual_solver <- function(KernelX, y, C1, C2, epsilon1, epsilon2,
   u1 <- HTH_inv_H %*% (f - alphas)
   u2 <- HTH_inv_H %*% (h + gammas)
   BaseDualHingeTSVRRegressor <- list("coef1" = as.matrix(u1),
-                                     "coef2" = as.matrix(u2))
+                                     "coef2" = as.matrix(u2),
+                                     "lag1" = alphas,
+                                     "lag2" = gammas)
 }
 
 #' Hinge Twin Support Vector Regression
@@ -55,26 +57,21 @@ hinge_tsvr <- function(X, y, C1 = 1, C2 = C1,
                        epsilon1 = 0.1, epsilon2 = epsilon1,
                        kernel = c("linear", "rbf", "poly"),
                        gamma = 1 / ncol(X), degree = 3, coef0 = 0,
-                       eps = 1e-14, max.steps = 4000,
+                       eps = 1e-7, max.steps = 4000,
                        solver = c("dual"), fit_intercept = TRUE,
-                       randx = 0.1, ...) {
+                       reduce_set = NULL, ...) {
   X <- as.matrix(X)
   y <- as.matrix(y)
   kernel <- match.arg(kernel)
   solver <- match.arg(solver)
-  kso <- kernel_select_option(X, kernel, "primal", randx,
-                              gamma, degree, coef0)
+  kso <- kernel_select_option_(X, kernel, reduce_set, gamma, degree, coef0)
   KernelX <- kso$KernelX
-  Kw <- kso$KernelX[kso$sample_idx, ]
-  X <- kso$X
   if (fit_intercept == TRUE) {
     KernelX <- cbind(KernelX, 1)
   }
-  if (solver == "dual") {
-    solver.res <- hinge_tsvr_dual_solver(KernelX, y, C1, C2,
+  solver.res <- hinge_tsvr_dual_solver(KernelX, y, C1, C2,
                                          epsilon1, epsilon2,
                                          eps, max.steps)
-  }
   TSVRegressor <- list("X" = X, "y" = y,
                        "C1" = C1, "C2" = C2,
                        "epsilon1" = epsilon1, "epsilon2" = epsilon2,
@@ -83,7 +80,7 @@ hinge_tsvr <- function(X, y, C1 = 1, C2 = C1,
                        "solver" = solver, "coef1" = solver.res$coef1,
                        "coef2" = solver.res$coef2,
                        "fit_intercept" = fit_intercept,
-                       "Kw" = Kw)
+                       "Kw" = Kw, solver.res = solver.res)
   class(TSVRegressor) <- "TSVRegressor"
   return(TSVRegressor)
 }
