@@ -35,7 +35,7 @@ sh_eps_tsvr_dual_solver <- function(KernelX, y, C1, C2, C3, C4, epsilon1, epsilo
   u1 <- GTG_C3_inv_GT %*% (y - alphas)
   u2 <- GTG_C4_inv_GT %*% (y + gammas)
 
-  BaseDualSquaredHingeEPSTWSVRRegressor <- list("coef1" = as.matrix(u1),
+  BaseDualSquaredHingeEPSTSVRRegressor <- list("coef1" = as.matrix(u1),
                                                 "coef2" = as.matrix(u2))
 }
 
@@ -84,7 +84,7 @@ sh_eps_tsvr <- function(X, y, C1 = 1, C2 = C1, C3 = 1, C4 = C3,
   }
   solver.res <- sh_eps_tsvr_dual_solver(KernelX, y, C1, C2, C3, C4, epsilon1, epsilon2,
                                         eps, max.steps)
-  EPSTWSVRRegressor <- list("X" = X, "y" = y,
+  EPSTSVRRegressor <- list("X" = X, "y" = y,
                             "C1" = C1, "C2" = C2,
                             "epsilon1" = epsilon1, "epsilon2" = epsilon2,
                             "kernel" = kernel,
@@ -93,6 +93,6 @@ sh_eps_tsvr <- function(X, y, C1 = 1, C2 = C1, C3 = 1, C4 = C3,
                             "coef2" = solver.res$coef2,
                             "fit_intercept" = fit_intercept,
                             "solver.res" = solver.res)
-  class(EPSTWSVRRegressor) <- "EPSTWSVRRegressor"
-  return(EPSTWSVRRegressor)
+  class(EPSTSVRRegressor) <- "EPSTSVRRegressor"
+  return(EPSTSVRRegressor)
 }

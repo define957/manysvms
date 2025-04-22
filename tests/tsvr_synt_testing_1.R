@@ -14,7 +14,6 @@ model <- hinge_eps_tsvr(x, y, kernel = "linear", epsilon1 = epsilon, max.steps =
                         C1 = 1, eps = 0)
 plot(model)
 
-
 model <- sh_eps_tsvr(x, y, kernel = "linear", epsilon1 = epsilon, max.steps = 80000,
                         C1 = 1, eps = 0)
 plot(model)
