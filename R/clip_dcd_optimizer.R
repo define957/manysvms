@@ -58,7 +58,7 @@ clip_dcd_optimizer <- function(H, q, lb, ub,
     lb_u[k] <- lb[k] - u[k]
     ub_u[k] <- ub[k] - u[k]
   }
-  obj_val <- 0.5 * t(u) %*% H %*% u - t(q) %*% u
+  obj_val <- 0.5 * t(u) %*% Hu - t(q) %*% u
   clip_dcd_res <- list('x' = u,'iterations' = t, 'objectiv.value' = obj_val)
   return(clip_dcd_res)
 }
