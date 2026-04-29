@@ -1,5 +1,6 @@
 hinge_tsvr_dual_solver <- function(KernelX, y, C1, C2, epsilon1, epsilon2,
                                    eps, max.steps) {
+  print("hi")
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   G <- KernelX
@@ -52,7 +53,7 @@ hinge_tsvr_dual_solver <- function(KernelX, y, C1, C2, epsilon1, epsilon2,
 #' @param fit_intercept if set \code{fit_intercept = TRUE},
 #'                      the function will evaluates intercept.
 #' @param reduce_set reduce set for reduce SVM, default \code{reduce_set = NULL}.
-#' @return return \code{TSVRClassifier} object.
+#' @return return \code{TSVMRegressor} object.
 #' @export
 hinge_tsvr <- function(X, y, C1 = 1, C2 = C1,
                        epsilon1 = 0.1, epsilon2 = epsilon1,
@@ -96,8 +97,8 @@ hinge_tsvr <- function(X, y, C1 = 1, C2 = C1,
                         "KernelX" = KernelX[, 1:kxp, drop = FALSE])
 
   TSVMRegressor <- structure(list("model_specs" = model_specs,
-                                   "model_coef" = model_coef,
-                                   "kernel_config" = kernel_config),
+                                  "model_coef" = model_coef,
+                                  "kernel_config" = kernel_config),
                              "class" = "TSVMRegressor")
   return(TSVMRegressor)
 }
@@ -166,9 +167,9 @@ plot.TSVMRegressor <- function(x, ...) {
          xlab = "x", ylab = "y")
     grid(lwd = 2,col = "grey")
     abline(coef1[2], coef1[1], col = "blue")
-    abline(coef1[2] - model_specs$epsilon1, coef1[1], col = "blue", lty = 2)
+    abline(coef1[2] + model_specs$epsilon1, coef1[1], col = "blue", lty = 2)
     abline(coef2[2], coef2[1], col = "blue")
-    abline(coef2[2] + model_specs$epsilon2, coef2[1], col = "blue", lty = 2)
+    abline(coef2[2] - model_specs$epsilon2, coef2[1], col = "blue", lty = 2)
     abline((coef1[2] + coef2[2]) / 2, (coef1[1] + coef2[1]) / 2, col = "black")
   }
 }
