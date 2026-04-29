@@ -1,6 +1,5 @@
 hinge_tsvr_dual_solver <- function(KernelX, y, C1, C2, epsilon1, epsilon2,
                                    eps, max.steps) {
-  print("hi")
   xn <- nrow(KernelX)
   xp <- ncol(KernelX)
   G <- KernelX
