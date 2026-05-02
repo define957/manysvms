@@ -26,3 +26,8 @@ model <- sh_eps_tsvr(x, y, kernel = "linear", epsilon1 = epsilon, max.steps = 80
 plot(model)
 mean_squared_error(y, predict(model, x))
 
+model <- hinge_wtsvr(x, y, kernel = "linear", epsilon1 = epsilon, max.steps = 80000,
+                     C1 = 1, eps = 0)
+plot(model)
+mean_squared_error(y, predict(model, x))
+
