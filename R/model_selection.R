@@ -164,15 +164,17 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   cv_res <- foreach::foreach(i = 1:n_param, .combine = rbind,
                              .packages = c('manysvms', 'Rcpp'),
                              .options.snow = opts) %dopar% {
-    temp <- data.frame(param_grid[i, ])
-    colnames(temp) <- param_names
+    params_to_add <- setNames(
+     lapply(param_names, function(nm) param_grid[[nm]][[i]]),
+     param_names
+    )
     params_cv <- list("model" = model,
                       "X" = X, "y" = y, "K" = K,
                       "metrics" = metrics,
                       "predict_func" =  predict_func,
                       "pipeline" = pipeline,
                       "metrics_params" = metrics_params,
-                      "model_settings" = append(model_settings, as.list(temp)),
+                      "model_settings" = append(model_settings, params_to_add),
                       "transy" = transy,
                       "model_seed" = model_seed
                        )
@@ -290,15 +292,17 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   cv_res <- foreach::foreach(i = 1:n_param, .combine = rbind,
                              .packages = c('manysvms', 'Rcpp'),
                              .options.snow = opts) %dopar% {
-    temp <- data.frame(param_grid[i, ])
-    colnames(temp) <- param_names
+    params_to_add <- setNames(
+      lapply(param_names, function(nm) param_grid[[nm]][[i]]),
+      param_names
+    )
     params_cv <- list("model" = model,
                       "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
                       "metrics" = metrics,
                       "predict_func" =  predict_func,
                       "pipeline" = pipeline,
                       "metrics_params" = metrics_params,
-                      "model_settings" = append(model_settings, as.list(temp)),
+                      "model_settings" = append(model_settings, params_to_add),
                       "transy" = transy,
                       "model_seed" = model_seed
                       )
@@ -479,15 +483,17 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   cv_res <- foreach::foreach(i = 1:n_param, .combine = rbind,
                              .packages = c('manysvms', 'Rcpp'),
                              .options.snow = opts) %dopar% {
-    temp <- data.frame(param_grid[i, ])
-    colnames(temp) <- param_names
+    params_to_add <- setNames(
+      lapply(param_names, function(nm) param_grid[[nm]][[i]]),
+      param_names
+    )
     params_cv <- list("model" = model,
                      "X" = X, "y" = y, "X_noisy" = X_noisy, "y_noisy" = y_noisy, "K" = K,
                      "metrics" = metrics,
                      "predict_func" =  predict_func,
                      "pipeline" = pipeline,
                      "metrics_params" = metrics_params,
-                     "model_settings" = append(model_settings, as.list(temp)),
+                     "model_settings" = append(model_settings, params_to_add),
                      "transy" = transy,
                      "model_seed" = model_seed
     )
