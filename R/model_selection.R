@@ -153,7 +153,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   }
   if (shuffle == TRUE) {
     idx <- sample(n)
-    X <- X[idx, ]
+    X <- X[idx, , drop = FALSE]
     y <- y[idx]
   }
   param_grid <- expand.grid(param_list)
@@ -280,7 +280,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   }
   if (shuffle == TRUE) {
     idx <- sample(n)
-    X <- X[idx, ]
+    X <- X[idx, , drop = FALSE]
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
@@ -394,7 +394,7 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
       X_train <- X_test
       y_train <- y_test
     }else{
-      X_train <- X[-idx, ,drop = FALSE]
+      X_train <- X[-idx, , drop = FALSE]
       y_train <- y_noisy[-idx]
       y_train_clean <- y[-idx]
     }
@@ -472,7 +472,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   if (shuffle == TRUE) {
     idx <- sample(n)
     X <- X[idx, ]
-    X_noisy <- X_noisy[idx, ]
+    X_noisy <- X_noisy[idx, , drop = FALSE]
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
@@ -581,14 +581,14 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metri
   index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
     idx <- which(index == i)
-    X_test <- X[idx, ]
+    X_test <- X[idx, , drop = FALSE]
     y_test <- y[idx]
     if (K == 1) {
       X_train <- X_test
       y_train <- y_test
     }else{
       X_train_clean <- X[-idx, , drop = FALSE]
-      X_train <- X_noisy[-idx, ]
+      X_train <- X_noisy[-idx, , drop = FALSE]
       y_train <- y_noisy[-idx]
       y_train_clean <- y[-idx]
     }
