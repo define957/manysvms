@@ -55,7 +55,7 @@ the function will evaluates intercept.}
 \item{reduce_set}{reduce set for reduce SVM, default \code{reduce_set = NULL}.}
 }
 \value{
-return \code{TSVRClassifier} object.
+return \code{EPSTSVMRegressor} object.
 }
 \description{
 \code{hinge_eps_tsvr} is an R implementation of Hinge-EPS-TSVR
