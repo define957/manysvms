@@ -59,7 +59,7 @@ trans.StandardScaler <- function(scaler, X) {
   X_centered_T     <- (t(X) - X_mean)
   # Calculate Standarded X (sd != 0)
   X_scaled[, idx]  <- t(X_centered_T[idx, ] / X_sd[idx])
-  X_scaled[, -idx] <- X_centered_T[-idx, ]
+  X_scaled[, -idx] <- t(X_centered_T[-idx, ])
   return(X_scaled)
 }
 

@@ -8,11 +8,15 @@ metrics_check_cv <- function(metrics) {
 
 metrics_params_check_cv <- function(num_metrics, metrics_params) {
   if (is.null(metrics_params)) {
-    metrics_params <- rep(list(NULL), num_metrics)
+    metrics_params <- vector("list", num_metrics)
   } else {
+    if (!is.list(metrics_params)) {
+      stop("'metrics_params' must be a list.")
+    }
     len_params <- length(metrics_params)
-    metrics_params <- append(metrics_params,
-                             rep(NULL, num_metrics - len_params))
+    if (len_params != num_metrics) {
+      stop(sprintf("Length of 'metrics_params' (%d) does not match number of metrics (%d).", len_params, num_metrics))
+    }
   }
   return(metrics_params)
 }
@@ -62,18 +66,18 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
   n <- nrow(X)
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
-  metrics_params_check_cv(num_metric, metrics_params)
+  metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
   metric_mat <- matrix(0, num_metric, K)
   index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
     idx <- which(index == i)
-    X_test <- X[idx, ]
+    X_test <- X[idx, , drop = FALSE]
     y_test <- y[idx]
     if (K == 1) {
       X_train <- X_test
       y_train <- y_test
     }else {
-      X_train <- X[-idx, ]
+      X_train <- X[-idx, , drop = FALSE]
       y_train <- y[-idx]
     }
     if (is.null(pipeline) == F) {
@@ -149,7 +153,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   }
   if (shuffle == TRUE) {
     idx <- sample(n)
-    X <- X[idx, ]
+    X <- X[idx, , drop = FALSE]
     y <- y[idx]
   }
   param_grid <- expand.grid(param_list)
@@ -276,7 +280,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   }
   if (shuffle == TRUE) {
     idx <- sample(n)
-    X <- X[idx, ]
+    X <- X[idx, , drop = FALSE]
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
@@ -309,6 +313,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
     cv_res <- do.call("cross_validation_noisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
+  close(pb)
   parallel::stopCluster(cl)
   cat("\n")
   num_metrics <- length(metrics)
@@ -376,20 +381,20 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
   y_noisy <- as.matrix(y_noisy)
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
-  metrics_params_check_cv(num_metric, metrics_params)
+  metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
   n <- nrow(X)
   num_metric <- length(metrics)
   metric_mat <- matrix(0, num_metric, K)
   index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
     idx <- which(index == i)
-    X_test <- X[idx, ]
+    X_test <- X[idx, , drop = FALSE]
     y_test <- y[idx]
     if (K == 1) {
       X_train <- X_test
       y_train <- y_test
     }else{
-      X_train <- X[-idx, ]
+      X_train <- X[-idx, , drop = FALSE]
       y_train <- y_noisy[-idx]
       y_train_clean <- y[-idx]
     }
@@ -467,7 +472,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   if (shuffle == TRUE) {
     idx <- sample(n)
     X <- X[idx, ]
-    X_noisy <- X_noisy[idx, ]
+    X_noisy <- X_noisy[idx, , drop = FALSE]
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
@@ -500,6 +505,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
     cv_res <- do.call("cross_validation_Xynoisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
+  close(pb)
   parallel::stopCluster(cl)
   cat("\n")
   num_metrics <- length(metrics)
@@ -568,21 +574,21 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metri
   y_noisy <- as.matrix(y_noisy)
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
-  metrics_params_check_cv(num_metric, metrics_params)
+  metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
   n <- nrow(X)
   num_metric <- length(metrics)
   metric_mat <- matrix(0, num_metric, K)
   index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
     idx <- which(index == i)
-    X_test <- X[idx, ]
+    X_test <- X[idx, , drop = FALSE]
     y_test <- y[idx]
     if (K == 1) {
       X_train <- X_test
       y_train <- y_test
     }else{
-      X_train_clean <- X[-idx, ]
-      X_train <- X_noisy[-idx, ]
+      X_train_clean <- X[-idx, , drop = FALSE]
+      X_train <- X_noisy[-idx, , drop = FALSE]
       y_train <- y_noisy[-idx]
       y_train_clean <- y[-idx]
     }
