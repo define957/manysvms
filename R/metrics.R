@@ -222,6 +222,7 @@ balanced_accuracy <- function(y, y_hat, sample_weight = NULL, adjusted = FALSE) 
   # Chance Correction: (score - 1/k) / (1 - 1/k), k = surviving classes.
   if (adjusted) {
     k <- length(per_class_recall)
+    if (k == 0) { stop("division by zero: all classes were dropped") }
     score <- (score - 1 / k) / (1 - 1 / k)
   }
   score
@@ -265,14 +266,16 @@ geometric_mean_of_recall <- function(
   }
   cm <- unname(cm)
 
-  # Per-Class Recall: empty rows become NA instead of 0/0.
+  # Per-Class Recall: classes with no true samples get recall 0,
+  # then all zero recalls are replaced by `correction`
   row_sum                 <- rowSums(cm)
-  per_class_recall        <- rep(correction, n_labels)
+  per_class_recall        <- rep(0, n_labels)
   valid                   <- row_sum > 0
   per_class_recall[valid] <- diag(cm)[valid] / row_sum[valid]
   if (any(!valid)) {
     warning("Recall is ill-defined and set to 0.0 in labels with no true samples.")
   }
+  per_class_recall[per_class_recall == 0] <- correction
 
   # Get G-mean of Recall.
   exp(mean(log(per_class_recall)))
