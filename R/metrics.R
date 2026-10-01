@@ -204,7 +204,6 @@ balanced_accuracy <- function(y, y_hat, sample_weight = NULL, adjusted = FALSE) 
     cm[is.na(cm)] <- 0
   }
   cm <- unname(cm)
-  print(cm)
 
   # Per-Class Recall: empty rows become NA instead of 0/0.
   row_sum                 <- rowSums(cm)
