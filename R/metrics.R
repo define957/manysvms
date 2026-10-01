@@ -166,6 +166,116 @@ precision <- function(y, y_hat) {
   conf_mat <- table(y_hat, y)
   tp <- conf_mat[1, 1]
   fp <- conf_mat[2, 1]
-  pre <- tp / (tp+fp)
+  pre <- tp / (tp + fp)
   return(pre)
 }
+
+#' Balanced Accuracy
+#'
+#' Compute balanced accuracy for classification, which is the average of
+#' recall obtained on each class. This implementation aligns with
+#' \code{sklearn.metrics.balanced_accuracy_score}.
+#' @author Zhang Jiaqi
+#' @param y,y_hat real values and fitted values.
+#' @param sample_weight numeric vector of sample weights, default \code{NULL}.
+#' @param adjusted if \code{TRUE}, adjust the score for chance so that random
+#'   performance scores 0 and perfect performance scores 1.
+#' @return balanced accuracy score, a numeric scalar.
+#' @export
+balanced_accuracy <- function(y, y_hat, sample_weight = NULL, adjusted = FALSE) {
+  if (length(y) != length(y_hat)) {
+    stop("'y' and 'y_hat' should have the same length.")
+  }
+  if (length(y) == 0) {
+    stop("Found input variables with only 0 samples.")
+  }
+  y        <- as.character(y)
+  y_hat    <- as.character(y_hat)
+  labels   <- sort(union(unique(y), unique(y_hat)))
+  n_labels <- length(labels)
+  f_y      <- factor(y, levels = labels)
+  f_yhat   <- factor(y_hat, levels = labels)
+
+  # Get Confusion Matrix: rows = true class, cols = predicted class.
+  if (is.null(sample_weight)) {
+    cm <- table(f_y, f_yhat)
+  } else {
+    cm <- tapply(sample_weight, list(f_y, f_yhat), sum)
+    cm[is.na(cm)] <- 0
+  }
+  cm <- unname(cm)
+  print(cm)
+
+  # Per-Class Recall: empty rows become NA instead of 0/0.
+  row_sum                 <- rowSums(cm)
+  per_class_recall        <- rep(NA_real_, n_labels)
+  valid                   <- row_sum > 0
+  per_class_recall[valid] <- diag(cm)[valid] / row_sum[valid]
+
+  # Drop Empty Classes.
+  if (any(!valid)) {
+    warning("y_hat contains classes not in y")
+    per_class_recall <- per_class_recall[valid]
+  }
+
+  score <- mean(per_class_recall)
+
+  # Chance Correction: (score - 1/k) / (1 - 1/k), k = surviving classes.
+  if (adjusted) {
+    k <- length(per_class_recall)
+    score <- (score - 1 / k) / (1 - 1 / k)
+  }
+  score
+}
+
+#' Geometric Mean of Recall
+#'
+#' Compute the geometric mean of per-class recall. This implementation aligns
+#' with \code{sklearn.metrics.geometric_mean_score}.
+#' @author Zhang Jiaqi
+#' @param y,y_hat real values and fitted values.
+#' @param sample_weight numeric vector of sample weights, default \code{NULL}.
+#' @param correction weight applied to classes with no true samples, default 0.
+#' @return geometric mean of per-class recall, a numeric scalar.
+#' @export
+geometric_mean_of_recall <- function(
+    y,
+    y_hat,
+    sample_weight = NULL,
+    correction = 0
+) {
+  if (length(y) != length(y_hat)) {
+    stop("'y' and 'y_hat' should have the same length.")
+  }
+  if (length(y) == 0) {
+    stop("Found input variables with only 0 samples.")
+  }
+  y        <- as.character(y)
+  y_hat    <- as.character(y_hat)
+  labels   <- sort(union(unique(y), unique(y_hat)))
+  n_labels <- length(labels)
+  f_y      <- factor(y, levels = labels)
+  f_yhat   <- factor(y_hat, levels = labels)
+
+  # Get Confusion Matrix: rows = true class, cols = predicted class.
+  if (is.null(sample_weight)) {
+    cm <- table(f_y, f_yhat)
+  } else {
+    cm <- tapply(sample_weight, list(f_y, f_yhat), sum)
+    cm[is.na(cm)] <- 0
+  }
+  cm <- unname(cm)
+
+  # Per-Class Recall: empty rows become NA instead of 0/0.
+  row_sum                 <- rowSums(cm)
+  per_class_recall        <- rep(correction, n_labels)
+  valid                   <- row_sum > 0
+  per_class_recall[valid] <- diag(cm)[valid] / row_sum[valid]
+  if (any(!valid)) {
+    warning("Recall is ill-defined and set to 0.0 in labels with no true samples.")
+  }
+
+  # Get G-mean of Recall.
+  exp(mean(log(per_class_recall)))
+}
+
