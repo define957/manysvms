@@ -173,8 +173,7 @@ precision <- function(y, y_hat) {
 #' Balanced Accuracy
 #'
 #' Compute balanced accuracy for classification, which is the average of
-#' recall obtained on each class. This implementation aligns with
-#' \code{sklearn.metrics.balanced_accuracy_score}.
+#' recall obtained on each class.
 #' @author Zhang Jiaqi
 #' @param y,y_hat real values and fitted values.
 #' @param sample_weight numeric vector of sample weights, default \code{NULL}.
@@ -230,8 +229,7 @@ balanced_accuracy <- function(y, y_hat, sample_weight = NULL, adjusted = FALSE) 
 
 #' Geometric Mean of Recall
 #'
-#' Compute the geometric mean of per-class recall. This implementation aligns
-#' with \code{sklearn.metrics.geometric_mean_score}.
+#' Compute the geometric mean of per-class recall.
 #' @author Zhang Jiaqi
 #' @param y,y_hat real values and fitted values.
 #' @param sample_weight numeric vector of sample weights, default \code{NULL}.

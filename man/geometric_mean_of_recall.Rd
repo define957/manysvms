@@ -17,8 +17,7 @@ geometric_mean_of_recall(y, y_hat, sample_weight = NULL, correction = 0)
 geometric mean of per-class recall, a numeric scalar.
 }
 \description{
-Compute the geometric mean of per-class recall. This implementation aligns
-with \code{sklearn.metrics.geometric_mean_score}.
+Compute the geometric mean of per-class recall.
 }
 \author{
 Zhang Jiaqi

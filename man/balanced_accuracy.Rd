@@ -19,8 +19,7 @@ balanced accuracy score, a numeric scalar.
 }
 \description{
 Compute balanced accuracy for classification, which is the average of
-recall obtained on each class. This implementation aligns with
-\code{sklearn.metrics.balanced_accuracy_score}.
+recall obtained on each class.
 }
 \author{
 Zhang Jiaqi
