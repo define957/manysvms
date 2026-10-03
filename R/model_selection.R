@@ -160,8 +160,12 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   n_param <- nrow(param_grid)
   param_names <- colnames(param_grid)
   cl <- parallel::makeCluster(threads.num)
-  pb <- utils::txtProgressBar(max = n_param, style = 3)
-  progress <- function(n){utils::setTxtProgressBar(pb, n)}
+  op <- options(cli.progress_show_after = 0)
+  on.exit(options(op), add = TRUE)
+  pb <- cli::cli_progress_bar("Grid search", total = n_param, clear = FALSE)
+  # pb <- utils::txtProgressBar(max = n_param, style = 3)
+  progress <- function(n){cli::cli_progress_update(id = pb, set = n)}
+  # progress <- function(n){utils::setTxtProgressBar(pb, n)}
   opts <- list(progress = progress)
   doSNOW::registerDoSNOW(cl)
   i <- 1
@@ -185,9 +189,10 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
     cv_res <- do.call("cross_validation", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
-  close(pb)
+  cli::cli_progress_done(id = pb)
+  # close(pb)
   parallel::stopCluster(cl)
-  cat("\n")
+  # cat("\n")
   num_metrics <- length(metrics)
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")
@@ -296,8 +301,12 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   n_param <- nrow(param_grid)
   param_names <- colnames(param_grid)
   cl <- parallel::makeCluster(threads.num)
-  pb <- utils::txtProgressBar(max = n_param, style = 3)
-  progress <- function(n){utils::setTxtProgressBar(pb, n)}
+  op <- options(cli.progress_show_after = 0)
+  on.exit(options(op), add = TRUE)
+  pb <- cli::cli_progress_bar("Grid search", total = n_param, clear = FALSE)
+  # pb <- utils::txtProgressBar(max = n_param, style = 3)
+  progress <- function(n){cli::cli_progress_update(id = pb, set = n)}
+  # progress <- function(n){utils::setTxtProgressBar(pb, n)}
   opts <- list(progress = progress)
   doSNOW::registerDoSNOW(cl)
   i <- 1
@@ -321,9 +330,10 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
     cv_res <- do.call("cross_validation_noisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
-  close(pb)
+  cli::cli_progress_done(id = pb)
+  # close(pb)
   parallel::stopCluster(cl)
-  cat("\n")
+  # cat("\n")
   num_metrics <- length(metrics)
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")
@@ -496,8 +506,13 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   n_param <- nrow(param_grid)
   param_names <- colnames(param_grid)
   cl <- parallel::makeCluster(threads.num)
-  pb <- utils::txtProgressBar(max = n_param, style = 3)
-  progress <- function(n){utils::setTxtProgressBar(pb, n)}
+  op <- options(cli.progress_show_after = 0)
+  on.exit(options(op), add = TRUE)
+  pb <- cli::cli_progress_bar("Grid search", total = n_param, clear = FALSE)
+  # pb <- utils::txtProgressBar(max = n_param, style = 3)
+
+  progress <- function(n){cli::cli_progress_update(id = pb, set = n)}
+  # progress <- function(n){utils::setTxtProgressBar(pb, n)}
   opts <- list(progress = progress)
   doSNOW::registerDoSNOW(cl)
   i <- 1
@@ -521,9 +536,10 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
     cv_res <- do.call("cross_validation_Xynoisy", params_cv)
     cv_res <- rbind(c(apply(cv_res, 1, mean), apply(cv_res, 1, sd)))
   }
-  close(pb)
+  cli::cli_progress_done(id = pb)
+  # close(pb)
   parallel::stopCluster(cl)
-  cat("\n")
+  # cat("\n")
   num_metrics <- length(metrics)
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")

@@ -16,7 +16,8 @@ Imports:
       foreach,
       doParallel,
       doSNOW,
-      iterators
+      iterators,
+      cli
 Suggests:
       MASS,
       ggplot2
