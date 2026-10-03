@@ -156,7 +156,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
     X <- X[idx, , drop = FALSE]
     y <- y[idx]
   }
-  param_grid <- expand.grid(param_list)
+  param_grid <- expand.grid(param_list, stringsAsFactors = FALSE)
   n_param <- nrow(param_grid)
   param_names <- colnames(param_grid)
   cl <- parallel::makeCluster(threads.num)
@@ -192,8 +192,16 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")
   e <- Sys.time()
-  idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
-  idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+  # idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
+  # idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+
+  idx_max <- sapply(seq_len(num_metrics),
+                    function(j) select_best_idx(cv_res[, j],
+                                                cv_res[, num_metrics + j], "max"))
+  idx_min <- sapply(seq_len(num_metrics),
+                    function(j) select_best_idx(cv_res[, j],
+                                                cv_res[, num_metrics + j], "min"))
+
   score_mat <- matrix(0, 2, 2*num_metrics)
   rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
@@ -284,7 +292,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
-  param_grid <- expand.grid(param_list)
+  param_grid <- expand.grid(param_list, stringsAsFactors = FALSE)
   n_param <- nrow(param_grid)
   param_names <- colnames(param_grid)
   cl <- parallel::makeCluster(threads.num)
@@ -320,8 +328,16 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")
   e <- Sys.time()
-  idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
-  idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+  # idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
+  # idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+
+  idx_max <- sapply(seq_len(num_metrics),
+                    function(j) select_best_idx(cv_res[, j],
+                                                cv_res[, num_metrics + j], "max"))
+  idx_min <- sapply(seq_len(num_metrics),
+                    function(j) select_best_idx(cv_res[, j],
+                                                cv_res[, num_metrics + j], "min"))
+
   score_mat <- matrix(0, 2, 2*num_metrics)
   rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
@@ -476,7 +492,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
     y <- y[idx]
     y_noisy <- y_noisy[idx]
   }
-  param_grid <- expand.grid(param_list)
+  param_grid <- expand.grid(param_list, stringsAsFactors = FALSE)
   n_param <- nrow(param_grid)
   param_names <- colnames(param_grid)
   cl <- parallel::makeCluster(threads.num)
@@ -512,8 +528,16 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
   name_matrics <- names(metrics)
   colnames(cv_res)[(num_metrics + 1):(2*num_metrics)] <- paste(name_matrics, "- sd")
   e <- Sys.time()
-  idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
-  idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+  # idx_max <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.max)
+  # idx_min <- apply(as.matrix(cv_res[,1:num_metrics]), 2, which.min)
+
+  idx_max <- sapply(seq_len(num_metrics),
+                           function(j) select_best_idx(cv_res[, j],
+                                                       cv_res[, num_metrics + j], "max"))
+  idx_min <- sapply(seq_len(num_metrics),
+                           function(j) select_best_idx(cv_res[, j],
+                                                       cv_res[, num_metrics + j], "min"))
+
   score_mat <- matrix(0, 2, 2*num_metrics)
   rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
@@ -616,4 +640,14 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metri
     }
   }
   return(metric_mat)
+}
+
+select_best_idx <- function(scores, sds, direction = c("max", "min")) {
+  direction <- match.arg(direction)
+  extreme <- if (direction == "max") max(scores) else min(scores)
+  ties <- which(scores == extreme)
+  if (length(ties) > 1) {
+    ties <- ties[which.min(sds[ties])]
+  }
+  return(ties)
 }
