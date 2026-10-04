@@ -21,6 +21,109 @@ metrics_params_check_cv <- function(num_metrics, metrics_params) {
   return(metrics_params)
 }
 
+#' Generate K Folds Indices for Cross Validation
+#'
+#' Split sample indices into \code{K} folds, optionally with shuffling
+#' and/or stratification by a label vector. The result can be passed to
+#' \code{cross_validation} and related functions via their \code{folds}
+#' argument.
+#'
+#' @author Zhang Jiaqi.
+#' @param num_data total number of samples (a positive integer).
+#' @param K number of folds, must be a positive integer no larger than
+#'          \code{num_data}.
+#' @param shuffle if \code{TRUE}, shuffle samples before splitting.
+#' @param stratified if \code{TRUE}, split each class of \code{stratify_by}
+#'                   separately so that every fold keeps (approximately)
+#'                   the same class proportions as the full dataset.
+#' @param stratify_by a vector of length \code{num_data} used for
+#'                    stratification (e.g. the label vector). Must be
+#'                    provided when \code{stratified = TRUE}; ignored
+#'                    otherwise.
+#' @param seed random seed for shuffling.
+#' @return a list of length \code{K}; each element is an integer vector
+#'         containing the test-set row indices of one fold. The folds
+#'         partition \code{1:num_data} exactly.
+#' @export
+make_k_folds <- function(
+    num_data,
+    K = 5,
+    shuffle = FALSE,
+    stratified = FALSE,
+    stratify_by = NULL,
+    seed = NULL
+) {
+  if (!is.numeric(num_data) || length(num_data) != 1 ||
+      is.na(num_data) || num_data %% 1 != 0 || num_data < 1) {
+    stop("'num_data' must be a positive integer.")
+  }
+  if (!is.numeric(K) || length(K) != 1 ||
+      is.na(K) || K %% 1 != 0 || K < 1) {
+    stop("'K' must be a positive integer.")
+  }
+  if (K > num_data) {
+    stop(sprintf("Cannot have K = %d with num_data = %d.", K, num_data))
+  }
+  if (stratified == TRUE && is.null(stratify_by)) {
+    stop("`stratify_by` must be provided when `stratified = TRUE`.")
+  }
+  if (!is.null(stratify_by) && any(is.na(stratify_by))) {
+    stop("`stratify_by` contains NA.")
+  }
+  if (!is.null(stratify_by)) {
+    stratify_by <- as.vector(stratify_by)
+    if (num_data != length(stratify_by)) {
+      stop("length of 'stratify_by' does not match 'num_data'.")
+    }
+  }
+  if (is.null(seed) == FALSE) {
+    set.seed(seed)
+  }
+  perm <- if (shuffle) {
+    sample.int(num_data)
+  } else {
+    seq_len(num_data)
+  }
+
+  index <- integer(num_data)
+  if (stratified) {
+    for (cls in unique(stratify_by)) {
+      idx_cls <- perm[stratify_by[perm] == cls]
+      index[idx_cls] <- sort(rep(1:K, length.out = length(idx_cls)))
+    }
+  } else {
+    index[perm] <- sort(rep(1:K, length.out = num_data))
+  }
+  folds <- lapply(1:K, function(i) { which(index == i) })
+  return(folds)
+}
+
+folds_check_cv <- function(folds, n) {
+  if (is.numeric(folds) && length(folds) == 1) {
+    index <- sort(rep(1:folds, length.out = n))
+    folds <- lapply(1:folds, function(i) which(index == i))
+  }
+  if (is.list(folds) == FALSE) {
+    stop("'folds' must be a positive integer or a list of index vectors.")
+  }
+  K <- length(folds)
+  if (K < 1) {
+    stop("'folds' must contain at least one fold.")
+  }
+  for (i in 1:K) {
+    if (is.numeric(folds[[i]]) == FALSE || any(folds[[i]] %% 1 != 0)) {
+      stop("Each element of 'folds' must be an integer vector of row indices.")
+    }
+    if (any(folds[[i]] < 1 | folds[[i]] > n)) {
+      stop(sprintf("Indices in folds[[%d]] out of range [1, %d].", i, n))
+    }
+  }
+  if (length(unique(unlist(folds))) != n) {
+    stop("The folds must cover each sample exactly once.")
+  }
+  return(folds)
+}
+
 metric_evaluate <- function(metric_func, y, y_hat, metric_params) {
   metric_params <- append(list("y" = y, "y_hat" = y_hat), metric_params)
   evaluate_res <- do.call("metric_func", metric_params)
@@ -42,7 +145,10 @@ predict_model <- function(model_res, X_test, y_test,
 #' @author Zhang Jiaqi.
 #' @param model your model.
 #' @param X,y dataset and label.
-#' @param K number of folds.
+#' @param folds a positive integer indicating the number of folds (sequential
+#'              split, compatible with the old \code{K} argument) or a list of
+#'              index vectors, where each element contains the test-set row
+#'              indices of one fold.
 #' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
 #' @param pipeline preprocessing pipline.
@@ -53,7 +159,7 @@ predict_model <- function(model_res, X_test, y_test,
 #' @param model_seed random_seed for model.
 #' @return return a metric matrix
 #' @export
-cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict,
+cross_validation <- function(model, X, y, folds = 5, metrics, predict_func = predict,
                              pipeline = NULL,
                              metrics_params = NULL, predict_params = NULL,
                              model_settings = NULL, transy = F,
@@ -64,13 +170,14 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
   X <- as.matrix(X)
   y <- as.matrix(y)
   n <- nrow(X)
+  folds <- folds_check_cv(folds, n)
+  K <- length(folds)
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
   metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
   metric_mat <- matrix(0, num_metric, K)
-  index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
-    idx <- which(index == i)
+    idx <- folds[[i]]
     X_test <- X[idx, , drop = FALSE]
     y_test <- y[idx]
     if (K == 1) {
@@ -113,7 +220,10 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @author Zhang Jiaqi.
 #' @param model your model.
 #' @param X,y dataset and label.
-#' @param K number of folds.
+#' @param folds a positive integer indicating the number of folds (sequential
+#'              split, compatible with the old \code{K} argument) or a list of
+#'              index vectors, where each element contains the test-set row
+#'              indices of one fold.
 #' @param metrics this parameter receive a metric function.
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
@@ -123,8 +233,9 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @param model_settings set parameters for model (need a list).
 #' @param transy apply transforms defined in `pipeline` on y, default FALSE.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
-#'                the dataset.
-#' @param seed random seed for \code{shuffle} option.
+#'                the dataset (only used when \code{folds} is a number).
+#' @param seed random seed for \code{shuffle} option (only used when
+#'             \code{folds} is a number).
 #' @param model_seed random_seed for model.
 #' @param threads.num the number of threads used for parallel execution.
 #' @return return a metric matrix
@@ -133,7 +244,7 @@ cross_validation <- function(model, X, y, K = 5, metrics, predict_func = predict
 #' @import doSNOW
 #' @import stats
 #' @export
-grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
+grid_search_cv <- function(model, X, y, folds = 5, metrics, param_list,
                            predict_func = predict,
                            pipeline = NULL,
                            metrics_params = NULL, predict_params = NULL,
@@ -148,13 +259,18 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
     names(metrics) <- paste("metric", length(metrics), sep = "")
   }
   n <- nrow(X)
-  if (is.null(seed) == FALSE) {
-    set.seed(seed)
-  }
-  if (shuffle == TRUE) {
-    idx <- sample(n)
-    X <- X[idx, , drop = FALSE]
-    y <- y[idx]
+  if (is.numeric(folds) && length(folds) == 1) {
+    K <- folds
+    if (is.null(seed) == FALSE) {
+      set.seed(seed)
+    }
+    if (shuffle == TRUE) {
+      idx <- sample(n)
+      X <- X[idx, , drop = FALSE]
+      y <- y[idx]
+    }
+  } else {
+    K <- length(folds)
   }
   param_grid <- expand.grid(param_list, stringsAsFactors = FALSE)
   n_param <- nrow(param_grid)
@@ -177,7 +293,7 @@ grid_search_cv <- function(model, X, y, K = 5, metrics, param_list,
      param_names
     )
     params_cv <- list("model" = model,
-                      "X" = X, "y" = y, "K" = K,
+                      "X" = X, "y" = y, "folds" = folds,
                       "metrics" = metrics,
                       "predict_func" =  predict_func,
                       "pipeline" = pipeline,
@@ -253,7 +369,10 @@ print.cv_model <- function(x, ...) {
 #' @param model your model.
 #' @param X,y dataset and label.
 #' @param y_noisy label (contains label noise)
-#' @param K number of folds.
+#' @param folds a positive integer indicating the number of folds (sequential
+#'              split, compatible with the old \code{K} argument) or a list of
+#'              index vectors, where each element contains the test-set row
+#'              indices of one fold.
 #' @param metrics this parameter receive a metric function.
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
@@ -263,8 +382,9 @@ print.cv_model <- function(x, ...) {
 #' @param model_settings set parameters for model (need a list).
 #' @param transy apply transforms defined in `pipeline` on y, default FALSE.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
-#'                the dataset.
-#' @param seed random seed for \code{shuffle} option.
+#'                the dataset (only used when \code{folds} is a number).
+#' @param seed random seed for \code{shuffle} option (only used when
+#'             \code{folds} is a number).
 #' @param model_seed random_seed for model.
 #' @param threads.num the number of threads used for parallel execution.
 #' @return return a metric matrix
@@ -273,7 +393,7 @@ print.cv_model <- function(x, ...) {
 #' @import doSNOW
 #' @import stats
 #' @export
-grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_list,
+grid_search_cv_noisy <- function(model, X, y, y_noisy, folds = 5, metrics, param_list,
                                  predict_func = predict,
                                  pipeline = NULL,
                                  metrics_params = NULL, predict_params = NULL,
@@ -288,14 +408,19 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
     names(metrics) <- paste("metric", length(metrics), sep = "")
   }
   n <- nrow(X)
-  if (is.null(seed) == FALSE) {
-    set.seed(seed)
-  }
-  if (shuffle == TRUE) {
-    idx <- sample(n)
-    X <- X[idx, , drop = FALSE]
-    y <- y[idx]
-    y_noisy <- y_noisy[idx]
+  if (is.numeric(folds) && length(folds) == 1) {
+    K <- folds
+    if (is.null(seed) == FALSE) {
+      set.seed(seed)
+    }
+    if (shuffle == TRUE) {
+      idx <- sample(n)
+      X <- X[idx, , drop = FALSE]
+      y <- y[idx]
+      y_noisy <- y_noisy[idx]
+    }
+  } else {
+    K <- length(folds)
   }
   param_grid <- expand.grid(param_list, stringsAsFactors = FALSE)
   n_param <- nrow(param_grid)
@@ -318,7 +443,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
       param_names
     )
     params_cv <- list("model" = model,
-                      "X" = X, "y" = y, "y_noisy" = y_noisy, "K" = K,
+                      "X" = X, "y" = y, "y_noisy" = y_noisy, "folds" = folds,
                       "metrics" = metrics,
                       "predict_func" =  predict_func,
                       "pipeline" = pipeline,
@@ -381,7 +506,10 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
 #' @param model your model.
 #' @param X,y dataset and label.
 #' @param y_noisy label with label noise.
-#' @param K number of folds.
+#' @param folds a positive integer indicating the number of folds (sequential
+#'              split, compatible with the old \code{K} argument) or a list of
+#'              index vectors, where each element contains the test-set row
+#'              indices of one fold.
 #' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
 #' @param pipeline preprocessing pipline.
@@ -392,7 +520,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, K = 5, metrics, param_lis
 #' @param model_seed random_seed for model.
 #' @return return a metric matrix
 #' @export
-cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
+cross_validation_noisy <- function(model, X, y, y_noisy, folds = 5, metrics,
                                    predict_func = predict,
                                    pipeline = NULL,
                                    metrics_params = NULL, predict_params = NULL,
@@ -405,15 +533,15 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
   X <- as.matrix(X)
   y <- as.matrix(y)
   y_noisy <- as.matrix(y_noisy)
+  n <- nrow(X)
+  folds <- folds_check_cv(folds, n)
+  K <- length(folds)
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
   metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
-  n <- nrow(X)
-  num_metric <- length(metrics)
   metric_mat <- matrix(0, num_metric, K)
-  index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
-    idx <- which(index == i)
+    idx <- folds[[i]]
     X_test <- X[idx, , drop = FALSE]
     y_test <- y[idx]
     if (K == 1) {
@@ -457,7 +585,10 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
 #' @param X,y dataset and label.
 #' @param X_noisy dataset with noise.
 #' @param y_noisy label (contains label noise)
-#' @param K number of folds.
+#' @param folds a positive integer indicating the number of folds (sequential
+#'              split, compatible with the old \code{K} argument) or a list of
+#'              index vectors, where each element contains the test-set row
+#'              indices of one fold.
 #' @param metrics this parameter receive a metric function.
 #' @param param_list parameter list.
 #' @param predict_func this parameter receive a function for predict.
@@ -467,8 +598,9 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
 #' @param model_settings set parameters for model (need a list).
 #' @param transy apply transforms defined in `pipeline` on y, default FALSE.
 #' @param shuffle if set \code{shuffle==TRUE}, This function will shuffle
-#'                the dataset.
-#' @param seed random seed for \code{shuffle} option.
+#'                the dataset (only used when \code{folds} is a number).
+#' @param seed random seed for \code{shuffle} option (only used when
+#'             \code{folds} is a number).
 #' @param model_seed random_seed for model.
 #' @param threads.num the number of threads used for parallel execution.
 #' @return return a metric matrix
@@ -477,7 +609,7 @@ cross_validation_noisy <- function(model, X, y, y_noisy, K = 5, metrics,
 #' @import doSNOW
 #' @import stats
 #' @export
-grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics, param_list,
+grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, folds = 5, metrics, param_list,
                                    predict_func = predict,
                                    pipeline = NULL,
                                    metrics_params = NULL, predict_params = NULL,
@@ -492,15 +624,20 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
     names(metrics) <- paste("metric", length(metrics), sep = "")
   }
   n <- nrow(X)
-  if (is.null(seed) == FALSE) {
-    set.seed(seed)
-  }
-  if (shuffle == TRUE) {
-    idx <- sample(n)
-    X <- X[idx, ]
-    X_noisy <- X_noisy[idx, , drop = FALSE]
-    y <- y[idx]
-    y_noisy <- y_noisy[idx]
+  if (is.numeric(folds) && length(folds) == 1) {
+    K <- folds
+    if (is.null(seed) == FALSE) {
+      set.seed(seed)
+    }
+    if (shuffle == TRUE) {
+      idx <- sample(n)
+      X <- X[idx, ]
+      X_noisy <- X_noisy[idx, , drop = FALSE]
+      y <- y[idx]
+      y_noisy <- y_noisy[idx]
+    }
+  } else {
+    K <- length(folds)
   }
   param_grid <- expand.grid(param_list, stringsAsFactors = FALSE)
   n_param <- nrow(param_grid)
@@ -524,7 +661,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
       param_names
     )
     params_cv <- list("model" = model,
-                     "X" = X, "y" = y, "X_noisy" = X_noisy, "y_noisy" = y_noisy, "K" = K,
+                     "X" = X, "y" = y, "X_noisy" = X_noisy, "y_noisy" = y_noisy, "folds" = folds,
                      "metrics" = metrics,
                      "predict_func" =  predict_func,
                      "pipeline" = pipeline,
@@ -588,7 +725,10 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
 #' @param X,y dataset and label.
 #' @param X_noisy dataset with noise.
 #' @param y_noisy label with label noise.
-#' @param K number of folds.
+#' @param folds a positive integer indicating the number of folds (sequential
+#'              split, compatible with the old \code{K} argument) or a list of
+#'              index vectors, where each element contains the test-set row
+#'              indices of one fold.
 #' @param metrics this parameter receive a metric function.
 #' @param predict_func this parameter receive a function for predict.
 #' @param pipeline preprocessing pipline.
@@ -599,7 +739,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics
 #' @param model_seed random_seed for model.
 #' @return return a metric matrix
 #' @export
-cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metrics,
+cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, folds = 5, metrics,
                                      predict_func = predict,
                                      pipeline = NULL,
                                      metrics_params = NULL, predict_params = NULL,
@@ -612,15 +752,15 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, K = 5, metri
   y <- as.matrix(y)
   X_noisy <- as.matrix(X_noisy)
   y_noisy <- as.matrix(y_noisy)
+  n <- nrow(X)
+  folds <- folds_check_cv(folds, n)
+  K <- length(folds)
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
   metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
-  n <- nrow(X)
-  num_metric <- length(metrics)
   metric_mat <- matrix(0, num_metric, K)
-  index <- sort(rep(1:K, length.out = n))
   for (i in 1:K) {
-    idx <- which(index == i)
+    idx <- folds[[i]]
     X_test <- X[idx, , drop = FALSE]
     y_test <- y[idx]
     if (K == 1) {

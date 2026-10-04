@@ -8,7 +8,7 @@ cross_validation(
   model,
   X,
   y,
-  K = 5,
+  folds = 5,
   metrics,
   predict_func = predict,
   pipeline = NULL,
@@ -24,7 +24,10 @@ cross_validation(
 
 \item{X, y}{dataset and label.}
 
-\item{K}{number of folds.}
+\item{folds}{a positive integer indicating the number of folds (sequential
+split, compatible with the old \code{K} argument) or a list of
+index vectors, where each element contains the test-set row
+indices of one fold.}
 
 \item{metrics}{this parameter receive a metric function.}
 

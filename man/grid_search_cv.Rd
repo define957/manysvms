@@ -8,7 +8,7 @@ grid_search_cv(
   model,
   X,
   y,
-  K = 5,
+  folds = 5,
   metrics,
   param_list,
   predict_func = predict,
@@ -28,7 +28,10 @@ grid_search_cv(
 
 \item{X, y}{dataset and label.}
 
-\item{K}{number of folds.}
+\item{folds}{a positive integer indicating the number of folds (sequential
+split, compatible with the old \code{K} argument) or a list of
+index vectors, where each element contains the test-set row
+indices of one fold.}
 
 \item{metrics}{this parameter receive a metric function.}
 
@@ -47,9 +50,10 @@ grid_search_cv(
 \item{transy}{apply transforms defined in `pipeline` on y, default FALSE.}
 
 \item{shuffle}{if set \code{shuffle==TRUE}, This function will shuffle
-the dataset.}
+the dataset (only used when \code{folds} is a number).}
 
-\item{seed}{random seed for \code{shuffle} option.}
+\item{seed}{random seed for \code{shuffle} option (only used when
+\code{folds} is a number).}
 
 \item{model_seed}{random_seed for model.}
 
