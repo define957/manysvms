@@ -12,7 +12,11 @@ pin_tsvm_dual_solver <- function(KernelX, idx, C1, C2, tau1, tau2, eps, max.step
   dualq1     <- matrix(1, Gn)
   duallb1    <- matrix(-tau1*C1, Gn)
   dualub1    <- matrix(C1, Gn)
-  u01        <- duallb1
+  if (tau1 == 0) {
+    u01        <- matrix(0, Gn)
+  } else {
+    u01        <- (duallb1 + dualub1) / 2
+  }
   dual_coef1 <- clip_dcd_optimizer(dualH1, dualq1, duallb1, dualub1,
                                    eps, max.steps, u01)$x
   coef1      <- -invHTH_GT %*% dual_coef1
@@ -24,7 +28,11 @@ pin_tsvm_dual_solver <- function(KernelX, idx, C1, C2, tau1, tau2, eps, max.step
   dualq2     <- matrix(1, Hn)
   duallb2    <- matrix(-tau2*C2, Hn)
   dualub2    <- matrix(C2, Hn)
-  u02        <- duallb2
+  if (tau2 == 0) {
+    u02        <- matrix(0, Hn)
+  } else {
+    u02        <- (duallb2 + dualub2) / 2
+  }
   dual_coef2 <- clip_dcd_optimizer(dualH2, dualq2, duallb2, dualub2,
                                    eps, max.steps, u02)$x
   coef2      <- invGTG_HT %*% dual_coef2
