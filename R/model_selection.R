@@ -175,40 +175,46 @@ cross_validation <- function(model, X, y, folds = 5, metrics, predict_func = pre
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
   metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
-  metric_mat <- matrix(0, num_metric, K)
+  metric_mat <- matrix(NA_real_, num_metric, K)
+  fold_errors <- vector("list", K)
   for (i in 1:K) {
-    idx <- folds[[i]]
-    X_test <- X[idx, , drop = FALSE]
-    y_test <- y[idx]
-    if (K == 1) {
-      X_train <- X_test
-      y_train <- y_test
-    }else {
-      X_train <- X[-idx, , drop = FALSE]
-      y_train <- y[-idx]
-    }
-    if (is.null(pipeline) == F) {
-      for (pipi in 1:length(pipeline)) {
-        pip_temp <- pipeline[[pipi]](X_train)
-        X_train <- trans(pip_temp, X_train)
-        X_test <- trans(pip_temp, X_test)
-        if (transy == T) {
-          pip_temp <- pipeline[[pipi]](y_train)
-          y_train <- trans(pip_temp, y_train)
-          y_test <- trans(pip_temp, y_test)
+    fold_errors[[i]] <- tryCatch({
+      idx <- folds[[i]]
+      X_test <- X[idx, , drop = FALSE]
+      y_test <- y[idx]
+      if (K == 1) {
+        X_train <- X_test
+        y_train <- y_test
+      }else {
+        X_train <- X[-idx, , drop = FALSE]
+        y_train <- y[-idx]
+      }
+      if (is.null(pipeline) == F) {
+        for (pipi in 1:length(pipeline)) {
+          pip_temp <- pipeline[[pipi]](X_train)
+          X_train <- trans(pip_temp, X_train)
+          X_test <- trans(pip_temp, X_test)
+          if (transy == T) {
+            pip_temp <- pipeline[[pipi]](y_train)
+            y_train <- trans(pip_temp, y_train)
+            y_test <- trans(pip_temp, y_test)
+          }
         }
       }
-    }
-    model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
-                                         model_settings))
-    predict_res <- predict_model(model_res, X_test, y_test,
-                                 predict_params, predict_func)
-    for (j in 1:num_metric) {
-      metric_j <- metrics[[j]]
-      metric_mat[j, i] <- metric_evaluate(metric_j,
-                                          y_test, predict_res$y_test_hat,
-                                          metrics_params[[j]])
-    }
+      model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
+                                           model_settings))
+      predict_res <- predict_model(model_res, X_test, y_test,
+                                   predict_params, predict_func)
+      for (j in 1:num_metric) {
+        metric_j <- metrics[[j]]
+        metric_mat[j, i] <- metric_evaluate(metric_j,
+                                            y_test, predict_res$y_test_hat,
+                                            metrics_params[[j]])
+      }
+    }, error = function(e) {
+      warning(sprintf("Fold %d failed: %s", i, conditionMessage(e)))
+      list(fold = i, message = conditionMessage(e))}
+    )
   }
   rownames(metric_mat) <- names(metrics)
   return(metric_mat)
@@ -322,11 +328,12 @@ grid_search_cv <- function(model, X, y, folds = 5, metrics, param_list,
   idx_min <- sapply(seq_len(num_metrics),
                     function(j) select_best_idx(cv_res[, j],
                                                 cv_res[, num_metrics + j], "min"))
-
-  score_mat <- matrix(0, 2, 2*num_metrics)
+  num_failed <- sum(apply(is.na(as.matrix(cv_res[, 1:num_metrics])), 1, all))
+  score_mat <- matrix(NA_real_, 2, 2*num_metrics)
   rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
   for (i in 1:num_metrics) {
+    if (is.na(idx_max[i])) { next}
     score_mat[1, i] <- cv_res[idx_max[i], i]
     score_mat[2, i] <- cv_res[idx_min[i], i]
     score_mat[1, num_metrics + i] <- cv_res[idx_max[i], num_metrics + i]
@@ -337,6 +344,7 @@ grid_search_cv <- function(model, X, y, folds = 5, metrics, param_list,
                    "idx_max" = idx_max,
                    "idx_min" = idx_min,
                    "num.parameters" = n_param,
+                   "num.failed" = num_failed,
                    "K" = K,
                    "time" = e - s,
                    "score_mat" = score_mat,
@@ -352,14 +360,73 @@ grid_search_cv <- function(model, X, y, folds = 5, metrics, param_list,
 #' @param x object of class \code{eps.svr}.
 #' @param ... unsed argument.
 #' @export
+# Original plain-text version, kept for reference:
+# print.cv_model <- function(x, ...) {
+#   cat("Results of Grid Search and Cross Validation\n\n")
+#   cat("Number of Fold", x$K, "\n")
+#   cat("Total Parameters:", x$num.parameters, "\n")
+#   cat("Failed Parameters:", x$num.failed, "\n\n")
+#   cat("Time Cost:\n")
+#   print(x$time)
+#   cat("Summary of Metrics\n\n")
+#   print(x$score_mat)
+# }
 print.cv_model <- function(x, ...) {
-  cat("Results of Grid Search and Cross Validation\n\n")
-  cat("Number of Fold", x$K, "\n")
-  cat("Total Parameters:", x$num.parameters, "\n\n")
-  cat("Time Cost:\n")
-  print(x$time)
-  cat("Summary of Metrics\n\n")
-  print(x$score_mat)
+  time_str <- paste(round(as.numeric(x$time, units = "secs"), 2), "secs")
+  failed <- if (is.null(x$num.failed)) "unknown" else x$num.failed
+  num_metrics <- length(x$idx_max)
+  metric_names <- colnames(x$score_mat)[1:num_metrics]
+
+  cli::cli_h1("Grid Search and Cross Validation")
+  info_names <- c("Number of folds", "Total parameters",
+                  "Failed parameters", "Time cost")
+  info_vals  <- c(as.character(x$K), as.character(x$num.parameters),
+                  as.character(failed), time_str)
+  pad <- max(nchar(info_names))
+  info_lines <- sprintf(paste0("%-", pad, "s: %s"), info_names, info_vals)
+  cli::cli_verbatim(info_lines)
+
+  cli::cli_h2("Best Parameters")
+  param_names <- colnames(x$param_grid)
+  n_col <- length(param_names) + 1
+  col_names <- c(param_names, "score")
+  body <- matrix("NA", nrow = 2 * num_metrics, ncol = n_col)
+  row_labels <- as.character(t(outer(metric_names, c("max", "min"),
+                                     paste, sep = ".")))
+  for (j in seq_len(num_metrics)) {
+    if (is.na(x$idx_max[j])) next
+    body[2 * j - 1, ] <- c(vapply(x$param_grid[x$idx_max[j], ],
+                                  format, character(1)),
+                           sprintf("%.4g", x$score_mat[1, j]))
+    body[2 * j, ] <- c(vapply(x$param_grid[x$idx_min[j], ],
+                              format, character(1)),
+                       sprintf("%.4g", x$score_mat[2, j]))
+  }
+  # 全局列宽, 手工拼行, 指标组之间插分割线
+  row_width <- max(nchar(row_labels))
+  col_width <- pmax(nchar(col_names), apply(nchar(body), 2, max))
+  fmt_row <- function(label, values) {
+    paste0(sprintf(paste0("%-", row_width, "s "), label),
+           paste(sprintf(paste0("%", col_width, "s"), values), collapse = " "))
+  }
+  header_line <- fmt_row("", col_names)
+  div_line <- strrep("─", nchar(header_line))
+  lines <- c(header_line, div_line)
+  for (j in seq_len(num_metrics)) {
+    lines <- c(lines,
+               fmt_row(row_labels[2 * j - 1], body[2 * j - 1, ]),
+               fmt_row(row_labels[2 * j], body[2 * j, ]),
+               div_line)
+  }
+  cli::cli_verbatim(lines)
+
+  cli::cli_h2("Summary of Metrics")
+  mat_lines <- capture.output(
+    print(format(round(x$score_mat, 4), nsmall = 4), quote = FALSE, right = TRUE)
+  )
+  cli::cli_verbatim(mat_lines)
+  cat("\n")
+  invisible(x)
 }
 
 
@@ -472,11 +539,12 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, folds = 5, metrics, param
   idx_min <- sapply(seq_len(num_metrics),
                     function(j) select_best_idx(cv_res[, j],
                                                 cv_res[, num_metrics + j], "min"))
-
-  score_mat <- matrix(0, 2, 2*num_metrics)
+  num_failed <- sum(apply(is.na(as.matrix(cv_res[, 1:num_metrics])), 1, all))
+  score_mat <- matrix(NA_real_, 2, 2*num_metrics)
   rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
   for (i in 1:num_metrics) {
+    if (is.na(idx_max[i])) { next}
     score_mat[1, i] <- cv_res[idx_max[i], i]
     score_mat[2, i] <- cv_res[idx_min[i], i]
     score_mat[1, num_metrics + i] <- cv_res[idx_max[i], num_metrics + i]
@@ -487,6 +555,7 @@ grid_search_cv_noisy <- function(model, X, y, y_noisy, folds = 5, metrics, param
                    "idx_max" = idx_max,
                    "idx_min" = idx_min,
                    "num.parameters" = n_param,
+                   "num.failed" = num_failed,
                    "K" = K,
                    "time" = e - s,
                    "score_mat" = score_mat,
@@ -539,42 +608,51 @@ cross_validation_noisy <- function(model, X, y, y_noisy, folds = 5, metrics,
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
   metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
-  metric_mat <- matrix(0, num_metric, K)
+  metric_mat <- matrix(NA_real_, num_metric, K)
+  fold_errors <- vector("list", K)
   for (i in 1:K) {
-    idx <- folds[[i]]
-    X_test <- X[idx, , drop = FALSE]
-    y_test <- y[idx]
-    if (K == 1) {
-      X_train <- X_test
-      y_train <- y_test
-    }else{
-      X_train <- X[-idx, , drop = FALSE]
-      y_train <- y_noisy[-idx]
-      y_train_clean <- y[-idx]
-    }
-    if (is.null(pipeline) == F) {
-      for (pipi in 1:length(pipeline)) {
-        pip_temp <- pipeline[[pipi]](X_train)
-        X_train <- trans(pip_temp, X_train)
-        X_test <- trans(pip_temp, X_test)
-        if (transy == T) {
-          pip_temp <- pipeline[[pipi]](y_train_clean)
-          y_train <- trans(pip_temp, y_train)
-          y_test <- trans(pip_temp, y_test)
+    fold_errors[[i]] <- tryCatch({
+      idx <- folds[[i]]
+      X_test <- X[idx, , drop = FALSE]
+      y_test <- y[idx]
+      if (K == 1) {
+        X_train <- X_test
+        y_train <- y_test
+        y_train_clean <- y_test
+      }else{
+        X_train <- X[-idx, , drop = FALSE]
+        y_train <- y_noisy[-idx]
+        y_train_clean <- y[-idx]
+      }
+      if (is.null(pipeline) == F) {
+        for (pipi in 1:length(pipeline)) {
+          pip_temp <- pipeline[[pipi]](X_train)
+          X_train <- trans(pip_temp, X_train)
+          X_test <- trans(pip_temp, X_test)
+          if (transy == T) {
+            pip_temp <- pipeline[[pipi]](y_train_clean)
+            y_train <- trans(pip_temp, y_train)
+            y_test <- trans(pip_temp, y_test)
+          }
         }
       }
-    }
-    model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
-                                         model_settings))
-    predict_res <- predict_model(model_res, X_test, y_test,
-                                 predict_params, predict_func)
-    for (j in 1:num_metric) {
-      metric_j <- metrics[[j]]
-      metric_mat[j, i] <- metric_evaluate(metric_j,
-                                          y_test, predict_res$y_test_hat,
-                                          metrics_params[[j]])
-    }
+      model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
+                                           model_settings))
+      predict_res <- predict_model(model_res, X_test, y_test,
+                                   predict_params, predict_func)
+      for (j in 1:num_metric) {
+        metric_j <- metrics[[j]]
+        metric_mat[j, i] <- metric_evaluate(metric_j,
+                                            y_test, predict_res$y_test_hat,
+                                            metrics_params[[j]])
+      }
+    }, error = function(e) {
+      warning(sprintf("Fold %d failed: %s", i, conditionMessage(e)))
+      list(fold = i, message = conditionMessage(e))
+      }
+    )
   }
+  rownames(metric_mat) <- names(metrics)
   return(metric_mat)
 }
 
@@ -690,11 +768,12 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, folds = 5, met
   idx_min <- sapply(seq_len(num_metrics),
                            function(j) select_best_idx(cv_res[, j],
                                                        cv_res[, num_metrics + j], "min"))
-
-  score_mat <- matrix(0, 2, 2*num_metrics)
+  num_failed <- sum(apply(is.na(as.matrix(cv_res[, 1:num_metrics])), 1, all))
+  score_mat <- matrix(NA_real_, 2, 2*num_metrics)
   rownames(score_mat) <- c("max", "min")
   colnames(score_mat) <- c(name_matrics, paste(name_matrics, "- sd"))
   for (i in 1:num_metrics) {
+    if (is.na(idx_max[i])) { next}
     score_mat[1, i] <- cv_res[idx_max[i], i]
     score_mat[2, i] <- cv_res[idx_min[i], i]
     score_mat[1, num_metrics + i] <- cv_res[idx_max[i], num_metrics + i]
@@ -705,6 +784,7 @@ grid_search_cv_Xynoisy <- function(model, X, y, X_noisy, y_noisy, folds = 5, met
                    "idx_max" = idx_max,
                    "idx_min" = idx_min,
                    "num.parameters" = n_param,
+                   "num.failed" = num_failed,
                    "K" = K,
                    "time" = e - s,
                    "score_mat" = score_mat,
@@ -758,52 +838,66 @@ cross_validation_Xynoisy <- function(model, X, y, X_noisy, y_noisy, folds = 5, m
   metrics <- metrics_check_cv(metrics)
   num_metric <- length(metrics)
   metrics_params <- metrics_params_check_cv(num_metric, metrics_params)
-  metric_mat <- matrix(0, num_metric, K)
+  metric_mat <- matrix(NA_real_, num_metric, K)
+  fold_errors <- vector("list", K)
   for (i in 1:K) {
-    idx <- folds[[i]]
-    X_test <- X[idx, , drop = FALSE]
-    y_test <- y[idx]
-    if (K == 1) {
-      X_train <- X_test
-      y_train <- y_test
-    }else{
-      X_train_clean <- X[-idx, , drop = FALSE]
-      X_train <- X_noisy[-idx, , drop = FALSE]
-      y_train <- y_noisy[-idx]
-      y_train_clean <- y[-idx]
-    }
-    if (is.null(pipeline) == F) {
-      for (pipi in 1:length(pipeline)) {
-        pip_temp <- pipeline[[pipi]](X_train_clean)
-        X_train <- trans(pip_temp, X_train)
-        X_test <- trans(pip_temp, X_test)
-        if (transy == T) {
-          pip_temp <- pipeline[[pipi]](y_train_clean)
-          y_train <- trans(pip_temp, y_train)
-          y_test <- trans(pip_temp, y_test)
+    fold_errors[[i]] <- tryCatch({
+      idx <- folds[[i]]
+      X_test <- X[idx, , drop = FALSE]
+      y_test <- y[idx]
+      if (K == 1) {
+        X_train <- X_test
+        y_train <- y_test
+        X_train_clean <- X_test
+        y_train_clean <- y_test
+      }else{
+        X_train_clean <- X[-idx, , drop = FALSE]
+        X_train <- X_noisy[-idx, , drop = FALSE]
+        y_train <- y_noisy[-idx]
+        y_train_clean <- y[-idx]
+      }
+      if (is.null(pipeline) == F) {
+        for (pipi in 1:length(pipeline)) {
+          pip_temp <- pipeline[[pipi]](X_train_clean)
+          X_train <- trans(pip_temp, X_train)
+          X_test <- trans(pip_temp, X_test)
+          if (transy == T) {
+            pip_temp <- pipeline[[pipi]](y_train_clean)
+            y_train <- trans(pip_temp, y_train)
+            y_test <- trans(pip_temp, y_test)
+          }
         }
       }
-    }
-    model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
-                                         model_settings))
-    predict_res <- predict_model(model_res, X_test, y_test,
-                                 predict_params, predict_func)
-    for (j in 1:num_metric) {
-      metric_j <- metrics[[j]]
-      metric_mat[j, i] <- metric_evaluate(metric_j,
-                                          y_test, predict_res$y_test_hat,
-                                          metrics_params[[j]])
-    }
+      model_res <- do.call("model", append(list("X" = X_train, "y" = y_train),
+                                           model_settings))
+      predict_res <- predict_model(model_res, X_test, y_test,
+                                   predict_params, predict_func)
+      for (j in 1:num_metric) {
+        metric_j <- metrics[[j]]
+        metric_mat[j, i] <- metric_evaluate(metric_j,
+                                            y_test, predict_res$y_test_hat,
+                                            metrics_params[[j]])
+      }
+    }, error = function(e) {
+      warning(sprintf("Fold %d failed: %s", i, conditionMessage(e)))
+      list(fold = i, message = conditionMessage(e))}
+    )
   }
+  rownames(metric_mat) <- names(metrics)
   return(metric_mat)
 }
 
 select_best_idx <- function(scores, sds, direction = c("max", "min")) {
   direction <- match.arg(direction)
-  extreme <- if (direction == "max") max(scores) else min(scores)
+  if (all(is.na(scores))) { return(NA_integer_) }
+  extreme <- if (direction == "max") max(scores, na.rm = TRUE) else min(scores, na.rm = TRUE)
   ties <- which(scores == extreme)
   if (length(ties) > 1) {
-    ties <- ties[which.min(sds[ties])]
+    if (!all(is.na(sds[ties]))) {
+      ties <- ties[which.min(sds[ties])]
+    } else {
+      ties <- ties[1]
+    }
   }
   return(ties)
 }
